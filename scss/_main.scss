@@ -1,0 +1,66 @@
+body {
+    overflow: hidden;
+    padding: 0px;
+    margin: 0px;
+}
+
+.alc-ct {
+    position: relative;
+}
+
+div.ajs-center-x {
+    /* to center the block */
+    margin-left: auto;
+    margin-right: auto;
+}
+div.ajs-center-y {
+    /* to center the block */
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.ajs-load-mask {
+    position: absolute;
+    text-align: center;
+    opacity: 0.5;
+    background-color: black;
+
+}
+
+.ajs-load-mask .ajs-msk-ctnt {
+    position: absolute;
+    background-color: #FFFFFF;
+    border: 2px solid darkgray;
+    border-radius: 10px;
+    display: inline-block;
+    top: 33%;
+    padding: 6px;
+    color: black;
+}
+
+.ajs-load-mask .ajs-msk-ctnt .ajs-mask-progr {
+    text-align: center;
+    vertical-align: central;
+    line-height: 48px;
+    font-family: monospace;
+    margin-left: auto;
+    margin-right: auto;
+    width: 48px;
+    height: 48px;
+    background-image: url('../images/loading.gif');
+}
+
+div.transform-h-x {
+    -webkit-transform: matrix(1, 42, 0, 0, 0, 71, 0, 0) rotate(45deg);
+    -moz-transform: matrix(1, 42, 0, 0, 0, 71, 0, 0) rotate(45deg);
+}
+
+div.transform-v-x {
+    -webkit-transform: matrix(1, 0.5, 0, 1, 0, 0);
+    -moz-transform: matrix(1, 0.5, 0, 1, 0, 0);
+}
+
+div.transform-v-z {
+    -webkit-transform: matrix(1, -0.5, 0, 1, 0, 0);
+    -moz-transform: matrix(1, -0.5, 0, 1, 0, 0);
+}
