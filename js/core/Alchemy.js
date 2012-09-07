@@ -1,5 +1,14 @@
-(function (gbl) {
-    gbl.Alchemy = {
+/*global process, exports, window, require*/
+var gbl, exp;
+if (typeof process === 'undefined') {
+    gbl = window;
+} else {
+    gbl = process;
+    exp = exports;
+}
+
+(function (gbl, exports) {
+    var alchemy = {
         /**
          * the current version of the framework; read-only
          *
@@ -110,13 +119,13 @@
                 }
             }
             // call onReady callback if script is ready
-            if (gbl.Alchemy.isFunction(cfg.onReady)) {
-                if (gbl.Alchemy.isReady) {
+            if (alchemy.isFunction(cfg.onReady)) {
+                if (alchemy.isReady) {
                     cfg.onReady.call();
                 } else {
                     document.addEventListener('DOMContentLoaded', function () {
                         cfg.onReady.call();
-                        gbl.Alchemy.isReady = true;
+                        alchemy.isReady = true;
                     });
                 }
             }
@@ -205,11 +214,11 @@
          */
         each: function (iterable, fn, scope, args) {
             var i, key;
-            if (gbl.Alchemy.isArray(iterable)) {
+            if (alchemy.isArray(iterable)) {
                 for (i = 0; i < iterable.length; i++) {
                     fn.call(scope, iterable[i], i, args);
                 }
-            } else if (gbl.Alchemy.isObject(iterable)) {
+            } else if (alchemy.isObject(iterable)) {
                 for (key in iterable) {
                     if (iterable.hasOwnProperty(key)) {
                         fn.call(scope, iterable[key], key, args);
@@ -259,7 +268,7 @@
 
             //console.log('Alchemy.mix', base, additive, override, allProps, cpConstr);
             if (cpConstr && additive.constructor !== Object.prototype.constructor) {
-                gbl.Alchemy.addMethod(base, 'constructor', additive.constructor);
+                alchemy.addMethod(base, 'constructor', additive.constructor);
                 delete additive.constructor;
             }
             /*jslint forin: true */
@@ -267,8 +276,8 @@
                 if (additive.hasOwnProperty(key) || allProps) {
                     if (override || base[key] === undefined) {
                         value = additive[key];
-                        if (gbl.Alchemy.isFunction(value)) {
-                            gbl.Alchemy.addMethod(base, key, value);
+                        if (alchemy.isFunction(value)) {
+                            alchemy.addMethod(base, key, value);
                         } else {
                             base[key] = value;
                         }
@@ -286,7 +295,7 @@
         defineProperty: function (obj, prop, opts) {
             //console.log('Alchemy.defineProperty', obj, prop, opts);
             if (opts && opts.meta) {
-                prop = gbl.Alchemy.metaPrefix + prop;
+                prop = alchemy.metaPrefix + prop;
             }
             return Object.defineProperty(obj, prop, opts);
         },
@@ -318,8 +327,8 @@
          *      the new prototype
          */
         brew: function (typeDef, overrides) {
-            var SuperType = typeDef.extend || gbl.Alchemy.MateriaPrima,
-                ns = (typeof typeDef.ns === 'string') ? gbl.Alchemy.ns(typeDef.ns) : null,
+            var SuperType = typeDef.extend || alchemy.MateriaPrima,
+                ns = (typeof typeDef.ns === 'string') ? alchemy.ns(typeDef.ns) : null,
                 typeName = typeDef.name,
                 includes = typeDef.ingredients,
                 ingredients,
@@ -336,21 +345,21 @@
             }
             if (includes) {
                 // enhance new prototype with given ingredients (mixins)
-                gbl.Alchemy.each(includes, function (cfg) {
+                alchemy.each(includes, function (cfg) {
                     NewType.addIngredient(cfg.key, cfg.ptype);
                 });
             }
             if (typeDef.vtype) {
                 // register view at view factory
-                gbl.Alchemy.v.Factory.registerView(typeDef.vtype, NewType);
+                alchemy.v.Factory.registerView(typeDef.vtype, NewType);
             }
             if (overrides) {
-                gbl.Alchemy.mix(NewType, overrides, {
+                alchemy.mix(NewType, overrides, {
                     copyConstructor: true
                 });
             }
             meta.push(['supertype', SuperType]);
-            gbl.Alchemy.each(meta, function (metaAttr) {
+            alchemy.each(meta, function (metaAttr) {
                 NewType.setMetaAttr(metaAttr[0], metaAttr[1]);
             });
             return NewType;
@@ -369,12 +378,12 @@
         create: function (cfg) {
             var result,
                 ptype = cfg.ptype;
-            if (gbl.Alchemy.isString(ptype)) {
-                ptype = gbl.Alchemy.ns(ptype);
+            if (alchemy.isString(ptype)) {
+                ptype = alchemy.ns(ptype);
             }
-            if (gbl.Alchemy.isFunction(ptype.create)) {
+            if (alchemy.isFunction(ptype.create)) {
                 result = ptype.create(cfg);
-            } else if (gbl.Alchemy.isObject(ptype)) {
+            } else if (alchemy.isObject(ptype)) {
                 result = Object.create(ptype);
             } else {
                 throw 'Invalid prototype: ' + ptype;
@@ -395,8 +404,8 @@
          *      the function object to be added
          */
         addMethod: function (object, name, method) {
-            var pre = gbl.Alchemy.metaPrefix;
-            if (gbl.Alchemy.isFunction(object.addMethod)) {
+            var pre = alchemy.metaPrefix;
+            if (alchemy.isFunction(object.addMethod)) {
                 // obj inherits from basic type
                 object.addMethod(name, method);
             } else {
@@ -531,6 +540,19 @@
         emptyFn: function () {}
     };
 
-    /*global process, exports, window*/
-}(typeof process === 'undefined' ? window : exports));
+    if (typeof require === 'function') {
+        // node.js
+        alchemy.mix(exports, alchemy);
+    } else {
+        // browser
+        gbl.Alchemy = alchemy;
+        gbl.require = function () {
+            // TODO:
+            // * handling of different modules
+            // * handling of file paths
+            return alchemy;
+        };
+    }
+
+}(gbl, exp));
 
