@@ -141,7 +141,7 @@ if (typeof process === 'undefined') {
          *      <code>true</code> if the given item is an object
          */
         isObject: function (o) {
-            return o && typeof o === 'object';
+            return o && typeof o === 'object' && !alchemy.isArray(o);
         },
 
         /**
@@ -254,6 +254,11 @@ if (typeof process === 'undefined') {
          *              the source properties will be overwritten even if they are
          *              already defined (defaults to <code>true</code>)
          *          </li>
+         *          <li>
+         *              <code>linkMethods</code> {boolean} if set to <code>true</code>
+         *              all methods will be assigned using the {@link #addMethod}
+         *              function (defaults to <code>false</code>
+         *          </li>
          *      </ul>
          *
          *  @return Object
@@ -263,6 +268,7 @@ if (typeof process === 'undefined') {
             var override = !options || (options.override !== false),
                 allProps = options && (options.all === true),
                 cpConstr = options && (options.copyConstructor === true),
+                linkMethods = options && (options.linkMethods === true),
                 key,
                 value;
 
@@ -276,7 +282,7 @@ if (typeof process === 'undefined') {
                 if (additive.hasOwnProperty(key) || allProps) {
                     if (override || base[key] === undefined) {
                         value = additive[key];
-                        if (alchemy.isFunction(value)) {
+                        if (linkMethods && alchemy.isFunction(value)) {
                             alchemy.addMethod(base, key, value);
                         } else {
                             base[key] = value;
@@ -542,7 +548,7 @@ if (typeof process === 'undefined') {
 
     if (typeof require === 'function') {
         // node.js
-        alchemy.mix(exports, alchemy);
+        alchemy.mix(exp, alchemy);
     } else {
         // browser
         gbl.Alchemy = alchemy;
@@ -553,6 +559,5 @@ if (typeof process === 'undefined') {
             return alchemy;
         };
     }
-
 }(gbl, exp));
 
