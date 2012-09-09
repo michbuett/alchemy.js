@@ -1,13 +1,25 @@
-/*global process, exports, window, require*/
-var gbl, exp;
-if (typeof process === 'undefined') {
-    gbl = window;
-} else {
-    gbl = process;
-    exp = exports;
-}
+/*
+ * Copyright (C) 2012 Michael Büttner
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+ * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of 
+ * the Software.
+ *
+ * The Software shall not be used for discriminating or manipulating people.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+ * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
-(function (gbl, exports) {
+(function () {
+
     var alchemy = {
         /**
          * the current version of the framework; read-only
@@ -33,6 +45,22 @@ if (typeof process === 'undefined') {
          * @type Boolean
          */
         isReady: false,
+
+        /**
+         * The set of type definitions
+         *
+         * @property formulas
+         * @type Object
+         */
+        formulas: {},
+
+        /**
+         * The set of defined prototypes
+         *
+         * @property potions
+         * @type Object
+         */
+        potions: {},
 
         /**
          * the default source path
@@ -307,6 +335,13 @@ if (typeof process === 'undefined') {
         },
 
         /**
+         *
+         */
+        addFormula: function (typeDef) {
+            alchemy.formula[typeDef.name] = typeDef;
+        },
+
+        /**
          * brews a new prototype based on the given ingredients
          *
          * @param {object} typeDef
@@ -482,7 +517,7 @@ if (typeof process === 'undefined') {
          */
         ns: function (namespace) {
             var ns = namespace.split('.');
-            var current = gbl;
+            var current = window;
             ns.forEach(function (key) {
                 if (typeof current[key] !== 'object') {
                     current[key] = {};
@@ -529,16 +564,16 @@ if (typeof process === 'undefined') {
          * @param {Function} callback
          * @param {HTMLElement} element
          */
-        reqAnimFrame: (function () {
-            return gbl.requestAnimationFrame ||
-                gbl.webkitRequestAnimationFrame ||
-                gbl.mozRequestAnimationFrame ||
-                gbl.oRequestAnimationFrame ||
-                gbl.msRequestAnimationFrame ||
+        reqAnimFrame: typeof window === 'undefined' ? function () {} : (function () {
+            return window.requestAnimationFrame ||
+                window.webkitRequestAnimationFrame ||
+                window.mozRequestAnimationFrame ||
+                window.oRequestAnimationFrame ||
+                window.msRequestAnimationFrame ||
                 function (callback, element) {
-                    gbl.setTimeout(callback, 16.666);
+                    window.setTimeout(callback, 16.666);
                 };
-        }()).bind(gbl),
+        }()).bind(window),
 
         /**
          * an reuseable empty function object
@@ -546,18 +581,22 @@ if (typeof process === 'undefined') {
         emptyFn: function () {}
     };
 
+    var alchemyFn = function (potion) {
+        return alchemy.potions[potion];
+    };
+    alchemy.mix(alchemyFn, alchemy);
+
     if (typeof require === 'function') {
         // node.js
-        alchemy.mix(exp, alchemy);
+        module.exports = alchemyFn;
     } else {
         // browser
-        gbl.Alchemy = alchemy;
-        gbl.require = function () {
+        window.require = function () {
             // TODO:
             // * handling of different modules
             // * handling of file paths
-            return alchemy;
+            return alchemyFn;
         };
     }
-}(gbl, exp));
+}());
 

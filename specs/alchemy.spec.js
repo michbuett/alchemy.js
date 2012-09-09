@@ -1,6 +1,7 @@
 /*global require*/
-var alchemy = require('../js/core/Alchemy.js');
 describe('alchemy', function () {
+    var alchemy = require('../js/core/Alchemy.js');
+
     describe('general utility methods', function () {
         it('can detect numbers', function () {
             expect(alchemy.isNumber(0)).toBeTruthy();
@@ -58,6 +59,22 @@ describe('alchemy', function () {
             expect(alchemy.isArray(null)).toBeFalsy();
             expect(alchemy.isArray(true)).toBeFalsy();
             expect(alchemy.isArray({})).toBeFalsy();
+        });
+    });
+
+    describe('Prototype definituion', function () {
+        afterEach(function () {
+            alchemy.potions = {};
+        });
+
+        it('can return registered prototypes', function () {
+            // prepare
+            var testProto = {
+                foo: 'bar'
+            };
+            alchemy.potions.test = testProto;
+            // execute/verify
+            expect(alchemy('test')).toBe(testProto);
         });
     });
 });
