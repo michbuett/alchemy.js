@@ -1,4 +1,3 @@
-xdescribe('MateriaPrima', function () {
-    var alchemy = require('../js/core/MateriaPrima.js');
-
+describe('MateriaPrima', function () {
+    var alchemy = require('../js/core/Alchemy.js');
 });

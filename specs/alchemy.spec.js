@@ -76,6 +76,18 @@ describe('alchemy', function () {
             // execute/verify
             expect(alchemy('test')).toBe(testProto);
         });
+
+        it('can load formulas', function () {
+            // prepare
+            alchemy.formulas = {};
+            alchemy.cfg.root = '../js';
+            // execute
+            var mp = alchemy('core.MateriaPrima');
+            // verify
+            expect(mp).toBeDefined();
+            expect(typeof mp.create).toBe('function');
+            expect(typeof mp.init).toBe('function');
+        });
     });
 });
 

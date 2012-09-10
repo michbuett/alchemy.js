@@ -62,7 +62,13 @@
          */
         potions: {},
 
+
+        cfg: {
+            root: '/js',
+        },
+
         /**
+         *
          * the default source path
          *
          * @property sourceRoot
@@ -338,7 +344,7 @@
          *
          */
         addFormula: function (typeDef) {
-            alchemy.formula[typeDef.name] = typeDef;
+            alchemy.formulas[typeDef.name] = typeDef;
         },
 
         /**
@@ -367,22 +373,24 @@
          * @return Object
          *      the new prototype
          */
-        brew: function (typeDef, overrides) {
-            var SuperType = typeDef.extend || alchemy.MateriaPrima,
-                ns = (typeof typeDef.ns === 'string') ? alchemy.ns(typeDef.ns) : null,
-                typeName = typeDef.name,
+        brew: function (typeDef) {
+            var SuperType = typeDef.extend || alchemy('core.MateriaPrima'),
+                name = typeDef.name,
                 includes = typeDef.ingredients,
-                ingredients,
+                overrides = typeDef.overrides,
                 NewType,
                 meta = [],
                 i;
 
+            if (alchemy.isString(SuperType)) {
+                SuperType = alchemy(SuperType);
+            }
             NewType = Object.create(SuperType);
 
-            if (ns && typeName) {
+            if (name) {
                 // register new type in global namespace
-                meta.push(['name', typeName], ['ns', typeDef.ns]);
-                ns[typeName] = NewType;
+                alchemy.potions[name] = NewType;
+                meta.push(['name', name]);
             }
             if (includes) {
                 // enhance new prototype with given ingredients (mixins)
@@ -580,16 +588,46 @@
          */
         emptyFn: function () {}
     };
-
-    var alchemyFn = function (potion) {
-        return alchemy.potions[potion];
+    var loadFormula;
+    var alchemyFn = function (potionName) {
+        var potion = alchemy.potions[potionName];
+        if (!potion) {
+            var formula = alchemy.formulas[name];
+            if (!formula) {
+                formula = loadFormula(potionName);
+            }
+            potion = alchemy.brew(formula);
+        }
+        return potion;
     };
     alchemy.mix(alchemyFn, alchemy);
 
+    /*global require, module*/
     if (typeof require === 'function') {
         // node.js
+        loadFormula = function (name) {
+            return require(name);
+        };
         module.exports = alchemyFn;
     } else {
+        loadFormula = function (name) {
+            var result;
+            var url = alchemy.cfg.root + '/' + name.replace(/\./g, '/') + '.js';
+            var request = new XMLHttpRequest();
+            request.open('GET', url, false);
+            request.send(null);
+            if (request.status === 200 && request.responseText) {
+                /*jslint evil: true*/
+                eval(request.responseText);
+                /*jslint evil: false*/
+                result = alchemy.formulas[name];
+            } else {
+                // no match
+                throw 'Cannot load formula: ' + name;
+            }
+            return result;
+
+        };
         // browser
         window.require = function () {
             // TODO:

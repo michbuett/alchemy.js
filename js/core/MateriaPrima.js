@@ -21,11 +21,11 @@
 
     var alchemy = require('alchemy');
     /**
-     * @class alchemy.MateriaPrima
+     * @class core.MateriaPrima
      * @extends Object
      */
     alchemy.addFormula({
-        name: 'alchemy.MateriaPrima',
+        name: 'core.MateriaPrima',
         extend: Object.prototype,
         overrides: {
             /**
