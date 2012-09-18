@@ -80,7 +80,6 @@ describe('alchemy', function () {
         it('can load formulas', function () {
             // prepare
             alchemy.formulas = {};
-            alchemy.cfg.root = '../js';
             // execute
             var mp = alchemy('core.MateriaPrima');
             // verify

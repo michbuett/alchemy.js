@@ -64,7 +64,7 @@
 
 
         cfg: {
-            root: '/js',
+            root: '..'
         },
 
         /**
@@ -374,7 +374,7 @@
          *      the new prototype
          */
         brew: function (typeDef) {
-            var SuperType = typeDef.extend || alchemy('core.MateriaPrima'),
+            var SuperType = typeDef.extend || alchemyFn('core.MateriaPrima'),
                 name = typeDef.name,
                 includes = typeDef.ingredients,
                 overrides = typeDef.overrides,
@@ -589,10 +589,13 @@
         emptyFn: function () {}
     };
     var loadFormula;
+    var getUrl = function (name) {
+        return alchemy.cfg.root + '/' + name.replace(/\./g, '/') + '.js';
+    };
     var alchemyFn = function (potionName) {
         var potion = alchemy.potions[potionName];
         if (!potion) {
-            var formula = alchemy.formulas[name];
+            var formula = alchemy.formulas[potionName];
             if (!formula) {
                 formula = loadFormula(potionName);
             }
@@ -606,15 +609,14 @@
     if (typeof require === 'function') {
         // node.js
         loadFormula = function (name) {
-            return require(name);
+            return require(getUrl(name));
         };
         module.exports = alchemyFn;
     } else {
         loadFormula = function (name) {
             var result;
-            var url = alchemy.cfg.root + '/' + name.replace(/\./g, '/') + '.js';
             var request = new XMLHttpRequest();
-            request.open('GET', url, false);
+            request.open('GET', getUrl(name), false);
             request.send(null);
             if (request.status === 200 && request.responseText) {
                 /*jslint evil: true*/

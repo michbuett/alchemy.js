@@ -1,51 +1,42 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-  "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<head>
-  <title>Jasmine Spec Runner</title>
+    <head>
+        <title>Jasmine Spec Runner</title>
 
-  <link rel="shortcut icon" type="image/png" href="../lib/jasmine-1.2.0/jasmine_favicon.png">
-  <link rel="stylesheet" type="text/css" href="../lib/jasmine-1.2.0/jasmine.css">
-  <script type="text/javascript" src="../lib/jasmine-1.2.0/jasmine.js"></script>
-  <script type="text/javascript" src="../lib/jasmine-1.2.0/jasmine-html.js"></script>
+        <link rel="shortcut icon" type="image/png" href="../lib/jasmine-1.2.0/jasmine_favicon.png">
+        <link rel="stylesheet" type="text/css" href="../lib/jasmine-1.2.0/jasmine.css">
+        <script type="text/javascript" src="../lib/jasmine-1.2.0/jasmine.js"></script>
+        <script type="text/javascript" src="../lib/jasmine-1.2.0/jasmine-html.js"></script>
 
-  <!-- include source files here... -->
-  <script type="text/javascript" src="../js/core/Alchemy.js"></script>
+        <!-- include source files here... -->
+        <script type="text/javascript" src="../js/core/Alchemy.js"></script>
 
-  <!-- include spec files here... -->
-  <script type="text/javascript" src="alchemy.spec.js"></script>
+        <!-- include spec files here... -->
+        <script type="text/javascript" src="alchemy.spec.js"></script>
 
-  <script type="text/javascript">
-    (function() {
-      var jasmineEnv = jasmine.getEnv();
-      jasmineEnv.updateInterval = 1000;
+        <script type="text/javascript">
+            (function() {
+                var jasmineEnv = jasmine.getEnv();
+                var htmlReporter = new jasmine.HtmlReporter();
+                var alchemy = require('alchemy');
 
-      var htmlReporter = new jasmine.HtmlReporter();
+                jasmineEnv.updateInterval = 1000;
+                jasmineEnv.addReporter(htmlReporter);
+                jasmineEnv.specFilter = function (spec) {
+                    return htmlReporter.specFilter(spec);
+                };
 
-      jasmineEnv.addReporter(htmlReporter);
+                window.onload = function () {
+                    // set root path so the core can load the sub modules
+                    alchemy.cfg.root = '../js';
+                    // execute the jasmine specs
+                    jasmineEnv.execute();
+                };
+            })();
+        </script>
 
-      jasmineEnv.specFilter = function(spec) {
-        return htmlReporter.specFilter(spec);
-      };
+    </head>
 
-      var currentWindowOnload = window.onload;
-
-      window.onload = function() {
-        if (currentWindowOnload) {
-          currentWindowOnload();
-        }
-        execJasmine();
-      };
-
-      function execJasmine() {
-        jasmineEnv.execute();
-      }
-
-    })();
-  </script>
-
-</head>
-
-<body>
-</body>
+    <body>
+    </body>
 </html>

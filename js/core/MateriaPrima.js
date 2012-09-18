@@ -19,7 +19,7 @@
  */
 (function () {
 
-    var alchemy = require('alchemy');
+    var alchemy = require('./Alchemy.js');
     /**
      * @class core.MateriaPrima
      * @extends Object
