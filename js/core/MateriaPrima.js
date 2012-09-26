@@ -18,8 +18,10 @@
  * SOFTWARE.
  */
 (function () {
+    'use strict';
 
     var alchemy = require('./Alchemy.js');
+
     /**
      * @class core.MateriaPrima
      * @extends Object
