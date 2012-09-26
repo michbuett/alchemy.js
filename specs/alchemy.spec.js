@@ -80,12 +80,79 @@ describe('alchemy', function () {
         it('can load formulas', function () {
             // prepare
             alchemy.formulas = {};
+            alchemy.potions = {};
             // execute
             var mp = alchemy('core.MateriaPrima');
             // verify
             expect(mp).toBeDefined();
             expect(typeof mp.create).toBe('function');
             expect(typeof mp.init).toBe('function');
+        });
+
+        it('can brew poitions (based on materia prima)', function () {
+            var potion = alchemy.brew({
+                name: 'dummy',
+                overrides: {
+                    foo: function () {
+                        return 'foo';
+                    }
+                }
+            });
+            expect(potion.getMetaAttr('name')).toBe('dummy');
+            expect(potion.getMetaAttr('supertype')).toBe(alchemy('core.MateriaPrima'));
+            expect(alchemy('core.MateriaPrima').isPrototypeOf(potion)).toBeTruthy();
+            expect(potion.foo()).toBe('foo');
+        });
+
+        it('can extend any other potion', function () {
+            var potion1 = alchemy.brew({
+                overrides: {
+                    foo: function () {
+                        return 'foo';
+                    }
+                }
+            });
+            var potion2 = alchemy.brew({
+                extend: potion1,
+                overrides: {
+                    bar: function () {
+                        return 'bar';
+                    }
+                }
+            });
+            expect(potion2.getMetaAttr('supertype')).toBe(potion1);
+            expect(potion1.isPrototypeOf(potion2)).toBeTruthy();
+            expect(potion2.foo()).toBe('foo');
+            expect(potion2.bar()).toBe('bar');
+        });
+
+        it('can override methods of super types', function () {
+            var potion1 = alchemy.brew({
+                overrides: {
+                    foo: function () {
+                        return 'foo';
+                    }
+                }
+            });
+            var potion2 = alchemy.brew({
+                extend: potion1,
+                overrides: {
+                    foo: function () {
+                        return _super.call(this) + ' - bar';
+                    }
+                }
+            });
+            var potion3 = alchemy.brew({
+                extend: potion2,
+                overrides: {
+                    foo: function () {
+                        return _super.call(this) + ' - baz';
+                    }
+                }
+            });
+            expect(potion1.foo()).toBe('foo');
+            expect(potion2.foo()).toBe('foo - bar');
+            expect(potion3.foo()).toBe('foo - bar - baz');
         });
     });
 });

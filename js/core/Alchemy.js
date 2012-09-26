@@ -383,7 +383,7 @@
                 i;
 
             if (alchemy.isString(SuperType)) {
-                SuperType = alchemy(SuperType);
+                SuperType = alchemyFn(SuperType);
             }
             NewType = Object.create(SuperType);
 
@@ -404,7 +404,8 @@
             }
             if (overrides) {
                 alchemy.mix(NewType, overrides, {
-                    copyConstructor: true
+                    copyConstructor: true,
+                    linkMethods: true
                 });
             }
             meta.push(['supertype', SuperType]);
@@ -609,7 +610,9 @@
     if (typeof require === 'function') {
         // node.js
         loadFormula = function (name) {
-            return require(getUrl(name));
+            console.log('loadFormula', name, getUrl(name));
+            require(getUrl(name));
+            return alchemy.formulas[name];
         };
         module.exports = alchemyFn;
     } else {
