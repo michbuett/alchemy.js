@@ -10,26 +10,30 @@
 
         <!-- include source files here... -->
         <script type="text/javascript" src="../js/core/Alchemy.js"></script>
+        <script type="text/javascript">
+            // set root path so the core can load the sub modules
+            var alchemy = require('alchemy');
+            alchemy.cfg.root = '../js';
+        </script>
 
         <!-- include spec files here... -->
         <script type="text/javascript" src="alchemy.spec.js"></script>
         <script type="text/javascript" src="materiaprima.spec.js"></script>
+        <script type="text/javascript" src="ingredient.spec.js"></script>
 
         <script type="text/javascript">
             (function() {
                 var jasmineEnv = jasmine.getEnv();
                 var htmlReporter = new jasmine.HtmlReporter();
-                var alchemy = require('alchemy');
 
                 jasmineEnv.updateInterval = 1000;
                 jasmineEnv.addReporter(htmlReporter);
+
                 jasmineEnv.specFilter = function (spec) {
                     return htmlReporter.specFilter(spec);
                 };
 
                 window.onload = function () {
-                    // set root path so the core can load the sub modules
-                    alchemy.cfg.root = '../js';
                     // execute the jasmine specs
                     jasmineEnv.execute();
                 };
