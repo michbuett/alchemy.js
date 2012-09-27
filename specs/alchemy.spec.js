@@ -63,24 +63,9 @@ describe('alchemy', function () {
     });
 
     describe('Prototype definituion', function () {
-        afterEach(function () {
-            alchemy.potions = {};
-        });
-
-        it('can return registered prototypes', function () {
-            // prepare
-            var testProto = {
-                foo: 'bar'
-            };
-            alchemy.potions.test = testProto;
-            // execute/verify
-            expect(alchemy('test')).toBe(testProto);
-        });
 
         it('can load formulas', function () {
             // prepare
-            alchemy.formulas = {};
-            alchemy.potions = {};
             // execute
             var mp = alchemy('core.MateriaPrima');
             // verify
