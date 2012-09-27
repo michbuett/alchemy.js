@@ -202,7 +202,7 @@
      *      <code>true</code> if the given item is a number
      */
     alchemy.isNumber = function (n) {
-        return typeof n === 'number';
+        return typeof n === 'number' && !isNaN(n);
     };
 
     /**
@@ -216,6 +216,32 @@
      */
     alchemy.isString = function (s) {
         return typeof s === 'string';
+    };
+
+    /**
+     * Checks if the given item is a boolean
+     *
+     * @param {Various} b
+     *      the value to check
+     *
+     * @return {Boolean}
+     *      <code>true</code> if and only if the check is passed
+     */
+    alchemy.isBoolean = function (b) {
+        return typeof b === 'boolean';
+    };
+
+    /**
+     * Checks if the given value is defined
+     *
+     * @param {Various} x
+     *      the value to check
+     *
+     * @return {Boolean}
+     *      <code>true</code> if and only if the check is passed
+     */
+    alchemy.isDefined = function (x) {
+        return alchemy.isNumber(x) || alchemy.isString(x) || alchemy.isObject(x) || alchemy.isArray(x) || alchemy.isFunction(x) || alchemy.isBoolean(x);
     };
 
     /**

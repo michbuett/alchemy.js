@@ -6,6 +6,11 @@ describe('alchemy', function () {
         it('can detect numbers', function () {
             expect(alchemy.isNumber(0)).toBeTruthy();
             expect(alchemy.isNumber(42)).toBeTruthy();
+            expect(alchemy.isNumber(Number.MIN_VALUE)).toBeTruthy();
+            expect(alchemy.isNumber(Number.MAX_VALUE)).toBeTruthy();
+            expect(alchemy.isNumber(Number.POSITIVE_INFINITY)).toBeTruthy();
+            expect(alchemy.isNumber(Number.NEGATIVE_INFINITY)).toBeTruthy();
+
             expect(alchemy.isNumber()).toBeFalsy();
             expect(alchemy.isNumber(null)).toBeFalsy();
             expect(alchemy.isNumber('42')).toBeFalsy();
@@ -13,6 +18,7 @@ describe('alchemy', function () {
             expect(alchemy.isNumber({})).toBeFalsy();
             expect(alchemy.isNumber([])).toBeFalsy();
             expect(alchemy.isNumber(function () {})).toBeFalsy();
+            expect(alchemy.isNumber(NaN)).toBeFalsy();
         });
 
         it('can detect strings', function () {
@@ -59,6 +65,42 @@ describe('alchemy', function () {
             expect(alchemy.isArray(null)).toBeFalsy();
             expect(alchemy.isArray(true)).toBeFalsy();
             expect(alchemy.isArray({})).toBeFalsy();
+        });
+
+        it('can detect boolean values', function () {
+            expect(alchemy.isBoolean(true)).toBeTruthy();
+            expect(alchemy.isBoolean(false)).toBeTruthy();
+
+            expect(alchemy.isBoolean(0)).toBeFalsy();
+            expect(alchemy.isBoolean(42)).toBeFalsy();
+            expect(alchemy.isBoolean(Number.MIN_VALUE)).toBeFalsy();
+            expect(alchemy.isBoolean(Number.MAX_VALUE)).toBeFalsy();
+            expect(alchemy.isBoolean(Number.POSITIVE_INFINITY)).toBeFalsy();
+            expect(alchemy.isBoolean(Number.NEGATIVE_INFINITY)).toBeFalsy();
+            expect(alchemy.isBoolean('42')).toBeFalsy();
+            expect(alchemy.isBoolean({})).toBeFalsy();
+            expect(alchemy.isBoolean([])).toBeFalsy();
+            expect(alchemy.isBoolean(function () {})).toBeFalsy();
+            expect(alchemy.isBoolean()).toBeFalsy();
+            expect(alchemy.isBoolean(null)).toBeFalsy();
+            expect(alchemy.isBoolean(NaN)).toBeFalsy();
+        });
+        it('can detect defined values', function () {
+            expect(alchemy.isDefined(0)).toBeTruthy();
+            expect(alchemy.isDefined(42)).toBeTruthy();
+            expect(alchemy.isDefined(Number.MIN_VALUE)).toBeTruthy();
+            expect(alchemy.isDefined(Number.MAX_VALUE)).toBeTruthy();
+            expect(alchemy.isDefined(Number.POSITIVE_INFINITY)).toBeTruthy();
+            expect(alchemy.isDefined(Number.NEGATIVE_INFINITY)).toBeTruthy();
+            expect(alchemy.isDefined('42')).toBeTruthy();
+            expect(alchemy.isDefined(true)).toBeTruthy();
+            expect(alchemy.isDefined({})).toBeTruthy();
+            expect(alchemy.isDefined([])).toBeTruthy();
+            expect(alchemy.isDefined(function () {})).toBeTruthy();
+
+            expect(alchemy.isDefined()).toBeFalsy();
+            expect(alchemy.isDefined(null)).toBeFalsy();
+            expect(alchemy.isDefined(NaN)).toBeFalsy();
         });
     });
 
