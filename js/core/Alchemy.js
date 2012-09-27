@@ -42,7 +42,7 @@
         if (!potion) {
             var formula = formulas[potionName];
             if (!formula) {
-                formula = loadFormula(potionName);
+                formula = alchemy.loadFormula(potionName);
             }
             if (!formula) {
                 throw 'Cannot load formula: ' + name;
@@ -61,6 +61,17 @@
      */
     alchemy.version = '0.1.0';
 
+    /**
+     *
+     *
+     * @property platform
+     * @type Object
+     * @readonly
+     */
+    alchemy.platform = {
+        isBrowser: typeof window === 'object',
+        isNode: typeof require === 'function'
+    };
 
     /**
      * the prefix for internal type and method meta properties
@@ -520,34 +531,33 @@
      */
     alchemy.emptyFn = function () {};
 
-    var loadFormula;
-    var getUrl = function (name) {
-        return alchemy.cfg.root + '/' + name.replace(/\./g, '/') + '.js';
-    };
+    /**
+     * Loads a formual synchronously.
+     */
+    alchemy.loadFormula = function (name) {
+        var url = alchemy.cfg.root + '/' + name.replace(/\./g, '/') + '.js',
+            request;
 
-    if (typeof require === 'function') {
-        // node.js
-        loadFormula = function (name) {
-            require(getUrl(name));
-            return formulas[name];
-        };
-        module.exports = alchemy;
-    } else {
-        loadFormula = function (name) {
-            var result;
-            var request = new XMLHttpRequest();
-            request.open('GET', getUrl(name), false);
+        if (alchemy.platform.isNode) {
+            require(url);
+        } else if (alchemy.platform.isBrowser) {
+            request = new XMLHttpRequest();
+            request.open('GET', url, false);
             request.send(null);
+
             if (request.status === 200 && request.responseText) {
                 /*jslint evil: true*/
                 eval(request.responseText);
                 /*jslint evil: false*/
-                result = formulas[name];
             }
-            return result;
+        }
+        return formulas[name];
+    };
 
-        };
-        // browser
+
+    if (alchemy.platform.isNode) {
+        module.exports = alchemy;
+    } else if (alchemy.platform.isBrowser) {
         window.require = function () {
             // TODO:
             // * handling of different modules
