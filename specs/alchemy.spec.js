@@ -104,6 +104,29 @@ describe('alchemy', function () {
         });
     });
 
+    describe('filename resolving', function () {
+        var root = alchemy.path.root;
+
+        beforeEach(function () {
+        });
+
+        afterEach(function () {
+            alchemy.path.root = root;
+        });
+
+        it('can resolve file names', function () {
+            // prepare
+            alchemy.path.root = 'root/';
+            alchemy.path.set({
+                myPackage: 'my/own/path'
+            });
+            // exec/verify
+            expect(alchemy.getFile('MyType')).toBe('root/MyType.js');
+            expect(alchemy.getFile('core.MateriaPrima')).toBe('root/js/core/MateriaPrima.js');
+            expect(alchemy.getFile('myPackage.MyOtherType')).toBe('root/my/own/path/MyOtherType.js');
+        });
+    });
+
     describe('Prototype definituion', function () {
 
         it('can load formulas', function () {

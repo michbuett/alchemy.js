@@ -100,6 +100,23 @@
         root: '..'
     };
 
+    alchemy.path = (function () {
+        var paths = {
+            core: 'js/core'
+        };
+        return {
+            root: '../../',
+
+            get: function (ns) {
+                return paths[ns];
+            },
+
+            set: function (cfg) {
+                paths = alchemy.mix(paths, cfg);
+            }
+        };
+    }());
+
     /**
      * provides keyboard properties (incl. keyboard events and key codes)
      *
@@ -557,11 +574,27 @@
      */
     alchemy.emptyFn = function () {};
 
+    alchemy.getFile = function (formula) {
+        var parts = formula.split('.'),
+            package,
+            name,
+            file;
+
+        if (parts.length > 1) {
+            package = parts.splice(0, parts.length - 1).join('.');
+            name = parts[0];
+            file = alchemy.path.get(package) + '/' + name + '.js';
+        } else {
+            file = parts[0] + '.js';
+        }
+        return alchemy.path.root + file;
+    };
+
     /**
      * Loads a formual synchronously.
      */
     alchemy.loadFormula = function (name) {
-        var url = alchemy.cfg.root + '/' + name.replace(/\./g, '/') + '.js',
+        var url = alchemy.getFile(name),
             request;
 
         if (alchemy.platform.isNode) {
