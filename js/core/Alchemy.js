@@ -6,7 +6,7 @@
  * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
  * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of 
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
  * the Software.
  *
  * The Software shall not be used for discriminating or manipulating people.
@@ -91,28 +91,63 @@
     alchemy.isReady = false;
 
     /**
-     * The configuration:
-     * <ul>
-     *      <li><code>root</code>: The root path for loading formulas</li>
-     * </ul>
+     * A submodule to handle the file paths of logical namespaces; See description
+     * of submethods for further details
+     *
+     * @property path
+     * @type Object
      */
-    alchemy.cfg = {
-        root: '..'
-    };
-
     alchemy.path = (function () {
-        var paths = {
-            core: 'js/core'
-        };
-        return {
-            root: '../../',
+        var root = '../../js',
+            pathMap = {
+                core: root + '/core'
+            };
 
-            get: function (ns) {
-                return paths[ns];
+        return {
+            /**
+             * Returns the filepath to a given namespace
+             *
+             * @param {String} ns
+             *      The name space
+             *
+             * @return {String}
+             *      The file path
+             *
+             * @memberOf alchemy.path
+             */
+            map: function (ns) {
+                var parts = ns,
+                    match,
+                    result = [];
+
+                if (alchemy.isString(parts)) {
+                    parts = parts.split('.');
+                }
+                if (!alchemy.isArray(parts)) {
+                    throw '[ERROR] invalid namespace to map: ' + ns;
+                }
+                while (parts.length > 0) {
+                    match = pathMap[parts.join('.')];
+                    if (match) {
+                        result.unshift(match);
+                        break;
+                    } else {
+                        result.unshift(parts.pop());
+                    }
+                }
+                return result.join('/');
             },
 
+            /**
+             * Add new configurations or change existing ones
+             *
+             * @param {Object} cfg
+             *      The name space cfg; Each key represents a namespace and the value should be the path
+             *
+             * @memberOf alchemy.path
+             */
             set: function (cfg) {
-                paths = alchemy.mix(paths, cfg);
+                pathMap = alchemy.mix(pathMap, cfg);
             }
         };
     }());
@@ -274,7 +309,7 @@
      *      the execution scope for the callback function
      *
      * @param {Object} args
-     *      optional; an argument which will be passed as an argument to the 
+     *      optional; an argument which will be passed as an argument to the
      *      callback function
      */
     alchemy.each = function (iterable, fn, scope, args) {
@@ -311,7 +346,7 @@
      *          </li>
      *          <li>
      *              <code>copyConstructor</code> {boolean} if set to <code>true
-     *              </code> the constructor method will be copied too (defaults 
+     *              </code> the constructor method will be copied too (defaults
      *              to <code>false</code>
      *          </li>
      *          <li>
@@ -512,7 +547,9 @@
      *      the modified function
      */
     alchemy.infect = function (f, code) {
+        /*jshint regexp: false*/
         var re = /^function.*\(.*\).*\{/,
+        /*jshint regexp: true*/
             fs = f.toString(),
             fHead = f.toString().match(re)[0],
             result;
@@ -574,24 +611,40 @@
      */
     alchemy.emptyFn = function () {};
 
+    /**
+     * Maps the name of a formula to the actual filename.
+     * NOTICE:
+     *  - This is supposed to be an internal helper method. In general there should be no need to use the method
+     *  explicitly. You can access potions by <code>alchemy('myNamspace.myFormula')</code>
+     *  - There is no check if the file atually exists.
+     *
+     * @param {String} formula
+     *      The fully qualified formula name (e.g.: 'core.MateriaPrima')
+     *
+     * @return {String}
+     *      The corresponding filename.
+     */
     alchemy.getFile = function (formula) {
         var parts = formula.split('.'),
-            package,
+            ns,
             name,
             file;
 
         if (parts.length > 1) {
-            package = parts.splice(0, parts.length - 1).join('.');
+            ns = parts.splice(0, parts.length - 1).join('.');
             name = parts[0];
-            file = alchemy.path.get(package) + '/' + name + '.js';
+            file = alchemy.path.map(ns) + '/' + name + '.js';
         } else {
             file = parts[0] + '.js';
         }
-        return alchemy.path.root + file;
+        return file;
     };
 
     /**
      * Loads a formual synchronously.
+     * NOTICE:
+     *  - This is supposed to be an internal helper method. In general there should be no need to use the method
+     *  explicitly. You can access potions by <code>alchemy('myNamspace.myFormula')</code>
      */
     alchemy.loadFormula = function (name) {
         var url = alchemy.getFile(name),

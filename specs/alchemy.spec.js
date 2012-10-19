@@ -1,5 +1,7 @@
 /*global require*/
 describe('alchemy', function () {
+    'use strict';
+
     var alchemy = require('../js/core/Alchemy.js');
 
     describe('general utility methods', function () {
@@ -105,25 +107,38 @@ describe('alchemy', function () {
     });
 
     describe('filename resolving', function () {
-        var root = alchemy.path.root;
+        alchemy.path.set({
+            myPackage: 'my/own/path',
+            myOtherPackage: 'my/other/path'
+        });
 
         beforeEach(function () {
         });
 
         afterEach(function () {
-            alchemy.path.root = root;
         });
 
-        it('can resolve file names', function () {
-            // prepare
-            alchemy.path.root = 'root/';
-            alchemy.path.set({
-                myPackage: 'my/own/path'
-            });
-            // exec/verify
-            expect(alchemy.getFile('MyType')).toBe('root/MyType.js');
-            expect(alchemy.getFile('core.MateriaPrima')).toBe('root/js/core/MateriaPrima.js');
-            expect(alchemy.getFile('myPackage.MyOtherType')).toBe('root/my/own/path/MyOtherType.js');
+        it('can resolve simple file names', function () {
+            expect(alchemy.getFile('MyType')).toBe('MyType.js');
+        });
+
+        it('can resolve preconfigured file names', function () {
+            expect(alchemy.getFile('core.MateriaPrima')).toBe('../../js/core/MateriaPrima.js');
+        });
+
+        it('can resolve files of custom packages', function () {
+            expect(alchemy.getFile('myPackage.MyType')).toBe('my/own/path/MyType.js');
+            expect(alchemy.getFile('myPackage.MyOtherType')).toBe('my/own/path/MyOtherType.js');
+            expect(alchemy.getFile('myOtherPackage.MyOtherType')).toBe('my/other/path/MyOtherType.js');
+        });
+
+        it('can resolve files of subpackages relative to their parents', function () {
+            expect(alchemy.getFile('myPackage.sub.MyType')).toBe('my/own/path/sub/MyType.js');
+            expect(alchemy.getFile('core.yellow.sub.Marine')).toBe('../../js/core/yellow/sub/Marine.js');
+        });
+
+        it('can resolve files of unconfigured packages to sane result', function () {
+            expect(alchemy.getFile('my.totally.unknown.package.Type')).toBe('my/totally/unknown/package/Type.js');
         });
     });
 
