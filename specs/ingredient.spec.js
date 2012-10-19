@@ -1,5 +1,6 @@
 describe('Ingredient', function () {
-    var alchemy = require('../js/core/Alchemy.js');
+    'use strict';
+    var alchemy = require('../lib/core/Alchemy.js');
     var testIngredient = alchemy.brew({
         extend: 'core.Ingredient',
         overrides: {

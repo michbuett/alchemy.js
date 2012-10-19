@@ -3,13 +3,19 @@
     <head>
         <title>Jasmine Spec Runner</title>
 
-        <link rel="shortcut icon" type="image/png" href="../lib/jasmine-1.2.0/jasmine_favicon.png">
-        <link rel="stylesheet" type="text/css" href="../lib/jasmine-1.2.0/jasmine.css">
-        <script type="text/javascript" src="../lib/jasmine-1.2.0/jasmine.js"></script>
-        <script type="text/javascript" src="../lib/jasmine-1.2.0/jasmine-html.js"></script>
+        <link rel="shortcut icon" type="image/png" href="../support/jasmine-1.2.0/jasmine_favicon.png">
+        <link rel="stylesheet" type="text/css" href="../support/jasmine-1.2.0/jasmine.css">
+        <script type="text/javascript" src="../support/jasmine-1.2.0/jasmine.js"></script>
+        <script type="text/javascript" src="../support/jasmine-1.2.0/jasmine-html.js"></script>
 
         <!-- include source files here... -->
-        <script type="text/javascript" src="../js/core/Alchemy.js"></script>
+        <script type="text/javascript" src="../lib/core/Alchemy.js"></script>
+        <script type="text/javascript">
+            var alchemy = require('alchemy');
+            alchemy.path.set({
+                core: '../lib/core'
+            });
+        </script>
 
         <!-- include spec files here... -->
         <script type="text/javascript" src="alchemy.spec.js"></script>

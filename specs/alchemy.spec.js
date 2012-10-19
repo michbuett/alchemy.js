@@ -2,7 +2,7 @@
 describe('alchemy', function () {
     'use strict';
 
-    var alchemy = require('../js/core/Alchemy.js');
+    var alchemy = require('../lib/core/Alchemy.js');
 
     describe('general utility methods', function () {
         it('can detect numbers', function () {
@@ -123,7 +123,7 @@ describe('alchemy', function () {
         });
 
         it('can resolve preconfigured file names', function () {
-            expect(alchemy.getFile('core.MateriaPrima')).toBe('../../js/core/MateriaPrima.js');
+            expect(alchemy.getFile('core.MateriaPrima')).toBe(alchemy.path.get('core') + '/MateriaPrima.js');
         });
 
         it('can resolve files of custom packages', function () {
@@ -134,7 +134,7 @@ describe('alchemy', function () {
 
         it('can resolve files of subpackages relative to their parents', function () {
             expect(alchemy.getFile('myPackage.sub.MyType')).toBe('my/own/path/sub/MyType.js');
-            expect(alchemy.getFile('core.yellow.sub.Marine')).toBe('../../js/core/yellow/sub/Marine.js');
+            expect(alchemy.getFile('core.yellow.sub.Marine')).toBe(alchemy.path.get('core') + '/yellow/sub/Marine.js');
         });
 
         it('can resolve files of unconfigured packages to sane result', function () {

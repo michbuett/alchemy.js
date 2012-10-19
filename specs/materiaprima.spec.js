@@ -1,7 +1,7 @@
 describe('MateriaPrima', function () {
     'use strict';
 
-    var alchemy = require('../js/core/Alchemy.js'),
+    var alchemy = require('../lib/core/Alchemy.js'),
         mp;
 
     beforeEach(function () {
