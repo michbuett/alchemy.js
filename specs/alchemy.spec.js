@@ -142,6 +142,49 @@ describe('alchemy', function () {
         });
     });
 
+    describe('rendering', function () {
+        it('can replace data attributes', function () {
+            expect(alchemy.render('<div id="<$=data.id$>" class="<$=data.cls$>"><$=data.text$></div>', {
+                id: 'test_id',
+                cls: 'test_class',
+                text: 'test_text'
+            })).toBe('<div id="test_id" class="test_class">test_text</div>');
+        });
+
+        it('can evaluate loops', function () {
+            /*jshint white: false*/
+            expect(alchemy.render([
+                '<$ for (var i = 0; i < data.list.length; i++) { $>',
+                    '<li><$=data.list[i]$></li>',
+                '<$ } $>'
+            ].join(''), {
+                list: [1, 2, 3]
+            })).toBe('<li>1</li><li>2</li><li>3</li>');
+            /*jshint white: true*/
+        });
+
+        it('can evaluate conditions', function () {
+            /*jshint white: false*/
+            var tpl = [
+                '<$ if (data.condition) { $>',
+                    '<div><$=data.trueVal$></div>',
+                '<$ } else { $>',
+                    '<div><$=data.falseVal$></div>',
+                '<$ } $>'
+            ].join('');
+            /*jshint white: true*/
+
+            expect(alchemy.render(tpl, {
+                condition: true,
+                trueVal: 'YEEEHAA!'
+            })).toBe('<div>YEEEHAA!</div>');
+            expect(alchemy.render(tpl, {
+                condition: false,
+                falseVal: 'OH NO!'
+            })).toBe('<div>OH NO!</div>');
+        });
+    });
+
     describe('Prototype definituion', function () {
 
         it('can load formulas', function () {
