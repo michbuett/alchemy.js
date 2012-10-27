@@ -26,13 +26,24 @@ It also provides a convenient super reference. Every method that overrides anoth
 ```js
 alchemy.addFormula({
   name: 'MyType',
-  extend: 'SomeSuperType',
   overrides: {
     foo: function () {      
-      return 'foo'
+      return 'foo';
     }
   }
 });
+
+alchemy.addFormula({
+  name: 'MySubType',
+  extend: 'MyType',
+  overrides: {
+    foo: function () {      
+      return _super.call(this) + ' - bar';
+    }
+  }
+});
+
+alchemy('MySubType').foo() // returns "foo - bar"
 ```
 
 You can create instances of a prototype using a factory pattern, e.g.
@@ -45,6 +56,13 @@ var myIntance = MyType.create({
 });
 ```
 
-* It provides a convenient super reference. Every method that overrides another one has access to a local variable ``_super}
-* It is really platform independent. It is tested to work with node.js and in a (good) browser.
-* Mixins
+In contrast to the native `Object.create` the arguments are passed to the constructor method of a new potion instance.
+
+
+Mixins
+------
+_coming soon_
+
+Events
+------
+_coming soon_
