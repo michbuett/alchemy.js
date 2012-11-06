@@ -142,7 +142,7 @@ describe('alchemy', function () {
         });
     });
 
-    describe('rendering', function () {
+    describe('render', function () {
         it('can replace data attributes', function () {
             expect(alchemy.render('<div id="<$=data.id$>" class="<$=data.cls$>"><$=data.text$></div>', {
                 id: 'test_id',
@@ -185,8 +185,178 @@ describe('alchemy', function () {
         });
     });
 
-    describe('Prototype definituion', function () {
+    describe('each', function () {
+        var expectedScope = {};
+        var actualScope;
+        var args = ['foo', 'bar', 'baz'];
+        var spy = jasmine.createSpy('iterator').andCallFake(function () {
+            actualScope = this;
+        });
 
+        beforeEach(function () {
+            spy.reset();
+        });
+
+        it('allows to iterate through arrays', function () {
+            // prepare
+            var array = [1, 2, 3, 4, 5];
+            // execute
+            alchemy.each(array, spy, expectedScope, args);
+            // verify
+            expect(spy).toHaveBeenCalled();
+            expect(spy.callCount).toBe(array.length);
+            expect(actualScope).toBe(expectedScope);
+            for (var i = 0; i < array.length; i++) {
+                var call = spy.calls[i];
+                expect(call.args[0]).toBe(array[i]);
+                expect(call.args[1]).toBe(i);
+                expect(call.args[2]).toBe(args[0]);
+                expect(call.args[3]).toBe(args[1]);
+                expect(call.args[4]).toBe(args[2]);
+            }
+        });
+
+        it('allows to iterate through objects', function () {
+            // prepare
+            var obj = {
+                key0: 'value0',
+                key1: 'value1',
+                key2: 'value2'
+            };
+            // execute
+            alchemy.each(obj, spy, expectedScope, args);
+            // verify
+            expect(spy).toHaveBeenCalled();
+            expect(spy.callCount).toBe(3);
+            expect(actualScope).toBe(expectedScope);
+            for (var i = 0; i < 3; i++) {
+                var call = spy.calls[i];
+                var key = 'key' + i;
+                var value = 'value' + i;
+
+                expect(call.args[0]).toBe(value);
+                expect(call.args[1]).toBe(key);
+                expect(call.args[2]).toBe(args[0]);
+                expect(call.args[3]).toBe(args[1]);
+                expect(call.args[4]).toBe(args[2]);
+            }
+        });
+
+        it('handles additional arguments correctly', function () {
+            alchemy.each([1], spy);
+            expect(spy.mostRecentCall.args.length).toBe(2);
+
+            alchemy.each([1], spy, null, 'foo');
+            expect(spy.mostRecentCall.args.length).toBe(3);
+            expect(spy.mostRecentCall.args[2]).toBe('foo');
+
+            alchemy.each([1], spy, null, ['foo', 'bar', 'baz']);
+            expect(spy.mostRecentCall.args.length).toBe(5);
+            expect(spy.mostRecentCall.args[2]).toBe('foo');
+            expect(spy.mostRecentCall.args[3]).toBe('bar');
+            expect(spy.mostRecentCall.args[4]).toBe('baz');
+        });
+
+        it('ignores non-iterable inputs', function () {
+            alchemy.each([], spy);
+            expect(spy).not.toHaveBeenCalled();
+
+            alchemy.each({}, spy);
+            expect(spy).not.toHaveBeenCalled();
+
+            alchemy.each(null, spy);
+            expect(spy).not.toHaveBeenCalled();
+
+            alchemy.each(undefined, spy);
+            expect(spy).not.toHaveBeenCalled();
+
+            alchemy.each(function () {}, spy);
+            expect(spy).not.toHaveBeenCalled();
+
+            alchemy.each(42, spy);
+            expect(spy).not.toHaveBeenCalled();
+
+            alchemy.each('Super duper mega party', spy);
+            expect(spy).not.toHaveBeenCalled();
+
+            alchemy.each(true, spy);
+            expect(spy).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('mix', function () {});
+
+    describe('override', function () {
+        it('allows overriding multiple methods at once', function () {
+            // prepare
+            var f1 = function () { return 'override-1'; };
+            var f2 = function () { return 'override-2'; };
+            var f3 = function () { return 'override-3'; };
+            var obj = {
+                f1: function () { return 'origin-1'; },
+                f2: function () { return 'origin-2'; },
+                f3: function () { return 'origin-3'; },
+                f4: function () { return 'origin-4'; },
+            };
+            // execute
+            alchemy.override(obj, {
+                f1: f1,
+                f2: f2,
+                f3: f3
+            });
+            // verify
+            expect(obj.f1()).toBe('override-1');
+            expect(obj.f2()).toBe('override-2');
+            expect(obj.f3()).toBe('override-3');
+            expect(obj.f4()).toBe('origin-4');
+        });
+
+        it('allows the overrides to access the overidden methods', function () {
+            // prepare
+            var obj = {
+                foo: function () {
+                    return 'foo';
+                }
+            };
+            // execute
+            alchemy.override(obj, {
+                foo: function () {
+                    return _super.call(this) + ' - bar';
+                }
+            });
+            alchemy.override(obj, {
+                foo: function () {
+                    return _super.call(this) + ' - baz';
+                }
+            });
+            // verify
+            expect(obj.foo()).toBe('foo - bar - baz');
+        });
+
+        it('allows overriding constructors', function () {
+            // prepare
+            var orgCtor = function () {
+                this.foo = 'foo';
+            };
+            var obj = {
+                constructor: orgCtor
+            };
+            var newCtor = function () {
+                this.bar = 'bar';
+                _super.call(this);
+            };
+            //execute
+            alchemy.override(obj, {
+                constructor: newCtor
+            });
+            obj.constructor();
+            // verify
+            expect(obj.foo).toBe('foo');
+            expect(obj.bar).toBe('bar');
+        });
+    });
+
+    describe('Prototype definituion', function () {
         it('can load formulas', function () {
             // prepare
             // execute
