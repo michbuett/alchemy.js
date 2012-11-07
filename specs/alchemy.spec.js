@@ -354,6 +354,25 @@ describe('alchemy', function () {
             expect(obj.foo).toBe('foo');
             expect(obj.bar).toBe('bar');
         });
+
+        it('can add non-function properties too', function () {
+            // prepare
+            var obj = {
+                foo: 'foo',
+                bar: 'bar'
+            };
+            // execute
+            obj = alchemy.override(obj, {
+                bar: 'baz',
+                ping: 'pong'
+            });
+            // verify
+            expect(obj).toEqual({
+                foo: 'foo',
+                bar: 'baz',
+                ping: 'pong'
+            });
+        });
     });
 
     describe('Prototype definituion', function () {
