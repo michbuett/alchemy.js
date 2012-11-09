@@ -30,7 +30,7 @@ describe('MateriaPrima', function () {
         });
     });
 
-    describe('creating instances', function () {
+    describe('create', function () {
         it('can create instances over instances', function () {
             var i1 = mp.create(),
                 i2 = i1.create();
@@ -41,22 +41,31 @@ describe('MateriaPrima', function () {
             expect(i2.getMetaAttr('basetype')).toBe(i1);
         });
 
-        it('calls the constructor and the init method', function () {
+        it('calls the constructor', function () {
             // prepare
             var arg0 = {},
                 arg1 = {},
                 arg2 = {},
                 call, i;
-            spyOn(mp, 'constructor').andCallThrough();
-            spyOn(mp, 'init');
+
+            spyOn(mp, 'constructor');
             // execute
             i = mp.create(arg0, arg1, arg2);
-            call = i.constructor.mostRecentCall;
             // verify
+            call = i.constructor.mostRecentCall;
             expect(i.constructor).toHaveBeenCalled();
             expect(call.args[0]).toBe(arg0);
             expect(call.args[1]).toBe(arg1);
             expect(call.args[2]).toBe(arg2);
+        });
+
+        it('allows the default constructor to call the the init method', function () {
+            // prepare
+            var i;
+            spyOn(mp, 'init');
+            // execute
+            i = mp.create();
+            // verify
             expect(i.init).toHaveBeenCalled();
         });
 
@@ -74,8 +83,5 @@ describe('MateriaPrima', function () {
             expect(i.foo).toBe(foo);
             expect(i.bar).toBe(bar);
         });
-    });
-
-    describe('adding and overriding methods', function () {
     });
 });

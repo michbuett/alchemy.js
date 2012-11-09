@@ -284,7 +284,48 @@ describe('alchemy', function () {
         });
     });
 
-    describe('mix', function () {});
+    describe('mix', function () {
+        it('allows to mix multiple objects', function () {
+            expect(alchemy.mix({
+                foo: 1,
+                bar: 2,
+                baz: 3
+            }, {
+                foo: 10,
+                bar: 20
+            }, {
+                foo: 100,
+                ping: 'pong'
+            }, {
+                foo: 1000,
+                bar: 2000
+            })).toEqual({
+                foo: 1000,
+                bar: 2000,
+                baz: 3,
+                ping: 'pong'
+            });
+        });
+
+        it('ignores unmixable objects', function () {
+            expect(alchemy.mix({
+                foo: 1,
+                bar: 2,
+                baz: 3
+            }, null, {
+                foo: 10,
+                bar: 20
+            }, 3, 'Hello Dear!', {
+                foo: 100,
+                ping: 'pong'
+            })).toEqual({
+                foo: 100,
+                bar: 20,
+                baz: 3,
+                ping: 'pong'
+            });
+        });
+    });
 
     describe('override', function () {
         it('allows overriding multiple methods at once', function () {
