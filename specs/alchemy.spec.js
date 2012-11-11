@@ -123,7 +123,7 @@ describe('alchemy', function () {
         });
 
         it('can resolve preconfigured file names', function () {
-            expect(alchemy.getFile('MateriaPrima')).toBe('../../lib/core/MateriaPrima.js');
+            expect(alchemy.getFile('MateriaPrima')).toBe(alchemy.path.get('MateriaPrima') + '.js');
         });
 
         it('can resolve files of custom packages', function () {
