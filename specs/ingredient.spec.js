@@ -2,7 +2,7 @@ describe('Ingredient', function () {
     'use strict';
     var alchemy = require('../lib/core/Alchemy.js');
     var testIngredient = alchemy.brew({
-        extend: 'core.Ingredient',
+        extend: 'Ingredient',
         overrides: {
             publics: ['foo', 'bar'],
             foo: function () {
@@ -27,7 +27,7 @@ describe('Ingredient', function () {
 
     it('can be mixed into any potion at any time', function () {
         // prepare
-        var testBase = alchemy('core.MateriaPrima').create();
+        var testBase = alchemy('MateriaPrima').create();
         // execute
         testBase.addIngredient('test', testIngredient);
         // verify

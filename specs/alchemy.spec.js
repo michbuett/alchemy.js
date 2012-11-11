@@ -123,7 +123,7 @@ describe('alchemy', function () {
         });
 
         it('can resolve preconfigured file names', function () {
-            expect(alchemy.getFile('core.MateriaPrima')).toBe(alchemy.path.get('core') + '/MateriaPrima.js');
+            expect(alchemy.getFile('MateriaPrima')).toBe('../../lib/core/MateriaPrima.js');
         });
 
         it('can resolve files of custom packages', function () {
@@ -134,7 +134,7 @@ describe('alchemy', function () {
 
         it('can resolve files of subpackages relative to their parents', function () {
             expect(alchemy.getFile('myPackage.sub.MyType')).toBe('my/own/path/sub/MyType.js');
-            expect(alchemy.getFile('core.yellow.sub.Marine')).toBe(alchemy.path.get('core') + '/yellow/sub/Marine.js');
+            expect(alchemy.getFile('myOtherPackage.yellow.sub.Marine')).toBe('my/other/path/yellow/sub/Marine.js');
         });
 
         it('can resolve files of unconfigured packages to sane result', function () {
@@ -420,7 +420,7 @@ describe('alchemy', function () {
         it('can load formulas', function () {
             // prepare
             // execute
-            var mp = alchemy('core.MateriaPrima');
+            var mp = alchemy('MateriaPrima');
             // verify
             expect(mp).toBeDefined();
             expect(typeof mp.create).toBe('function');
@@ -437,8 +437,8 @@ describe('alchemy', function () {
                 }
             });
             expect(potion.getMetaAttr('name')).toBe('dummy');
-            expect(potion.getMetaAttr('supertype')).toBe(alchemy('core.MateriaPrima'));
-            expect(alchemy('core.MateriaPrima').isPrototypeOf(potion)).toBeTruthy();
+            expect(potion.getMetaAttr('supertype')).toBe(alchemy('MateriaPrima'));
+            expect(alchemy('MateriaPrima').isPrototypeOf(potion)).toBeTruthy();
             expect(potion.foo()).toBe('foo');
         });
 

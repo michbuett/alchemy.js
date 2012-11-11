@@ -1,10 +1,10 @@
-describe('core.Oculus', function () {
+describe('Oculus', function () {
     'use strict';
 
     var alchemy = require('../lib/core/Alchemy.js');
 
     beforeEach(function () {
-        this.oculus = alchemy('core.Oculus').create();
+        this.oculus = alchemy('Oculus').create();
     });
 
     afterEach(function () {
