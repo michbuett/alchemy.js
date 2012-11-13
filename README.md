@@ -53,6 +53,23 @@ alchemy.addFormula({
 alchemy('MySubType').foo() // returns "foo - bar"
 ```
 
+Aside from defining potions you can extend any object any time, e.g 
+```js
+var obj = {
+  foo: function () {
+    return 'foo';
+  }
+};
+
+alchemy.override(obj, {
+  foo: function () {
+    return _super() + ' - bar';
+  }
+});
+
+obj.foo(); // will return "foo - bar"
+```
+
 You can create instances of a prototype using a factory pattern, e.g.
 
 ```js
