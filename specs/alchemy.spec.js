@@ -414,9 +414,27 @@ describe('alchemy', function () {
                 ping: 'pong'
             });
         });
+
+        it('allows wrapping methods manually', function () {
+            // prepare
+            var orgFoo = jasmine.createSpy('original obj.foo');
+            var obj = {
+                foo: orgFoo
+            };
+            alchemy.override(obj, {
+                foo: function () {
+                    _super.call(this);
+                }
+            });
+            spyOn(obj, 'foo').andCallThrough();
+            // execute
+            obj.foo();
+            // verify
+            expect(orgFoo).toHaveBeenCalled();
+        });
     });
 
-    describe('Prototype definituion', function () {
+    describe('brew', function () {
         it('can load formulas', function () {
             // prepare
             // execute
@@ -491,6 +509,72 @@ describe('alchemy', function () {
             expect(potion1.foo()).toBe('foo');
             expect(potion2.foo()).toBe('foo - bar');
             expect(potion3.foo()).toBe('foo - bar - baz');
+        });
+
+        it('allows to create different potions of the same super types without conflicts', function () {
+            var realbase = alchemy.brew({
+                overrides: {
+                    foo: function () {
+                        return 'real base';
+                    }
+                }
+            });
+            // first override
+            var base = alchemy.brew({
+                extend: realbase,
+                overrides: {
+                    foo: function () {
+                        return 'base';
+                    }
+                }
+            });
+            // second override (split to 3 different versions)
+            var potion1 = alchemy.brew({
+                extend: base,
+                overrides: {
+                    foo: function () {
+                        return _super.call(this) + ' - foo';
+                    }
+                }
+            });
+            var potion2 = alchemy.brew({
+                extend: base,
+                overrides: {
+                    foo: function () {
+                        return _super.call(this) + ' - bar';
+                    }
+                }
+            });
+            var potion3 = alchemy.brew({
+                extend: base,
+                overrides: {
+                    foo: function () {
+                        return _super.call(this) + ' - baz';
+                    }
+                }
+            });
+            // third override (override the different versions to check if there are conflicts)
+            var potion2Sub = alchemy.brew({
+                extend: potion2,
+                overrides: {
+                    foo: function () {
+                        return _super.call(this) + ' - sub';
+                    }
+                }
+            });
+            var potion3Sub = alchemy.brew({
+                extend: potion3,
+                overrides: {
+                    foo: function () {
+                        return _super.call(this) + ' - sub';
+                    }
+                }
+            });
+            expect(potion1.foo()).toBe('base - foo');
+            expect(potion2.foo()).toBe('base - bar');
+            expect(potion3.foo()).toBe('base - baz');
+            expect(potion2Sub.foo()).toBe('base - bar - sub');
+            expect(potion3Sub.foo()).toBe('base - baz - sub');
         });
     });
 });
