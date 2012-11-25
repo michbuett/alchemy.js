@@ -1,7 +1,7 @@
 describe('Oculus', function () {
     'use strict';
 
-    var alchemy = require('../lib/core/Alchemy.js');
+    var alchemy = require('../../alchemy.js');
 
     beforeEach(function () {
         this.oculus = alchemy('Oculus').create();

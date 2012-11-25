@@ -2,7 +2,7 @@
 describe('alchemy', function () {
     'use strict';
 
-    var alchemy = require('../lib/core/Alchemy.js');
+    var alchemy = require('../../alchemy.js');
 
     describe('general utility methods', function () {
         it('can detect numbers', function () {
