@@ -146,4 +146,49 @@ describe('Oculus', function () {
             expect(this.oculus.events).toEqual({});
         });
     });
+
+    describe('observe', function () {
+        beforeEach(function () {
+            this.observable = alchemy('Oculus').create();
+        });
+        afterEach(function () {
+            this.observable.dispose();
+        });
+
+        it('allows to add handler to other observeable objects', function () {
+            // prepare
+            var arg = {foo: 'bar'};
+            var spy = jasmine.createSpy('handler');
+            this.oculus.observe(this.observable, 'party', spy);
+            // execute
+            this.observable.trigger('party', arg);
+            // verify
+            expect(spy).toHaveBeenCalledWith(arg);
+        });
+
+        it('uses the correct scope', function () {
+            // prepare
+            var scope = {};
+            var actualScope;
+            var spy = jasmine.createSpy('handler').andCallFake(function () {
+                actualScope = this;
+            });
+            this.oculus.observe(this.observable, 'party', spy, scope);
+            // execute
+            this.observable.trigger('party');
+            // verify
+            expect(actualScope).toBe(scope);
+        });
+
+        it('removes listeners from observed objects on dispose', function () {
+            // prepare
+            var spy = jasmine.createSpy('handler');
+            this.oculus.observe(this.observable, 'party', spy);
+            // execute
+            this.oculus.dispose();
+            this.observable.trigger('party');
+            // verify
+            expect(spy).not.toHaveBeenCalled();
+        });
+    });
 });
