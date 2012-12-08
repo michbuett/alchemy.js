@@ -14,14 +14,13 @@
         <script type="text/javascript">
             var alchemy = require('alchemy');
             alchemy.path.set({
-                Ingredient: '../lib/core/Ingredient',
-                MateriaPrima: '../lib/core/MateriaPrima',
-                Oculus: '../lib/core/Oculus'
+                core: '../lib/core',
             });
         </script>
 
         <!-- include spec files here... -->
         <script type="text/javascript" src="alchemy.spec.js"></script>
+        <script type="text/javascript" src="alchemy.path.spec.js"></script>
         <script type="text/javascript" src="materiaprima.spec.js"></script>
         <script type="text/javascript" src="ingredient.spec.js"></script>
         <script type="text/javascript" src="occulus.spec.js"></script>

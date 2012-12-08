@@ -106,42 +106,6 @@ describe('alchemy', function () {
         });
     });
 
-    describe('filename resolving', function () {
-        alchemy.path.set({
-            myPackage: 'my/own/path',
-            myOtherPackage: 'my/other/path'
-        });
-
-        beforeEach(function () {
-        });
-
-        afterEach(function () {
-        });
-
-        it('can resolve simple file names', function () {
-            expect(alchemy.getFile('MyType')).toBe('MyType.js');
-        });
-
-        it('can resolve preconfigured file names', function () {
-            expect(alchemy.getFile('MateriaPrima')).toBe(alchemy.path.get('MateriaPrima') + '.js');
-        });
-
-        it('can resolve files of custom packages', function () {
-            expect(alchemy.getFile('myPackage.MyType')).toBe('my/own/path/MyType.js');
-            expect(alchemy.getFile('myPackage.MyOtherType')).toBe('my/own/path/MyOtherType.js');
-            expect(alchemy.getFile('myOtherPackage.MyOtherType')).toBe('my/other/path/MyOtherType.js');
-        });
-
-        it('can resolve files of subpackages relative to their parents', function () {
-            expect(alchemy.getFile('myPackage.sub.MyType')).toBe('my/own/path/sub/MyType.js');
-            expect(alchemy.getFile('myOtherPackage.yellow.sub.Marine')).toBe('my/other/path/yellow/sub/Marine.js');
-        });
-
-        it('can resolve files of unconfigured packages to sane result', function () {
-            expect(alchemy.getFile('my.totally.unknown.package.Type')).toBe('my/totally/unknown/package/Type.js');
-        });
-    });
-
     describe('render', function () {
         it('can replace data attributes', function () {
             expect(alchemy.render('<div id="<$=data.id$>" class="<$=data.cls$>"><$=data.text$></div>', {
