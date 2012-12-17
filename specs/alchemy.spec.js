@@ -147,6 +147,34 @@ describe('alchemy', function () {
                 falseVal: 'OH NO!'
             })).toBe('<div>OH NO!</div>');
         });
+
+        it('removes block comments', function () {
+            /*jshint white: false*/
+            var tpl = [
+                '<div>',
+                '/*',
+                ' * This is a comment',
+                ' */',
+                'YEEEHAA!/* and another comment*/',
+                '</div>'
+            ].join('\n');
+            /*jshint white: true*/
+
+            expect(alchemy.render(tpl).replace(/\s/g, '')).toBe('<div>YEEEHAA!</div>');
+        });
+
+        it('removes line comments', function () {
+            /*jshint white: false*/
+            var tpl = [
+                '<div>',
+                '// This is a comment',
+                'YEEEHAA! // and another comment',
+                '</div>'
+            ].join('\n');
+            /*jshint white: true*/
+
+            expect(alchemy.render(tpl).replace(/\s/g, '')).toBe('<div>YEEEHAA!</div>');
+        });
     });
 
     describe('each', function () {
