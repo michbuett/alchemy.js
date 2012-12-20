@@ -8,12 +8,23 @@
         <!-- <link rel="stylesheet" type="text/css" href="css/alchemy.css"/>
         <link rel="stylesheet" type="text/css" href="css/cast-away.css"/> -->
 
-        <script type="text/javascript" src="../../lib/core/Alchemy.js"></script>
+        <script type="text/javascript" src="../../../lib/core/Alchemy.js"></script>
         <script type="text/javascript">
             var alchemy = require('alchemy');
-            alchemy.heatupCauldron({
+            alchemy.heatUp({
+                path: {
+                    core: '../../../lib/core',
+                    browser: '../../../lib/browser',
+                    arena: 'js'
+                },
+
+                require: ['arena.Application'],
+
                 onReady: function () {
-                    document.body.innerHTML = 'Hello World!';
+                    var app = alchemy('browser.Application').create({
+                        title: 'Arena'
+                    });
+                    app.launch();
                 }
             });
         </script>
