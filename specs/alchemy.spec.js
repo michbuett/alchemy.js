@@ -426,6 +426,44 @@ describe('alchemy', function () {
         });
     });
 
+    describe('extract', function () {
+        it('reduces an array of objects to an array of object values', function () {
+            expect(alchemy.extract([{
+                key: 'foo'
+            }, {
+                key: 'bar'
+            }, {
+                key: 'baz'
+            }, {
+                kez: 'bam'
+            }], 'key')).toEqual(['foo', 'bar', 'baz', undefined]);
+        });
+
+        it('reduces an object of objects to an array of object values', function () {
+            expect(alchemy.extract({
+                o1: {
+                    key: 'foo'
+                },
+                o2: {
+                    key: 'bar'
+                },
+                o3: {
+                    key: 'baz'
+                },
+                o4: {
+                    kez: 'bam'
+                }
+            }, 'key')).toEqual(['foo', 'bar', 'baz', undefined]);
+        });
+
+        it('allway returns an array', function () {
+            expect(alchemy.isArray(alchemy.extract())).toBeTruthy();
+            expect(alchemy.isArray(alchemy.extract(null, null))).toBeTruthy();
+            expect(alchemy.isArray(alchemy.extract([], 'foo'))).toBeTruthy();
+            expect(alchemy.isArray(alchemy.extract(null, 'bar'))).toBeTruthy();
+        });
+    });
+
     describe('brew', function () {
         it('can load formulas', function () {
             // prepare
