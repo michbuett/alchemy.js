@@ -10,13 +10,6 @@
 
         <!-- include source files here... -->
         <script type="text/javascript" src="../lib/core/Alchemy.js"></script>
-        <script type="text/javascript" src="../lib/core/MateriaPrima.js"></script>
-        <script type="text/javascript">
-            var alchemy = require('alchemy');
-            alchemy.path.set({
-                core: '../lib/core',
-            });
-        </script>
 
         <!-- include spec files here... -->
         <script type="text/javascript" src="alchemy.spec.js"></script>
@@ -37,11 +30,24 @@
                 jasmineEnv.specFilter = function (spec) {
                     return htmlReporter.specFilter(spec);
                 };
+                var alchemy = require('alchemy');
+                alchemy.heatUp({
+                    path: {
+                        core: '../lib/core',
+                        browser: '../lib/browser'
+                    },
 
-                window.onload = function () {
-                    // execute the jasmine specs
-                    jasmineEnv.execute();
-                };
+                    require: [
+                        'MateriaPrima',
+                        'Ingredient',
+                        'Oculus',
+                    ],
+
+                    onReady: function () {
+                        // execute the jasmine specs
+                        jasmineEnv.execute();
+                    }
+                });
             })();
         </script>
 

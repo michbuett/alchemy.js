@@ -1,15 +1,19 @@
 describe('Ingredient', function () {
     'use strict';
     var alchemy = require('../../alchemy.js');
-    var testIngredient = alchemy.brew({
-        extend: 'Ingredient',
-        overrides: {
-            publics: ['foo', 'bar'],
-            foo: function () {
-                return 'foo';
-            },
-            bar: 'bar'
-        }
+    var testIngredient;
+
+    beforeEach(function () {
+        testIngredient = testIngredient || alchemy.brew({
+            extend: 'Ingredient',
+            overrides: {
+                publics: ['foo', 'bar'],
+                foo: function () {
+                    return 'foo';
+                },
+                bar: 'bar'
+            }
+        });
     });
 
     it('can be mixed into any potion during brewing', function () {
