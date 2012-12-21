@@ -33,6 +33,34 @@
         name: 'arena.Viewport',
         extend: 'Oculus',
         overrides: {
+            template: [
+                '<div id="<$data.id$>" class="viewport">',
+                '<div class="fps"></div>',
+                '</div>'
+            ].join(''),
+
+            update: function (frame, app) {
+                if (frame % 100 === 0) {
+                    var fpsEl = document.querySelector('.viewport .fps');
+                    if (fpsEl) {
+                        fpsEl.innerHTML = 'FPS: ' + Math.round(app.fps());
+                    }
+                }
+            },
+
+            draw: function () {
+                if (!this.rendered) {
+                    this.render();
+                }
+            },
+
+            render: function () {
+                document.body.innerHTML = alchemy.render(this.template, {
+                    id: this.id
+                });
+                this.rendered = true;
+                return null;
+            }
         }
     });
 }());

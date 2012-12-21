@@ -32,6 +32,20 @@
         extend: 'browser.Application',
         requires: ['arena.Viewport'],
         overrides: {
+            prepare: function () {
+                this.viewport = alchemy('arena.Viewport').create();
+            },
+
+            update: function (frame) {
+                this.viewport.update(frame, this);
+                if (frame > 1000) {
+                    this.end();
+                }
+            },
+
+            draw: function () {
+                this.viewport.draw();
+            }
         }
     });
 }());
