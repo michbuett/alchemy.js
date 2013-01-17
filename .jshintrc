@@ -16,7 +16,6 @@
 
     // Globals
     "predef"        : [
-        "_super",
         // for jasmine testing framework
         "jasmine", "describe", "it", "beforeEach", "afterEach", "spyOn", "waits", "waitsFor", "runs", "expect"
     ],
