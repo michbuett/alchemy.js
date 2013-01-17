@@ -4,7 +4,7 @@ describe('Oculus', function () {
     var alchemy = require('../../alchemy.js');
 
     beforeEach(function () {
-        this.oculus = alchemy('Oculus').create();
+        this.oculus = alchemy('Oculus').brew();
     });
 
     afterEach(function () {
@@ -149,7 +149,7 @@ describe('Oculus', function () {
 
     describe('observe', function () {
         beforeEach(function () {
-            this.observable = alchemy('Oculus').create();
+            this.observable = alchemy('Oculus').brew();
         });
         afterEach(function () {
             this.observable.dispose();

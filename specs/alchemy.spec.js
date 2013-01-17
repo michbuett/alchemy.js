@@ -499,7 +499,7 @@ describe('alchemy', function () {
             var mp = alchemy('MateriaPrima');
             // verify
             expect(mp).toBeDefined();
-            expect(typeof mp.create).toBe('function');
+            expect(typeof mp.brew).toBe('function');
             expect(typeof mp.init).toBe('function');
         });
 

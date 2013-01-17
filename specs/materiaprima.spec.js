@@ -5,7 +5,7 @@ describe('MateriaPrima', function () {
         mp;
 
     beforeEach(function () {
-        mp = alchemy('MateriaPrima').create();
+        mp = alchemy('MateriaPrima').brew();
     });
 
     afterEach(function () {
@@ -32,8 +32,8 @@ describe('MateriaPrima', function () {
 
     describe('create', function () {
         it('can create instances over instances', function () {
-            var i1 = mp.create(),
-                i2 = i1.create();
+            var i1 = mp.brew(),
+                i2 = i1.brew();
 
             expect(mp.isPrototypeOf(i1)).toBeTruthy();
             expect(i1.getMetaAttr('basetype')).toBe(mp);
@@ -50,7 +50,7 @@ describe('MateriaPrima', function () {
 
             spyOn(mp, 'constructor');
             // execute
-            i = mp.create(arg0, arg1, arg2);
+            i = mp.brew(arg0, arg1, arg2);
             // verify
             call = i.constructor.mostRecentCall;
             expect(i.constructor).toHaveBeenCalled();
@@ -64,7 +64,7 @@ describe('MateriaPrima', function () {
             var i;
             spyOn(mp, 'init');
             // execute
-            i = mp.create();
+            i = mp.brew();
             // verify
             expect(i.init).toHaveBeenCalled();
         });
@@ -75,7 +75,7 @@ describe('MateriaPrima', function () {
                 foo = {},
                 bar = {};
             // execute
-            i = mp.create({
+            i = mp.brew({
                 foo: foo,
                 bar: bar
             });

@@ -31,7 +31,7 @@ describe('Ingredient', function () {
 
     it('can be mixed into any potion at any time', function () {
         // prepare
-        var testBase = alchemy('MateriaPrima').create();
+        var testBase = alchemy('MateriaPrima').brew();
         // execute
         testBase.addIngredient('test', testIngredient);
         // verify
