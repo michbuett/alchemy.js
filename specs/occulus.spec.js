@@ -191,4 +191,33 @@ describe('Oculus', function () {
             expect(spy).not.toHaveBeenCalled();
         });
     });
+
+    describe('once', function () {
+        it('allows to add an one-time listener', function () {
+            // prepare
+            var spy = jasmine.createSpy('handler');
+            this.oculus.once('party', spy);
+            // execute
+            this.oculus.trigger('party');
+            this.oculus.trigger('party');
+            this.oculus.trigger('party');
+            // verify
+            expect(spy).toHaveBeenCalled();
+            expect(spy.callCount).toBe(1);
+        });
+
+        it('calls the listener in the correct scope', function () {
+            // prepare
+            var spy = jasmine.createSpy('listener').andCallFake(function () {
+                actualScope = this;
+            });
+            var expectedScope = {};
+            var actualScope;
+            this.oculus.once('myEvent', spy, expectedScope);
+            // execute
+            this.oculus.trigger('myEvent');
+            // verify
+            expect(actualScope).toBe(expectedScope);
+        });
+    });
 });
