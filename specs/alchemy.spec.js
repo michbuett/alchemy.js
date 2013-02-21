@@ -175,6 +175,14 @@ describe('alchemy', function () {
 
             expect(alchemy.render(tpl).replace(/\s/g, '')).toBe('<div>YEEEHAA!</div>');
         });
+
+        it('has no access to the main closure scope', function () {
+            expect(alchemy.render('<$=(typeof potions)$>')).toBe('undefined');
+        });
+
+        it('has access to the explicitly given closure scope', function () {
+            expect(alchemy.render('<$=(typeof alchemy)$>')).toBe('function');
+        });
     });
 
     describe('each', function () {
