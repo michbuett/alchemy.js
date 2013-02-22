@@ -5,7 +5,7 @@ describe('MateriaPrima', function () {
         mp;
 
     beforeEach(function () {
-        mp = alchemy('MateriaPrima').brew();
+        mp = alchemy('alchemy.core.MateriaPrima').brew();
     });
 
     afterEach(function () {
@@ -15,7 +15,8 @@ describe('MateriaPrima', function () {
 
     describe('Meta attributes', function () {
         it('can return meta attributes of a prototype', function () {
-            expect(mp.getMetaAttr('name')).toBe('MateriaPrima');
+            expect(mp.getMetaAttr('name')).toBe('alchemy.core.MateriaPrima');
+            expect(mp.getMetaAttr('alias')).toBe('MateriaPrima');
         });
 
         it('can set meta attributes', function () {

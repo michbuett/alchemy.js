@@ -4,7 +4,7 @@ describe('Oculus', function () {
     var alchemy = require('../../alchemy.js');
 
     beforeEach(function () {
-        this.oculus = alchemy('Oculus').brew();
+        this.oculus = alchemy('alchemy.core.Oculus').brew();
     });
 
     afterEach(function () {

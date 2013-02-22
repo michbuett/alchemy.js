@@ -12,7 +12,7 @@ describe('alchemy.path', function () {
 
     describe('get', function () {
         it('returns the path for a given namespace', function () {
-            expect(alchemy.path.get('MateriaPrima')).toBe(initialSettings.MateriaPrima);
+            expect(alchemy.path.get('alchemy')).toBe(initialSettings.alchemy);
         });
 
         it('returns all paths if namespace is omitted', function () {
@@ -38,19 +38,10 @@ describe('alchemy.path', function () {
             });
             alchemy.path.set({
                 myPackage: 'my/other/path',
-                MateriaPrima: 'my/MateriaSecundus'
+                alchemy: 'my/other/alchemy'
             });
             expect(alchemy.path.get('myPackage')).toBe('my/other/path');
-            expect(alchemy.path.get('MateriaPrima')).toBe('my/MateriaSecundus');
-        });
-
-        it('allows to change the paths of all core modules at once', function () {
-            alchemy.path.set({
-                core: 'my/path'
-            });
-            expect(alchemy.path.get('MateriaPrima')).toBe('my/path/MateriaPrima');
-            expect(alchemy.path.get('Ingredient')).toBe('my/path/Ingredient');
-            expect(alchemy.path.get('Oculus')).toBe('my/path/Oculus');
+            expect(alchemy.path.get('alchemy')).toBe('my/other/alchemy');
         });
     });
 

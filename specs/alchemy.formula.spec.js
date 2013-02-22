@@ -5,9 +5,9 @@ describe('alchemy.formula', function () {
     var formula = alchemy.formula;
 
     it('allows to get the formulas of the core module', function () {
-        expect(formula.get('MateriaPrima')).toBeDefined();
-        expect(formula.get('Ingredient')).toBeDefined();
-        expect(formula.get('Oculus')).toBeDefined();
+        expect(formula.get('alchemy.core.MateriaPrima')).toBeDefined();
+        expect(formula.get('alchemy.core.Ingredient')).toBeDefined();
+        expect(formula.get('alchemy.core.Oculus')).toBeDefined();
     });
 
     it('allows to store new formulas', function () {

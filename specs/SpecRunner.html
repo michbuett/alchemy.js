@@ -33,14 +33,13 @@
                 var alchemy = require('alchemy');
                 alchemy.heatUp({
                     path: {
-                        core: '../lib/core',
-                        browser: '../lib/browser'
+                        alchemy: '../lib'
                     },
 
                     require: [
-                        'MateriaPrima',
-                        'Ingredient',
-                        'Oculus',
+                        'alchemy.core.MateriaPrima',
+                        'alchemy.core.Ingredient',
+                        'alchemy.core.Oculus',
                     ],
 
                     onReady: function () {

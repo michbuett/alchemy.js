@@ -5,7 +5,7 @@ describe('Ingredient', function () {
 
     beforeEach(function () {
         testIngredient = testIngredient || alchemy.brew({
-            extend: 'Ingredient',
+            extend: 'alchemy.core.Ingredient',
             overrides: {
                 publics: ['foo', 'bar'],
                 foo: function () {
