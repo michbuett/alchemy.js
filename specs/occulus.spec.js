@@ -54,6 +54,26 @@ describe('Oculus', function () {
             expect(actualScope).toBe(expectedScope);
         });
 
+        it('provides an event object', function () {
+            var eventname;
+            var handler = function (data, event) {
+                eventname = event.name;
+            };
+            this.oculus.on('myFirstEvent', handler);
+            this.oculus.on('mySecondEvent', handler);
+
+            // first trigger with params
+            this.oculus.trigger('myFirstEvent', {foo: 'bar'});
+            expect(eventname).toBe('myFirstEvent');
+            eventname = 0;
+
+            // second trigger without params
+            this.oculus.trigger('mySecondEvent');
+            expect(eventname).toBe('mySecondEvent');
+        });
+
+        it('supports event namespaces', function () {
+        });
     });
 
     describe('removing listeners', function () {
@@ -163,7 +183,7 @@ describe('Oculus', function () {
             // execute
             this.observable.trigger('party', arg);
             // verify
-            expect(spy).toHaveBeenCalledWith(arg);
+            expect(spy).toHaveBeenCalledWith(arg, {name: 'party'});
         });
 
         it('uses the correct scope', function () {
