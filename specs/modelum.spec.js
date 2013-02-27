@@ -1,10 +1,10 @@
-describe('alchemy.core.Model', function () {
+describe('alchemy.core.Modelum', function () {
     'use strict';
 
     var alchemy = require('../../alchemy.js');
 
     beforeEach(function () {
-        this.model = alchemy('alchemy.core.Model').brew({
+        this.model = alchemy('alchemy.core.Modelum').brew({
             data: {
                 foo: 'bar',
                 ping: 'pong'
@@ -25,22 +25,27 @@ describe('alchemy.core.Model', function () {
             expect(this.model.get('ping')).toBe('pong');
             expect(this.model.get('baz')).not.toBeDefined();
         });
+    });
 
-        it('allows to get all stored attribute values when key is omitted', function () {
-            expect(this.model.get()).toEqual({
+    describe('toData', function () {
+        it('allows to get all stored attribute', function () {
+            expect(this.model.toData()).toEqual({
                 foo: 'bar',
                 ping: 'pong'
             });
         });
-    });
 
+        it('always returns an object', function () {
+            expect(alchemy.isObject(alchemy('Modelum').brew().toData())).toBeTruthy();
+        });
+    });
     describe('set', function () {
         it('allows to set attributs one by one', function () {
             // prepare
             // execute
             this.model.set('foo', 'baz');
             // verify
-            expect(this.model.get()).toEqual({
+            expect(this.model.toData()).toEqual({
                 foo: 'baz',
                 ping: 'pong'
             });
@@ -54,7 +59,7 @@ describe('alchemy.core.Model', function () {
                 boom: 'bang'
             });
             // verify
-            expect(this.model.get()).toEqual({
+            expect(this.model.toData()).toEqual({
                 foo: 'baz',
                 boom: 'bang',
                 ping: 'pong'
