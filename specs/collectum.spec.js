@@ -1,9 +1,7 @@
-
-describe('alchemy.core.Model', function () {
+describe('alchemy.core.Collectum', function () {
     'use strict';
 
     var alchemy = require('../../alchemy.js');
-    var Collectum = alchemy('alchemy.core.Collectum');
     var data1 = {
         id: 'id-1',
         foo: 'foo'
@@ -17,9 +15,8 @@ describe('alchemy.core.Model', function () {
         baz: 'baz'
     };
 
-
     beforeEach(function () {
-        this.collectum = Collectum.brew({
+        this.collectum = alchemy('alchemy.core.Collectum').brew({
             items: [data1, data2, data3]
         });
     });
@@ -33,10 +30,10 @@ describe('alchemy.core.Model', function () {
 
     describe('constructor', function () {
         it('allows to add items using the constructor', function () {
-            this.collectum = Collectum.brew();
+            this.collectum = alchemy('Collectum').brew();
             expect(this.collectum.length).toBe(0);
 
-            this.collectum = Collectum.brew({
+            this.collectum = alchemy('Collectum').brew({
                 items: [data1, data2, data3]
             });
             expect(this.collectum.length).toBe(3);
@@ -156,13 +153,197 @@ describe('alchemy.core.Model', function () {
             // verify
             expect(this.collectum.length).toBe(4);
         });
-    });
 
-    describe('insert', function () {
-        it('allows to insert an new item at the given position', function () {
+        it('prevents adding the same object twice with a single command', function () {
+            // prepare
+            var newItem = {
+                id: 'new',
+            };
+            // execute
+            this.collectum.add([newItem, newItem, newItem, newItem]);
+            // verify
+            expect(this.collectum.length).toBe(4);
+        });
+
+        it('can store objects whithout id - but only once', function () {
+            // prepare
+            var newItem = {
+                foo: 'bar',
+            };
+            expect(this.collectum.length).toBe(3);
+            // execute
+            this.collectum.add(newItem);
+            this.collectum.add(newItem);
+            this.collectum.add(newItem);
+            this.collectum.add(newItem);
+            // verify
+            expect(this.collectum.length).toBe(4);
+            expect(newItem.id).toBeDefined();
         });
     });
 
-    describe('remove', function () {
+    describe('insert', function () {
+        it('allows to insert a new item at the given position', function () {
+            // prepare
+            var newItem = {
+                id: 'new',
+            };
+            // execute
+            this.collectum.insert(1, newItem);
+            // verify
+            expect(this.collectum.length).toBe(4);
+            expect(this.collectum.indexOf(data1)).toBe(0);
+            expect(this.collectum.indexOf(newItem)).toBe(1);
+            expect(this.collectum.indexOf(data2)).toBe(2);
+            expect(this.collectum.indexOf(data3)).toBe(3);
+            expect(this.collectum.get('new')).toBe(newItem);
+        });
+
+        it('allows to insert multiple items at the given position', function () {
+            // prepare
+            var newItem1 = {
+                id: 'new1',
+            };
+            var newItem2 = {
+                id: 'new2',
+            };
+            var newItem3 = {
+                id: 'new3',
+            };
+            // execute
+            this.collectum.insert(1, [newItem1, newItem2, newItem3]);
+            // verify
+            expect(this.collectum.length).toBe(6);
+            expect(this.collectum.indexOf(data1)).toBe(0);
+            expect(this.collectum.indexOf(newItem1)).toBe(1);
+            expect(this.collectum.indexOf(newItem2)).toBe(2);
+            expect(this.collectum.indexOf(newItem3)).toBe(3);
+            expect(this.collectum.indexOf(data2)).toBe(4);
+            expect(this.collectum.indexOf(data3)).toBe(5);
+            expect(this.collectum.get('new1')).toBe(newItem1);
+            expect(this.collectum.get('new2')).toBe(newItem2);
+            expect(this.collectum.get('new3')).toBe(newItem3);
+        });
+
+        it('prevents adding the same object twice', function () {
+            // prepare
+            var newItem = {
+                id: 'new',
+            };
+            // execute
+            this.collectum.insert(1, newItem);
+            this.collectum.insert(1, newItem);
+            this.collectum.insert(1, newItem);
+            this.collectum.insert(1, newItem);
+            // verify
+            expect(this.collectum.length).toBe(4);
+        });
+
+        it('prevents adding the same object twice with a single command', function () {
+            // prepare
+            var newItem = {
+                id: 'new',
+            };
+            // execute
+            this.collectum.insert(1, [newItem, newItem, newItem, newItem]);
+            // verify
+            expect(this.collectum.length).toBe(4);
+        });
+
+        it('can store objects whithout id - but only once', function () {
+            // prepare
+            var newItem = {
+                foo: 'bar',
+            };
+            expect(this.collectum.length).toBe(3);
+            // execute
+            this.collectum.insert(1, newItem);
+            this.collectum.insert(1, newItem);
+            this.collectum.insert(1, newItem);
+            this.collectum.insert(1, newItem);
+            // verify
+            expect(this.collectum.length).toBe(4);
+            expect(newItem.id).toBeDefined();
+        });
+    });
+
+    describe('remove and removeAt', function () {
+        it('allows to remove an item', function () {
+            // prepare
+            // execute
+            this.collectum.remove(data2);
+            // verify
+            expect(this.collectum.length).toEqual(2);
+            expect(this.collectum.toData()).toEqual([{
+                id: 'id-1',
+                foo: 'foo'
+            }, {
+                id: 'id-3',
+                baz: 'baz'
+            }]);
+            expect(this.collectum.contains(data1)).toBeTruthy();
+            expect(this.collectum.contains(data2)).toBeFalsy();
+            expect(this.collectum.contains(data3)).toBeTruthy();
+
+            expect(this.collectum.indexOf(data1)).toEqual(0);
+            expect(this.collectum.indexOf(data2)).toEqual(-1);
+            expect(this.collectum.indexOf(data3)).toEqual(1);
+
+            expect(this.collectum.get(data1.id)).toBe(data1);
+            expect(this.collectum.get(data2.id)).not.toBeDefined();
+            expect(this.collectum.get(data3.id)).toBe(data3);
+        });
+
+        it('allows to remove an item by its id', function () {
+            // prepare
+            // execute
+            this.collectum.remove(data2.id);
+            // verify
+            expect(this.collectum.length).toEqual(2);
+            expect(this.collectum.toData()).toEqual([{
+                id: 'id-1',
+                foo: 'foo'
+            }, {
+                id: 'id-3',
+                baz: 'baz'
+            }]);
+            expect(this.collectum.contains(data1)).toBeTruthy();
+            expect(this.collectum.contains(data2)).toBeFalsy();
+            expect(this.collectum.contains(data3)).toBeTruthy();
+
+            expect(this.collectum.indexOf(data1)).toEqual(0);
+            expect(this.collectum.indexOf(data2)).toEqual(-1);
+            expect(this.collectum.indexOf(data3)).toEqual(1);
+
+            expect(this.collectum.get(data1.id)).toBe(data1);
+            expect(this.collectum.get(data2.id)).not.toBeDefined();
+            expect(this.collectum.get(data3.id)).toBe(data3);
+        });
+
+        it('allows to remove an item by its index', function () {
+            // prepare
+            // execute
+            this.collectum.removeAt(1);
+            // verify
+            expect(this.collectum.length).toEqual(2);
+            expect(this.collectum.toData()).toEqual([{
+                id: 'id-1',
+                foo: 'foo'
+            }, {
+                id: 'id-3',
+                baz: 'baz'
+            }]);
+            expect(this.collectum.contains(data1)).toBeTruthy();
+            expect(this.collectum.contains(data2)).toBeFalsy();
+            expect(this.collectum.contains(data3)).toBeTruthy();
+
+            expect(this.collectum.indexOf(data1)).toEqual(0);
+            expect(this.collectum.indexOf(data2)).toEqual(-1);
+            expect(this.collectum.indexOf(data3)).toEqual(1);
+
+            expect(this.collectum.get(data1.id)).toBe(data1);
+            expect(this.collectum.get(data2.id)).not.toBeDefined();
+            expect(this.collectum.get(data3.id)).toBe(data3);
+        });
     });
 });
