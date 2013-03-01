@@ -520,4 +520,41 @@ describe('alchemy.core.Collectum', function () {
             expect(onChange).not.toHaveBeenCalled();
         });
     });
+
+    describe('event proxy', function () {
+        it('triggers the changes of a model', function () {
+            // prepare
+            var model = alchemy('alchemy.core.Modelum').brew({
+                foo: 'bar'
+            });
+            var onChange = jasmine.createSpy('onChange');
+            this.collectum.add(model);
+            this.collectum.on('change', onChange);
+            // execute
+            model.set('foo', 'baz');
+            // verify
+            expect(onChange).toHaveBeenCalled();
+            expect(onChange.mostRecentCall.args[0].source).toBe(model);
+        });
+
+        it('acts as a proxy for all events of a stored item', function () {
+            // prepare
+            var item = alchemy('alchemy.core.Oculus').brew();
+            var handler1 = jasmine.createSpy('foo');
+            var handler2 = jasmine.createSpy('bar');
+            this.collectum.add(item);
+            this.collectum.on('foo', handler1);
+            this.collectum.on('bar', handler2);
+            // execute
+            item.trigger('foo', {
+                foo: 'foo'
+            });
+            // verify
+            expect(handler1).toHaveBeenCalled();
+            expect(handler1.mostRecentCall.args[0].source).toBe(item);
+            expect(handler1.mostRecentCall.args[0].foo).toBe('foo');
+            expect(handler1.mostRecentCall.args[1].name).toBe('foo');
+            expect(handler2).not.toHaveBeenCalled();
+        });
+    });
 });
