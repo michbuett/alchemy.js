@@ -183,7 +183,9 @@ describe('Oculus', function () {
             // execute
             this.observable.trigger('party', arg);
             // verify
-            expect(spy).toHaveBeenCalledWith(arg, {name: 'party'});
+            expect(spy.mostRecentCall.args[0]).toBe(arg);
+            expect(spy.mostRecentCall.args[1].name).toBe('party');
+            expect(spy.mostRecentCall.args[1].source).toBe(this.observable);
         });
 
         it('uses the correct scope', function () {
