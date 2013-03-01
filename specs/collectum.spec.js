@@ -180,6 +180,56 @@ describe('alchemy.core.Collectum', function () {
             expect(this.collectum.length).toBe(4);
             expect(newItem.id).toBeDefined();
         });
+
+        it('triggers the "add" and the "change" event (once!) when adding items', function () {
+            // prepare
+            var onAdd = jasmine.createSpy('onAdd');
+            var onChange = jasmine.createSpy('onChange');
+            this.collectum.on('add', onAdd);
+            this.collectum.on('change', onChange);
+            var newItem1 = {
+                id: 'new1',
+            };
+            var newItem2 = {
+                id: 'new2',
+            };
+            var newItem3 = {
+                id: 'new3',
+            };
+            // execute
+            this.collectum.add([newItem1, newItem2, newItem3, data1, newItem1]);
+            // verify
+            expect(onAdd).toHaveBeenCalled();
+            expect(onAdd.callCount).toBe(1);
+            expect(onAdd.mostRecentCall.args[0].added).toEqual([newItem1, newItem2, newItem3]);
+            expect(onAdd.mostRecentCall.args[0].insertIndex).toBe(3);
+            expect(onChange).toHaveBeenCalled();
+            expect(onChange.callCount).toBe(1);
+            expect(onChange.mostRecentCall.args[0].added).toEqual([newItem1, newItem2, newItem3]);
+            expect(onChange.mostRecentCall.args[0].insertIndex).toBe(3);
+        });
+
+        it('triggers no event when adding items silently', function () {
+            // prepare
+            var onAdd = jasmine.createSpy('onAdd');
+            var onChange = jasmine.createSpy('onChange');
+            this.collectum.on('add', onAdd);
+            this.collectum.on('change', onChange);
+            var newItem1 = {
+                id: 'new1',
+            };
+            var newItem2 = {
+                id: 'new2',
+            };
+            var newItem3 = {
+                id: 'new3',
+            };
+            // execute
+            this.collectum.add([newItem1, newItem2, newItem3], true);
+            // verify
+            expect(onAdd).not.toHaveBeenCalled();
+            expect(onChange).not.toHaveBeenCalled();
+        });
     });
 
     describe('insert', function () {
@@ -265,6 +315,56 @@ describe('alchemy.core.Collectum', function () {
             expect(this.collectum.length).toBe(4);
             expect(newItem.id).toBeDefined();
         });
+
+        it('triggers the "add" and the "change" event (once!) when inserting items', function () {
+            // prepare
+            var onAdd = jasmine.createSpy('onAdd');
+            var onChange = jasmine.createSpy('onChange');
+            this.collectum.on('add', onAdd);
+            this.collectum.on('change', onChange);
+            var newItem1 = {
+                id: 'new1',
+            };
+            var newItem2 = {
+                id: 'new2',
+            };
+            var newItem3 = {
+                id: 'new3',
+            };
+            // execute
+            this.collectum.insert(1, [newItem1, newItem2, newItem3, data1, newItem1]);
+            // verify
+            expect(onAdd).toHaveBeenCalled();
+            expect(onAdd.callCount).toBe(1);
+            expect(onAdd.mostRecentCall.args[0].added).toEqual([newItem1, newItem2, newItem3]);
+            expect(onAdd.mostRecentCall.args[0].insertIndex).toBe(1);
+            expect(onChange).toHaveBeenCalled();
+            expect(onChange.callCount).toBe(1);
+            expect(onChange.mostRecentCall.args[0].added).toEqual([newItem1, newItem2, newItem3]);
+            expect(onChange.mostRecentCall.args[0].insertIndex).toBe(1);
+        });
+
+        it('triggers no event when inserting items silently', function () {
+            // prepare
+            var onAdd = jasmine.createSpy('onAdd');
+            var onChange = jasmine.createSpy('onChange');
+            this.collectum.on('add', onAdd);
+            this.collectum.on('change', onChange);
+            var newItem1 = {
+                id: 'new1',
+            };
+            var newItem2 = {
+                id: 'new2',
+            };
+            var newItem3 = {
+                id: 'new3',
+            };
+            // execute
+            this.collectum.insert(1, [newItem1, newItem2, newItem3], true);
+            // verify
+            expect(onAdd).not.toHaveBeenCalled();
+            expect(onChange).not.toHaveBeenCalled();
+        });
     });
 
     describe('remove and removeAt', function () {
@@ -344,6 +444,80 @@ describe('alchemy.core.Collectum', function () {
             expect(this.collectum.get(data1.id)).toBe(data1);
             expect(this.collectum.get(data2.id)).not.toBeDefined();
             expect(this.collectum.get(data3.id)).toBe(data3);
+        });
+
+        it('ignores invalid input', function () {
+            // prepare
+            // execute
+            this.collectum.remove();
+            this.collectum.remove('bullshit');
+            this.collectum.remove({cool: 'Object'});
+            // verify
+            expect(this.collectum.length).toEqual(3);
+        });
+
+        it('triggers the "remove" and the "change" event when removing an item', function () {
+            // prepare
+            var onRemove = jasmine.createSpy('onRemove');
+            var onChange = jasmine.createSpy('onChange');
+            this.collectum.on('remove', onRemove);
+            this.collectum.on('change', onChange);
+            // execute
+            this.collectum.remove(data1);
+            // verify
+            expect(onRemove).toHaveBeenCalled();
+            expect(onRemove.mostRecentCall.args[0].removed).toBe(data1);
+            expect(onChange).toHaveBeenCalled();
+            expect(onChange.mostRecentCall.args[0].removed).toBe(data1);
+            expect(onChange.mostRecentCall.args[0].added).not.toBeDefined();
+        });
+
+        it('triggers the "remove" and the "change" event when removing an item by its id', function () {
+            // prepare
+            var onRemove = jasmine.createSpy('onRemove');
+            var onChange = jasmine.createSpy('onChange');
+            this.collectum.on('remove', onRemove);
+            this.collectum.on('change', onChange);
+            // execute
+            this.collectum.remove(data1.id);
+            // verify
+            expect(onRemove).toHaveBeenCalled();
+            expect(onRemove.mostRecentCall.args[0].removed).toBe(data1);
+            expect(onChange).toHaveBeenCalled();
+            expect(onChange.mostRecentCall.args[0].removed).toBe(data1);
+            expect(onChange.mostRecentCall.args[0].added).not.toBeDefined();
+        });
+
+        it('triggers the "remove" and the "change" event when removing an item by its index', function () {
+            // prepare
+            var onRemove = jasmine.createSpy('onRemove');
+            var onChange = jasmine.createSpy('onChange');
+            this.collectum.on('remove', onRemove);
+            this.collectum.on('change', onChange);
+            // execute
+            this.collectum.removeAt(0);
+            // verify
+            expect(onRemove).toHaveBeenCalled();
+            expect(onRemove.mostRecentCall.args[0].removed).toBe(data1);
+            expect(onChange).toHaveBeenCalled();
+            expect(onChange.mostRecentCall.args[0].removed).toBe(data1);
+            expect(onChange.mostRecentCall.args[0].added).not.toBeDefined();
+        });
+
+        it('triggers no event when removing an item silently', function () {
+            // prepare
+            var onRemove = jasmine.createSpy('onRemove');
+            var onChange = jasmine.createSpy('onChange');
+            this.collectum.on('remove', onRemove);
+            this.collectum.on('change', onChange);
+            // execute
+            this.collectum.removeAt(0, true);
+            this.collectum.remove(data2, true);
+            this.collectum.remove(data3.id, true);
+            // verify
+            expect(this.collectum.length).toEqual(0);
+            expect(onRemove).not.toHaveBeenCalled();
+            expect(onChange).not.toHaveBeenCalled();
         });
     });
 });
