@@ -38,6 +38,24 @@ describe('alchemy.core.Collectum', function () {
             });
             expect(this.collectum.length).toBe(3);
         });
+
+        it('allows to change the default property that determines the item \'s id', function () {
+            // prepare
+            var id = 'my-id-0815';
+            var data = {
+                myId: id,
+                foo: 'bar'
+            };
+
+            // execute
+            this.collectum = alchemy('Collectum').brew({
+                idProp: 'myId',
+                items: [data]
+            });
+
+            // verify
+            expect(this.collectum.get(id)).toBe(data);
+        });
     });
 
     describe('contains', function () {
