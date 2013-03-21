@@ -575,4 +575,49 @@ describe('alchemy.core.Collectum', function () {
             expect(handler2).not.toHaveBeenCalled();
         });
     });
+
+    describe('each', function () {
+        it('calls the given callbacks once for each item', function () {
+            // prepare
+            var cb = jasmine.createSpy('callback');
+            // execute
+            this.collectum.each(cb);
+            // verify
+            expect(cb.callCount).toBe(3);
+            expect(cb.calls[0].args[0]).toBe(data1);
+            expect(cb.calls[0].args[1]).toBe(0);
+            expect(cb.calls[1].args[0]).toBe(data2);
+            expect(cb.calls[1].args[1]).toBe(1);
+            expect(cb.calls[2].args[0]).toBe(data3);
+            expect(cb.calls[2].args[1]).toBe(2);
+        });
+
+        it('calls the given callback with the correct scope', function () {
+            // prepare
+            var cb = jasmine.createSpy('callback');
+            var scope = {};
+            // execute
+            this.collectum.each(cb, scope);
+            // verify
+            expect(cb.calls[0].object).toBe(scope);
+            expect(cb.calls[1].object).toBe(scope);
+            expect(cb.calls[2].object).toBe(scope);
+        });
+
+        it('passes the additional arguments to the callback', function () {
+            // prepare
+            var cb = jasmine.createSpy('callback');
+            var arg1 = {};
+            var arg2 = {};
+            // execute
+            this.collectum.each(cb, null, [arg1, arg2]);
+            // verify
+            expect(cb.calls[0].args[2]).toBe(arg1);
+            expect(cb.calls[0].args[3]).toBe(arg2);
+            expect(cb.calls[1].args[2]).toBe(arg1);
+            expect(cb.calls[1].args[3]).toBe(arg2);
+            expect(cb.calls[2].args[2]).toBe(arg1);
+            expect(cb.calls[2].args[3]).toBe(arg2);
+        });
+    });
 });
