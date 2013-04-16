@@ -31,7 +31,7 @@ describe('MateriaPrima', function () {
         });
     });
 
-    describe('create', function () {
+    describe('brew', function () {
         it('can create instances over instances', function () {
             var i1 = mp.brew(),
                 i2 = i1.brew();
@@ -83,6 +83,57 @@ describe('MateriaPrima', function () {
             // verify
             expect(i.foo).toBe(foo);
             expect(i.bar).toBe(bar);
+        });
+    });
+
+    describe('addIngredient', function () {
+        beforeEach(function () {
+            this.ingredient = alchemy.brew({
+                name: 'test.Ingredient',
+                extend: 'alchemy.core.Ingredient',
+                overrides: {
+                    publics: ['foo', 'bar'],
+                    foo: 'foo',
+                    bar: function () {
+                        return 'bar';
+                    }
+                }
+            });
+        });
+
+        afterEach(function () {
+            this.ingredient.dispose();
+            this.ingredient = null;
+        });
+
+        it('allows to add new ingredients any time', function () {
+            // prepare
+            expect(mp.foo).not.toBeDefined();
+            expect(mp.bar).not.toBeDefined();
+            // expect
+            mp.addIngredient('test', this.ingredient);
+            // verify
+            expect(mp.foo).toBe('foo');
+            expect(mp.bar()).toBe('bar');
+        });
+
+        it('allows to add new ingredients by their names', function () {
+            // prepare
+            expect(mp.foo).not.toBeDefined();
+            expect(mp.bar).not.toBeDefined();
+            // expect
+            mp.addIngredient('test', 'test.Ingredient');
+            // verify
+            expect(mp.foo).toBe('foo');
+            expect(mp.bar()).toBe('bar');
+        });
+
+        it('stores the ingredients as meta informations', function () {
+            // prepare
+            // expect
+            mp.addIngredient('test', this.ingredient);
+            // verify
+            expect(mp.getMetaAttr('ingredients').test).toBe(this.ingredient);
         });
     });
 });
