@@ -520,8 +520,8 @@ describe('alchemy', function () {
                     }
                 }
             });
-            expect(potion.getMetaAttr('name')).toBe('dummy');
-            expect(potion.getMetaAttr('supertype')).toBe(alchemy('MateriaPrima'));
+            expect(potion.meta('name')).toBe('dummy');
+            expect(potion.meta('supertype')).toBe(alchemy('MateriaPrima'));
             expect(alchemy('MateriaPrima').isPrototypeOf(potion)).toBeTruthy();
             expect(potion.foo()).toBe('foo');
         });
@@ -542,7 +542,7 @@ describe('alchemy', function () {
                     }
                 }
             });
-            expect(potion2.getMetaAttr('supertype')).toBe(potion1);
+            expect(potion2.meta('supertype')).toBe(potion1);
             expect(potion1.isPrototypeOf(potion2)).toBeTruthy();
             expect(potion2.foo()).toBe('foo');
             expect(potion2.bar()).toBe('bar');
