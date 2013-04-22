@@ -74,7 +74,14 @@ describe('alchemy.core.Collectum', function () {
             expect(this.collectum.at(1)).toBe(data2);
             expect(this.collectum.at(2)).toBe(data3);
             expect(this.collectum.at()).not.toBeDefined();
-            expect(this.collectum.at(-1)).not.toBeDefined();
+            expect(this.collectum.at(42)).not.toBeDefined();
+        });
+
+        it('allows to get the last items using a negative index', function () {
+            expect(this.collectum.at(-1)).toBe(data3);
+            expect(this.collectum.at(-2)).toBe(data2);
+            expect(this.collectum.at(-3)).toBe(data1);
+            expect(this.collectum.at()).not.toBeDefined();
             expect(this.collectum.at(42)).not.toBeDefined();
         });
     });
