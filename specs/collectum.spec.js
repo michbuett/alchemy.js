@@ -581,6 +581,20 @@ describe('alchemy.core.Collectum', function () {
             expect(handler1.mostRecentCall.args[1].name).toBe('foo');
             expect(handler2).not.toHaveBeenCalled();
         });
+
+        it('can proxy events without event data', function () {
+            // prepare
+            var item = alchemy('alchemy.core.Oculus').brew();
+            var handler1 = jasmine.createSpy('foo');
+            this.collectum.add(item);
+            this.collectum.on('foo', handler1);
+            // execute
+            item.trigger('foo');
+            // verify
+            expect(handler1).toHaveBeenCalled();
+            expect(handler1.mostRecentCall.args[0].source).toBe(item);
+            expect(handler1.mostRecentCall.args[1].name).toBe('foo');
+        });
     });
 
     describe('each', function () {
