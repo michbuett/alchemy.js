@@ -627,6 +627,21 @@ describe('alchemy', function () {
         });
     });
 
+    describe('union', function () {
+        it('allows to get unique set of values from multiple arrays or objects', function () {
+            expect(alchemy.union([1, 2, 4, 10], [3, 4], [1, 2, 5, 101])).toEqual([1, 2, 4, 10, 3, 5, 101]);
+            expect(alchemy.union({foo: 'foo'}, {bar: 'bar'}, {bar: 'baz'})).toEqual(['foo', 'bar', 'baz']);
+            expect(alchemy.union({foo: 'foo'}, ['foo', 'bar'], {bar: 'baz'})).toEqual(['foo', 'bar', 'baz']);
+        });
+
+        it('ignores non-iterable inputs', function () {
+            expect(alchemy.union()).toEqual([]);
+            expect(alchemy.union([1, 2, 4, 10], null, [1, 2, 5, 101])).toEqual([1, 2, 4, 10, 5, 101]);
+            expect(alchemy.union({foo: 'foo'}, {bar: 'bar'})).toEqual(['foo', 'bar']);
+            expect(alchemy.union({foo: 'foo'}, null, ['foo', 'bar'], 1, 'two', {bar: 'baz'})).toEqual(['foo', 'bar', 'baz']);
+        });
+    });
+
     describe('brew', function () {
         it('can load formulas', function () {
             // prepare
