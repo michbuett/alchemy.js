@@ -500,6 +500,133 @@ describe('alchemy', function () {
         });
     });
 
+    describe('getter and setter', function () {
+        it('allows to define a getter function', function () {
+            // prepare
+            var obj = {};
+            var getter = jasmine.createSpy().andCallFake(function () {
+                return 'bar';
+            });
+            var expectedValue;
+            // execute
+            alchemy.defineGetter(obj, 'foo', getter);
+            expectedValue = obj.foo;
+            // verify
+            expect(getter).toHaveBeenCalled();
+            expect(expectedValue).toBe('bar');
+        });
+
+        it('allows to define an existing function as a getter function', function () {
+            // prepare
+            var getter = jasmine.createSpy().andCallFake(function () {
+                return 'bar';
+            });
+            var obj = {
+                getFoo: getter
+            };
+            var expectedValue;
+            // execute
+            alchemy.defineGetter(obj, 'foo');
+            expectedValue = obj.foo;
+            // verify
+            expect(getter).toHaveBeenCalled();
+            expect(expectedValue).toBe('bar');
+        });
+
+        it('allows to define a default getter function', function () {
+            // prepare
+            var obj = {
+                _foo: 'bar'
+            };
+            var expectedValue;
+            // execute
+            alchemy.defineGetter(obj, 'foo');
+            expectedValue = obj.foo;
+            // verify
+            expect(expectedValue).toBe('bar');
+        });
+
+        it('allows to override a getter function', function () {
+            // prepare
+            var obj = {
+                _foo: 'bar'
+            };
+            var expectedValue;
+            // execute
+            alchemy.defineGetter(obj, 'foo');
+            alchemy.override(obj, {
+                getFoo: function hocuspocus(_super) {
+                    return function () {
+                        return 'foo - ' + _super.call(this) + ' - baz';
+                    };
+                }
+            });
+            expectedValue = obj.foo;
+            // verify
+            expect(expectedValue).toBe('foo - bar - baz');
+        });
+
+        it('allows to define a setter function', function () {
+            // prepare
+            var obj = {};
+            var expectedValue;
+            var setter = jasmine.createSpy().andCallFake(function (val) {
+                expectedValue = val;
+            });
+            // execute
+            alchemy.defineSetter(obj, 'foo', setter);
+            obj.foo = 'bar';
+            // verify
+            expect(setter).toHaveBeenCalled();
+            expect(expectedValue).toBe('bar');
+        });
+
+        it('allows to define an existing function as a setter', function () {
+            // prepare
+            var expectedValue;
+            var setter = jasmine.createSpy().andCallFake(function (val) {
+                expectedValue = val;
+            });
+            var obj = {
+                setFoo: setter
+            };
+            // execute
+            alchemy.defineSetter(obj, 'foo');
+            obj.foo = 'bar';
+            // verify
+            expect(setter).toHaveBeenCalled();
+            expect(expectedValue).toBe('bar');
+        });
+
+        it('allows to define a default setter', function () {
+            // prepare
+            var obj = {};
+            // execute
+            alchemy.defineSetter(obj, 'foo');
+            obj.foo = 'bar';
+            // verify
+            expect(obj._foo).toBe('bar');
+        });
+
+        it('allows to override a setter function', function () {
+            // prepare
+            var obj = {};
+            // execute
+            alchemy.defineGetter(obj, 'foo');
+            alchemy.defineSetter(obj, 'foo');
+            alchemy.override(obj, {
+                setFoo: function hocuspocus(_super) {
+                    return function (val) {
+                        return _super.call(this, 'foo - ' + val + ' - baz');
+                    };
+                }
+            });
+            obj.foo = 'bar';
+            // verify
+            expect(obj.foo).toBe('foo - bar - baz');
+        });
+    });
+
     describe('brew', function () {
         it('can load formulas', function () {
             // prepare
