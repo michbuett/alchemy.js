@@ -119,7 +119,7 @@ describe('alchemy', function () {
             /*jshint white: false*/
             expect(alchemy.render([
                 '<$ for (var i = 0; i < data.list.length; i++) { $>',
-                    '<li><$=data.list[i]$></li>',
+                '<li><$=data.list[i]$></li>',
                 '<$ } $>'
             ].join(''), {
                 list: [1, 2, 3]
@@ -131,9 +131,9 @@ describe('alchemy', function () {
             /*jshint white: false*/
             var tpl = [
                 '<$ if (data.condition) { $>',
-                    '<div><$=data.trueVal$></div>',
+                '<div><$=data.trueVal$></div>',
                 '<$ } else { $>',
-                    '<div><$=data.falseVal$></div>',
+                '<div><$=data.falseVal$></div>',
                 '<$ } $>'
             ].join('');
             /*jshint white: true*/
@@ -361,18 +361,18 @@ describe('alchemy', function () {
             };
             // execute
             alchemy.override(obj, {
-                foo: function hocuspocus(_super) {
+                foo: alchemy.hocuspocus(function (_super) {
                     return function () {
                         return _super.call(this) + ' - bar';
                     };
-                }
+                })
             });
             alchemy.override(obj, {
-                foo: function hocuspocus(_super) {
+                foo: alchemy.hocuspocus(function (_super) {
                     return function () {
                         return _super.call(this) + ' - baz';
                     };
-                }
+                })
             });
             // verify
             expect(obj.foo()).toBe('foo - bar - baz');
@@ -386,12 +386,12 @@ describe('alchemy', function () {
             var obj = {
                 constructor: orgCtor
             };
-            var newCtor = function hocuspocus(_super) {
+            var newCtor = alchemy.hocuspocus(function (_super) {
                 return function () {
                     this.bar = 'bar';
                     _super.call(this);
                 };
-            };
+            });
             //execute
             alchemy.override(obj, {
                 constructor: newCtor
@@ -428,11 +428,11 @@ describe('alchemy', function () {
                 foo: orgFoo
             };
             alchemy.override(obj, {
-                foo: function hocuspocus(_super) {
+                foo: alchemy.hocuspocus(function (_super) {
                     return function () {
                         _super.call(this);
                     };
-                }
+                })
             });
             spyOn(obj, 'foo').andCallThrough();
             // execute
@@ -450,11 +450,11 @@ describe('alchemy', function () {
             };
             // execute
             alchemy.override(obj, {
-                foo: function hocuspocus() {
+                foo: alchemy.hocuspocus(function () {
                     return function () {
                         actualScopeObj = expectedScopeObj;
                     };
-                }
+                })
             });
             obj.foo();
             // verify
@@ -555,11 +555,11 @@ describe('alchemy', function () {
             // execute
             alchemy.defineGetter(obj, 'foo');
             alchemy.override(obj, {
-                getFoo: function hocuspocus(_super) {
+                getFoo: alchemy.hocuspocus(function (_super) {
                     return function () {
                         return 'foo - ' + _super.call(this) + ' - baz';
                     };
-                }
+                })
             });
             expectedValue = obj.foo;
             // verify
@@ -615,11 +615,11 @@ describe('alchemy', function () {
             alchemy.defineGetter(obj, 'foo');
             alchemy.defineSetter(obj, 'foo');
             alchemy.override(obj, {
-                setFoo: function hocuspocus(_super) {
+                setFoo: alchemy.hocuspocus(function (_super) {
                     return function (val) {
                         return _super.call(this, 'foo - ' + val + ' - baz');
                     };
-                }
+                })
             });
             obj.foo = 'bar';
             // verify
@@ -701,21 +701,21 @@ describe('alchemy', function () {
             var potion2 = alchemy.brew({
                 extend: potion1,
                 overrides: {
-                    foo: function hocuspocus(_super) {
+                    foo: alchemy.hocuspocus(function (_super) {
                         return function () {
                             return _super.call(this) + ' - bar';
                         };
-                    }
+                    })
                 }
             });
             var potion3 = alchemy.brew({
                 extend: potion2,
                 overrides: {
-                    foo: function hocuspocus(_super) {
+                    foo: alchemy.hocuspocus(function (_super) {
                         return function () {
                             return _super.call(this) + ' - baz';
                         };
-                    }
+                    })
                 }
             });
             expect(potion1.foo()).toBe('foo');
@@ -744,52 +744,52 @@ describe('alchemy', function () {
             var potion1 = alchemy.brew({
                 extend: base,
                 overrides: {
-                    foo: function hocuspocus(_super) {
+                    foo: alchemy.hocuspocus(function (_super) {
                         return function () {
                             return _super.call(this) + ' - foo';
                         };
-                    }
+                    })
                 }
             });
             var potion2 = alchemy.brew({
                 extend: base,
                 overrides: {
-                    foo: function hocuspocus(_super) {
+                    foo: alchemy.hocuspocus(function (_super) {
                         return function () {
                             return _super.call(this) + ' - bar';
                         };
-                    }
+                    })
                 }
             });
             var potion3 = alchemy.brew({
                 extend: base,
                 overrides: {
-                    foo: function hocuspocus(_super) {
+                    foo: alchemy.hocuspocus(function (_super) {
                         return function () {
                             return _super.call(this) + ' - baz';
                         };
-                    }
+                    })
                 }
             });
             // third override (override the different versions to check if there are conflicts)
             var potion2Sub = alchemy.brew({
                 extend: potion2,
                 overrides: {
-                    foo: function hocuspocus(_super) {
+                    foo: alchemy.hocuspocus(function (_super) {
                         return function () {
                             return _super.call(this) + ' - sub';
                         };
-                    }
+                    })
                 }
             });
             var potion3Sub = alchemy.brew({
                 extend: potion3,
                 overrides: {
-                    foo: function hocuspocus(_super) {
+                    foo: alchemy.hocuspocus(function (_super) {
                         return function () {
                             return _super.call(this) + ' - sub';
                         };
-                    }
+                    })
                 }
             });
             expect(potion1.foo()).toBe('base - foo');

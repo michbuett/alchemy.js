@@ -47,11 +47,11 @@ describe('Ingredient', function () {
                 ptype: testIngredient
             }],
             overrides: {
-                foo: function hocuspocus(_super) {
+                foo: alchemy.hocuspocus(function (_super) {
                     return function () {
                         return _super.call(this) + ' - bar';
                     };
-                }
+                })
             }
         });
         // verify
