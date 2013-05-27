@@ -501,7 +501,23 @@ describe('alchemy', function () {
     });
 
     describe('getter and setter', function () {
-        it('allows to define a getter function', function () {
+        it('allows to define a named getter function', function () {
+            // prepare
+            var obj = {};
+            var getter = jasmine.createSpy().andCallFake(function () {
+                return 'bar';
+            });
+            var expectedValue;
+            // execute
+            alchemy.defineGetter(obj, 'foo', getter, 'foo?');
+            expectedValue = obj.foo;
+            // verify
+            expect(getter).toHaveBeenCalled();
+            expect(expectedValue).toBe('bar');
+            expect(Object.keys(obj)).toEqual(['foo', 'foo?']);
+        });
+
+        it('allows to define a named getter function using a default name', function () {
             // prepare
             var obj = {};
             var getter = jasmine.createSpy().andCallFake(function () {
@@ -514,6 +530,23 @@ describe('alchemy', function () {
             // verify
             expect(getter).toHaveBeenCalled();
             expect(expectedValue).toBe('bar');
+            expect(Object.keys(obj)).toEqual(['foo', 'getFoo']);
+        });
+
+        it('allows to define an anonym getter function', function () {
+            // prepare
+            var obj = {};
+            var getter = jasmine.createSpy().andCallFake(function () {
+                return 'bar';
+            });
+            var expectedValue;
+            // execute
+            alchemy.defineGetter(obj, 'foo', getter, false);
+            expectedValue = obj.foo;
+            // verify
+            expect(getter).toHaveBeenCalled();
+            expect(expectedValue).toBe('bar');
+            expect(Object.keys(obj)).toEqual(['foo']);
         });
 
         it('allows to define an existing function as a getter function', function () {
@@ -566,7 +599,23 @@ describe('alchemy', function () {
             expect(expectedValue).toBe('foo - bar - baz');
         });
 
-        it('allows to define a setter function', function () {
+        it('allows to define a named setter function', function () {
+            // prepare
+            var obj = {};
+            var expectedValue;
+            var setter = jasmine.createSpy().andCallFake(function (val) {
+                expectedValue = val;
+            });
+            // execute
+            alchemy.defineSetter(obj, 'foo', setter, 'foo!');
+            obj.foo = 'bar';
+            // verify
+            expect(setter).toHaveBeenCalled();
+            expect(expectedValue).toBe('bar');
+            expect(Object.keys(obj)).toEqual(['foo', 'foo!']);
+        });
+
+        it('allows to define a named setter function using a default name', function () {
             // prepare
             var obj = {};
             var expectedValue;
@@ -579,6 +628,23 @@ describe('alchemy', function () {
             // verify
             expect(setter).toHaveBeenCalled();
             expect(expectedValue).toBe('bar');
+            expect(Object.keys(obj)).toEqual(['foo', 'setFoo']);
+        });
+
+        it('allows to define an anonym setter function', function () {
+            // prepare
+            var obj = {};
+            var expectedValue;
+            var setter = jasmine.createSpy().andCallFake(function (val) {
+                expectedValue = val;
+            });
+            // execute
+            alchemy.defineSetter(obj, 'foo', setter, false);
+            obj.foo = 'bar';
+            // verify
+            expect(setter).toHaveBeenCalled();
+            expect(expectedValue).toBe('bar');
+            expect(Object.keys(obj)).toEqual(['foo']);
         });
 
         it('allows to define an existing function as a setter', function () {
