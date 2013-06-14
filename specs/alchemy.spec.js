@@ -693,6 +693,7 @@ describe('alchemy', function () {
         });
     });
 
+    /** @name TEST_union */
     describe('union', function () {
         it('allows to get unique set of values from multiple arrays or objects', function () {
             expect(alchemy.union([1, 2, 4, 10], [3, 4], [1, 2, 5, 101])).toEqual([1, 2, 4, 10, 3, 5, 101]);
@@ -708,6 +709,7 @@ describe('alchemy', function () {
         });
     });
 
+    /** @name TEST_brew */
     describe('brew', function () {
         it('can load formulas', function () {
             // prepare
@@ -863,6 +865,98 @@ describe('alchemy', function () {
             expect(potion3.foo()).toBe('base - baz');
             expect(potion2Sub.foo()).toBe('base - bar - sub');
             expect(potion3Sub.foo()).toBe('base - baz - sub');
+        });
+
+        it('allows to define attributes with given getter and setter function', function () {
+            // prepare
+            var potion = alchemy.brew({
+                attributes: {
+                    foo: {
+                        get: 'getFoo',
+                        set: 'setFoo',
+                    }
+                },
+                overrides: {
+                    getFoo: jasmine.createSpy('getFoo').andReturn('bar'),
+                    setFoo: jasmine.createSpy('setFoo')
+                }
+            });
+            // excute
+            potion.foo = 'baz';
+            var result = potion.foo;
+            // verify
+            expect(potion.getFoo).toHaveBeenCalled();
+            expect(potion.setFoo).toHaveBeenCalledWith('baz');
+            expect(result).toBe('bar');
+        });
+
+        it('allows to define attributes with default getter and setter function', function () {
+            // prepare
+            var potion = alchemy.brew({
+                attributes: {
+                    foo: {
+                        get: 'myGetFoo',
+                        set: 'mySetFoo',
+                    }
+                }
+            });
+            // excute
+            potion.foo = 'bar';
+            var result = potion.foo;
+            // verify
+            expect(alchemy.isFunction(potion.myGetFoo)).toBeTruthy();
+            expect(alchemy.isFunction(potion.mySetFoo)).toBeTruthy();
+            expect(result).toBe('bar');
+        });
+
+        it('allows to define attributes with anonymous getter and setter function', function () {
+            // prepare
+            var getter = jasmine.createSpy('getter').andReturn('bar');
+            var setter = jasmine.createSpy('setter');
+            var potion = alchemy.brew({
+                attributes: {
+                    foo: {
+                        get: getter,
+                        set: setter,
+                    }
+                }
+            });
+            // excute
+            potion.foo = 'baz';
+            var result = potion.foo;
+            // verify
+            expect(getter).toHaveBeenCalled();
+            expect(setter).toHaveBeenCalledWith('baz');
+            expect(alchemy.isFunction(potion.getFoo)).toBeFalsy();
+            expect(alchemy.isFunction(potion.setFoo)).toBeFalsy();
+            expect(result).toBe('bar');
+        });
+
+        it('allows to override attribute getter/setter', function () {
+            // prepare
+            var potion = alchemy.brew({
+                attributes: {
+                    foo: {
+                        get: 'getFoo',
+                    }
+                },
+                overrides: {
+                    getFoo: function () {
+                        return 'foo';
+                    }
+                }
+            });
+            alchemy.override(potion, {
+                getFoo: alchemy.hocuspocus(function (_super) {
+                    return function () {
+                        return _super.call(this) + ' - bar';
+                    };
+                })
+            });
+            // excute
+            var result = potion.foo;
+            // verify
+            expect(result).toBe('foo - bar');
         });
     });
 });
