@@ -185,6 +185,7 @@ describe('alchemy', function () {
         });
     });
 
+    /** @name TEST_each */
     describe('each', function () {
         var expectedScope = {};
         var actualScope;
@@ -284,6 +285,7 @@ describe('alchemy', function () {
         });
     });
 
+    /** @name TEST_mix */
     describe('mix', function () {
         it('allows to mix multiple objects', function () {
             expect(alchemy.mix({
@@ -327,6 +329,288 @@ describe('alchemy', function () {
         });
     });
 
+
+    describe('extract', function () {
+        it('reduces an array of objects to an array of object values', function () {
+            expect(alchemy.extract([{
+                key: 'foo'
+            }, {
+                key: 'bar'
+            }, {
+                key: 'baz'
+            }, {
+                kez: 'bam'
+            }], 'key')).toEqual(['foo', 'bar', 'baz', undefined]);
+        });
+
+        it('reduces an object of objects to an array of object values', function () {
+            expect(alchemy.extract({
+                o1: {
+                    key: 'foo'
+                },
+                o2: {
+                    key: 'bar'
+                },
+                o3: {
+                    key: 'baz'
+                },
+                o4: {
+                    kez: 'bam'
+                }
+            }, 'key')).toEqual(['foo', 'bar', 'baz', undefined]);
+        });
+
+        it('allway returns an array', function () {
+            expect(alchemy.isArray(alchemy.extract())).toBeTruthy();
+            expect(alchemy.isArray(alchemy.extract(null, null))).toBeTruthy();
+            expect(alchemy.isArray(alchemy.extract([], 'foo'))).toBeTruthy();
+            expect(alchemy.isArray(alchemy.extract(null, 'bar'))).toBeTruthy();
+        });
+    });
+
+    /** @name TEST_union */
+    describe('union', function () {
+        it('allows to get unique set of values from multiple arrays or objects', function () {
+            expect(alchemy.union([1, 2, 4, 10], [3, 4], [1, 2, 5, 101])).toEqual([1, 2, 4, 10, 3, 5, 101]);
+            expect(alchemy.union({foo: 'foo'}, {bar: 'bar'}, {bar: 'baz'})).toEqual(['foo', 'bar', 'baz']);
+            expect(alchemy.union({foo: 'foo'}, ['foo', 'bar'], {bar: 'baz'})).toEqual(['foo', 'bar', 'baz']);
+        });
+
+        it('ignores non-iterable inputs', function () {
+            expect(alchemy.union()).toEqual([]);
+            expect(alchemy.union([1, 2, 4, 10], null, [1, 2, 5, 101])).toEqual([1, 2, 4, 10, 5, 101]);
+            expect(alchemy.union({foo: 'foo'}, {bar: 'bar'})).toEqual(['foo', 'bar']);
+            expect(alchemy.union({foo: 'foo'}, null, ['foo', 'bar'], 1, 'two', {bar: 'baz'})).toEqual(['foo', 'bar', 'baz']);
+        });
+    });
+
+    /** @name TEST_meta */
+    describe('meta', function () {
+        it('can set meta attributes', function () {
+            var obj = {};
+            var dummy = {};
+            alchemy.meta(obj, 'dummy', dummy);
+            expect(alchemy.meta(obj, 'dummy')).toBe(dummy);
+        });
+
+        it('does not pollute the objects namespace', function () {
+            var obj = {};
+            alchemy.meta(obj, 'foo', 'bar');
+            expect(obj.foo).not.toBeDefined();
+        });
+    });
+
+    /** @name TEST_defineProperty */
+    describe('defineProperty', function () {
+        it('allows you to define new properties which are writable, enumerable and configurable by default', function () {
+            // prepare
+            var obj = {};
+            // execute
+            alchemy.defineProperty(obj, 'foo', {value: 'bar'});
+            // verify
+            expect(obj.foo).toBe('bar');
+            expect(Object.getOwnPropertyDescriptor(obj, 'foo')).toEqual({
+                value: 'bar',
+                writable: true,
+                enumerable: true,
+                configurable: true
+            });
+        });
+
+        it('can create read-only properties', function () {
+            // prepare
+            var obj = {};
+            alchemy.defineProperty(obj, 'foo', {
+                value: 'bar',
+                writable: false
+            });
+            // execute / verify
+            expect(Object.getOwnPropertyDescriptor(obj, 'foo').writable).toBeFalsy();
+            expect(function () {
+                obj.foo = 'bar';
+            }).toThrow();
+            expect(obj.foo).toBe('bar');
+        });
+
+        it('can create not-enumerable properties', function () {
+            // prepare
+            var obj = {};
+            alchemy.defineProperty(obj, 'foo', {
+                value: 'bar',
+                enumerable: false
+            });
+            // execute / verify
+            expect(obj.foo).toBe('bar');
+            expect(Object.getOwnPropertyDescriptor(obj, 'foo').enumerable).toBeFalsy();
+            expect(obj.propertyIsEnumerable('foo')).toBeFalsy();
+            expect(Object.keys(obj)).toEqual([]);
+        });
+
+        it('can create properties which cannot be redefined', function () {
+            // prepare
+            var obj = {};
+            alchemy.defineProperty(obj, 'foo', {
+                value: 'bar',
+                configurable: false
+            });
+            // execute / verify
+            expect(obj.foo).toBe('bar');
+            expect(Object.getOwnPropertyDescriptor(obj, 'foo').configuration).toBeFalsy();
+            expect(function () {
+                alchemy.defineProperty(obj, 'foo', {
+                    value: 'baz'
+                });
+            }).toThrow();
+        });
+
+        it('allows to define a named getter function', function () {
+            // prepare
+            var getter = jasmine.createSpy().andCallFake(function () {
+                return 'bar';
+            });
+            var obj = {
+                'foo?': getter
+            };
+            var expectedValue;
+            // execute
+            alchemy.defineProperty(obj, 'foo', {
+                get: 'foo?'
+            });
+            expectedValue = obj.foo;
+            // verify
+            expect(getter).toHaveBeenCalled();
+            expect(expectedValue).toBe('bar');
+        });
+
+        it('allows to define a named getter function using a default name', function () {
+            // prepare
+            var getter = jasmine.createSpy().andCallFake(function () {
+                return 'bar';
+            });
+            var obj = {
+                getFoo: getter
+            };
+            var expectedValue;
+            // execute
+            alchemy.defineProperty(obj, 'foo', {get: true});
+            expectedValue = obj.foo;
+            // verify
+            expect(getter).toHaveBeenCalled();
+            expect(expectedValue).toBe('bar');
+        });
+
+        it('allows to define an anonym getter function', function () {
+            // prepare
+            var obj = {};
+            var getter = jasmine.createSpy().andCallFake(function () {
+                return 'bar';
+            });
+            var expectedValue;
+            // execute
+            alchemy.defineProperty(obj, 'foo', {get: getter});
+            expectedValue = obj.foo;
+            // verify
+            expect(getter).toHaveBeenCalled();
+            expect(expectedValue).toBe('bar');
+            expect(Object.keys(obj)).toEqual(['foo']);
+        });
+
+
+        it('allows to override a getter function', function () {
+            // prepare
+            var obj = {
+                getFoo: function () {
+                    return 'bar';
+                }
+            };
+            var expectedValue;
+            // execute
+            alchemy.defineProperty(obj, 'foo', {get: true});
+            alchemy.override(obj, {
+                getFoo: alchemy.hocuspocus(function (_super) {
+                    return function () {
+                        return 'foo - ' + _super.call(this) + ' - baz';
+                    };
+                })
+            });
+            expectedValue = obj.foo;
+            // verify
+            expect(expectedValue).toBe('foo - bar - baz');
+        });
+
+        it('allows to define a named setter function', function () {
+            // prepare
+            var setter = jasmine.createSpy();
+            var obj = {
+                'foo!': setter
+            };
+            // execute
+            alchemy.defineProperty(obj, 'foo', {set: 'foo!'});
+            obj.foo = 'bar';
+            // verify
+            expect(setter).toHaveBeenCalledWith('bar');
+        });
+
+        it('allows to define a named setter function using a default name', function () {
+            // prepare
+            var setter = jasmine.createSpy();
+            var obj = {
+                setFoo: setter
+            };
+            // execute
+            alchemy.defineProperty(obj, 'foo', {set: true});
+            obj.foo = 'bar';
+            // verify
+            expect(setter).toHaveBeenCalledWith('bar');
+        });
+
+        it('allows to define an anonym setter function', function () {
+            // prepare
+            var setter = jasmine.createSpy();
+            var obj = {};
+            // execute
+            alchemy.defineProperty(obj, 'foo', {set: setter});
+            obj.foo = 'bar';
+            // verify
+            expect(setter).toHaveBeenCalledWith('bar');
+        });
+
+        it('allows to override a setter function', function () {
+            // prepare
+            var obj = {
+                getFoo: function () {
+                    return this._foo;
+                },
+                setFoo: function (val) {
+                    this._foo = val;
+                    return this._foo;
+                }
+            };
+            // execute
+            alchemy.defineProperty(obj, 'foo', {
+                get: true,
+                set: true
+            });
+            alchemy.override(obj, {
+                setFoo: alchemy.hocuspocus(function (_super) {
+                    return function (val) {
+                        return _super.call(this, 'foo - ' + val + ' - baz');
+                    };
+                })
+            });
+            obj.foo = 'bar';
+            // verify
+            expect(obj.foo).toBe('foo - bar - baz');
+        });
+
+        it('allows to mark an object as a property definition (mode B)', function () {
+            var prop = alchemy.defineProperty({});
+            expect(alchemy.isObject(prop)).toBeTruthy();
+            expect(alchemy.meta(prop, 'isProperty')).toBeTruthy();
+        });
+    });
+
+    /** @name TEST_override */
     describe('override', function () {
         it('allows overriding multiple methods at once', function () {
             // prepare
@@ -460,252 +744,58 @@ describe('alchemy', function () {
             // verify
             expect(actualScopeObj).toBe(expectedScopeObj);
         });
-    });
 
-    describe('extract', function () {
-        it('reduces an array of objects to an array of object values', function () {
-            expect(alchemy.extract([{
-                key: 'foo'
-            }, {
-                key: 'bar'
-            }, {
-                key: 'baz'
-            }, {
-                kez: 'bam'
-            }], 'key')).toEqual(['foo', 'bar', 'baz', undefined]);
-        });
-
-        it('reduces an object of objects to an array of object values', function () {
-            expect(alchemy.extract({
-                o1: {
-                    key: 'foo'
-                },
-                o2: {
-                    key: 'bar'
-                },
-                o3: {
-                    key: 'baz'
-                },
-                o4: {
-                    kez: 'bam'
-                }
-            }, 'key')).toEqual(['foo', 'bar', 'baz', undefined]);
-        });
-
-        it('allway returns an array', function () {
-            expect(alchemy.isArray(alchemy.extract())).toBeTruthy();
-            expect(alchemy.isArray(alchemy.extract(null, null))).toBeTruthy();
-            expect(alchemy.isArray(alchemy.extract([], 'foo'))).toBeTruthy();
-            expect(alchemy.isArray(alchemy.extract(null, 'bar'))).toBeTruthy();
-        });
-    });
-
-    describe('getter and setter', function () {
-        it('allows to define a named getter function', function () {
+        it('can create properties', function () {
             // prepare
             var obj = {};
-            var getter = jasmine.createSpy().andCallFake(function () {
-                return 'bar';
-            });
-            var expectedValue;
             // execute
-            alchemy.defineGetter(obj, 'foo', getter, 'foo?');
-            expectedValue = obj.foo;
-            // verify
-            expect(getter).toHaveBeenCalled();
-            expect(expectedValue).toBe('bar');
-            expect(Object.keys(obj)).toEqual(['foo', 'foo?']);
-        });
-
-        it('allows to define a named getter function using a default name', function () {
-            // prepare
-            var obj = {};
-            var getter = jasmine.createSpy().andCallFake(function () {
-                return 'bar';
-            });
-            var expectedValue;
-            // execute
-            alchemy.defineGetter(obj, 'foo', getter);
-            expectedValue = obj.foo;
-            // verify
-            expect(getter).toHaveBeenCalled();
-            expect(expectedValue).toBe('bar');
-            expect(Object.keys(obj)).toEqual(['foo', 'getFoo']);
-        });
-
-        it('allows to define an anonym getter function', function () {
-            // prepare
-            var obj = {};
-            var getter = jasmine.createSpy().andCallFake(function () {
-                return 'bar';
-            });
-            var expectedValue;
-            // execute
-            alchemy.defineGetter(obj, 'foo', getter, false);
-            expectedValue = obj.foo;
-            // verify
-            expect(getter).toHaveBeenCalled();
-            expect(expectedValue).toBe('bar');
-            expect(Object.keys(obj)).toEqual(['foo']);
-        });
-
-        it('allows to define an existing function as a getter function', function () {
-            // prepare
-            var getter = jasmine.createSpy().andCallFake(function () {
-                return 'bar';
-            });
-            var obj = {
-                getFoo: getter
-            };
-            var expectedValue;
-            // execute
-            alchemy.defineGetter(obj, 'foo');
-            expectedValue = obj.foo;
-            // verify
-            expect(getter).toHaveBeenCalled();
-            expect(expectedValue).toBe('bar');
-        });
-
-        it('allows to define a default getter function', function () {
-            // prepare
-            var obj = {
-                _foo: 'bar'
-            };
-            var expectedValue;
-            // execute
-            alchemy.defineGetter(obj, 'foo');
-            expectedValue = obj.foo;
-            // verify
-            expect(expectedValue).toBe('bar');
-        });
-
-        it('allows to override a getter function', function () {
-            // prepare
-            var obj = {
-                _foo: 'bar'
-            };
-            var expectedValue;
-            // execute
-            alchemy.defineGetter(obj, 'foo');
             alchemy.override(obj, {
-                getFoo: alchemy.hocuspocus(function (_super) {
-                    return function () {
-                        return 'foo - ' + _super.call(this) + ' - baz';
-                    };
-                })
+                foo: alchemy.defineProperty({
+                    value: 'foo'
+                }),
+                bar: alchemy.defineProperty({
+                    value: 'bar',
+                    writable: false,
+                    enumerable: false,
+                    configurable: false,
+                }),
             });
-            expectedValue = obj.foo;
             // verify
-            expect(expectedValue).toBe('foo - bar - baz');
+            expect(obj.foo).toBe('foo');
+            expect(obj.bar).toBe('bar');
+            expect(Object.getOwnPropertyDescriptor(obj, 'foo')).toEqual({
+                value: 'foo',
+                writable: true,
+                enumerable: true,
+                configurable: true
+            });
+            expect(Object.getOwnPropertyDescriptor(obj, 'bar')).toEqual({
+                value: 'bar',
+                writable: false,
+                enumerable: false,
+                configurable: false
+            });
         });
 
-        it('allows to define a named setter function', function () {
+        it('can define getter and setter', function () {
             // prepare
-            var obj = {};
-            var expectedValue;
-            var setter = jasmine.createSpy().andCallFake(function (val) {
-                expectedValue = val;
-            });
-            // execute
-            alchemy.defineSetter(obj, 'foo', setter, 'foo!');
-            obj.foo = 'bar';
-            // verify
-            expect(setter).toHaveBeenCalled();
-            expect(expectedValue).toBe('bar');
-            expect(Object.keys(obj)).toEqual(['foo', 'foo!']);
-        });
-
-        it('allows to define a named setter function using a default name', function () {
-            // prepare
-            var obj = {};
-            var expectedValue;
-            var setter = jasmine.createSpy().andCallFake(function (val) {
-                expectedValue = val;
-            });
-            // execute
-            alchemy.defineSetter(obj, 'foo', setter);
-            obj.foo = 'bar';
-            // verify
-            expect(setter).toHaveBeenCalled();
-            expect(expectedValue).toBe('bar');
-            expect(Object.keys(obj)).toEqual(['foo', 'setFoo']);
-        });
-
-        it('allows to define an anonym setter function', function () {
-            // prepare
-            var obj = {};
-            var expectedValue;
-            var setter = jasmine.createSpy().andCallFake(function (val) {
-                expectedValue = val;
-            });
-            // execute
-            alchemy.defineSetter(obj, 'foo', setter, false);
-            obj.foo = 'bar';
-            // verify
-            expect(setter).toHaveBeenCalled();
-            expect(expectedValue).toBe('bar');
-            expect(Object.keys(obj)).toEqual(['foo']);
-        });
-
-        it('allows to define an existing function as a setter', function () {
-            // prepare
-            var expectedValue;
-            var setter = jasmine.createSpy().andCallFake(function (val) {
-                expectedValue = val;
-            });
             var obj = {
-                setFoo: setter
+                getFoo: jasmine.createSpy('getFoo').andReturn('bar'),
+                setFoo: jasmine.createSpy('setFoo'),
             };
             // execute
-            alchemy.defineSetter(obj, 'foo');
-            obj.foo = 'bar';
-            // verify
-            expect(setter).toHaveBeenCalled();
-            expect(expectedValue).toBe('bar');
-        });
-
-        it('allows to define a default setter', function () {
-            // prepare
-            var obj = {};
-            // execute
-            alchemy.defineSetter(obj, 'foo');
-            obj.foo = 'bar';
-            // verify
-            expect(obj._foo).toBe('bar');
-        });
-
-        it('allows to override a setter function', function () {
-            // prepare
-            var obj = {};
-            // execute
-            alchemy.defineGetter(obj, 'foo');
-            alchemy.defineSetter(obj, 'foo');
             alchemy.override(obj, {
-                setFoo: alchemy.hocuspocus(function (_super) {
-                    return function (val) {
-                        return _super.call(this, 'foo - ' + val + ' - baz');
-                    };
-                })
+                foo: alchemy.defineProperty({
+                    get: true,
+                    set: true
+                }),
             });
-            obj.foo = 'bar';
+            var result = obj.foo;
+            obj.foo = 'baz';
             // verify
-            expect(obj.foo).toBe('foo - bar - baz');
-        });
-    });
-
-    /** @name TEST_union */
-    describe('union', function () {
-        it('allows to get unique set of values from multiple arrays or objects', function () {
-            expect(alchemy.union([1, 2, 4, 10], [3, 4], [1, 2, 5, 101])).toEqual([1, 2, 4, 10, 3, 5, 101]);
-            expect(alchemy.union({foo: 'foo'}, {bar: 'bar'}, {bar: 'baz'})).toEqual(['foo', 'bar', 'baz']);
-            expect(alchemy.union({foo: 'foo'}, ['foo', 'bar'], {bar: 'baz'})).toEqual(['foo', 'bar', 'baz']);
-        });
-
-        it('ignores non-iterable inputs', function () {
-            expect(alchemy.union()).toEqual([]);
-            expect(alchemy.union([1, 2, 4, 10], null, [1, 2, 5, 101])).toEqual([1, 2, 4, 10, 5, 101]);
-            expect(alchemy.union({foo: 'foo'}, {bar: 'bar'})).toEqual(['foo', 'bar']);
-            expect(alchemy.union({foo: 'foo'}, null, ['foo', 'bar'], 1, 'two', {bar: 'baz'})).toEqual(['foo', 'bar', 'baz']);
+            expect(result).toBe('bar');
+            expect(obj.getFoo).toHaveBeenCalled();
+            expect(obj.setFoo).toHaveBeenCalledWith('baz');
         });
     });
 
@@ -870,13 +960,12 @@ describe('alchemy', function () {
         it('allows to define attributes with given getter and setter function', function () {
             // prepare
             var potion = alchemy.brew({
-                attributes: {
-                    foo: {
+                overrides: {
+                    foo: alchemy.defineProperty({
                         get: 'getFoo',
                         set: 'setFoo',
-                    }
-                },
-                overrides: {
+                    }),
+
                     getFoo: jasmine.createSpy('getFoo').andReturn('bar'),
                     setFoo: jasmine.createSpy('setFoo')
                 }
@@ -890,35 +979,16 @@ describe('alchemy', function () {
             expect(result).toBe('bar');
         });
 
-        it('allows to define attributes with default getter and setter function', function () {
-            // prepare
-            var potion = alchemy.brew({
-                attributes: {
-                    foo: {
-                        get: 'myGetFoo',
-                        set: 'mySetFoo',
-                    }
-                }
-            });
-            // excute
-            potion.foo = 'bar';
-            var result = potion.foo;
-            // verify
-            expect(alchemy.isFunction(potion.myGetFoo)).toBeTruthy();
-            expect(alchemy.isFunction(potion.mySetFoo)).toBeTruthy();
-            expect(result).toBe('bar');
-        });
-
         it('allows to define attributes with anonymous getter and setter function', function () {
             // prepare
             var getter = jasmine.createSpy('getter').andReturn('bar');
             var setter = jasmine.createSpy('setter');
             var potion = alchemy.brew({
-                attributes: {
-                    foo: {
+                overrides: {
+                    foo: alchemy.defineProperty({
                         get: getter,
                         set: setter,
-                    }
+                    })
                 }
             });
             // excute
@@ -927,34 +997,31 @@ describe('alchemy', function () {
             // verify
             expect(getter).toHaveBeenCalled();
             expect(setter).toHaveBeenCalledWith('baz');
-            expect(alchemy.isFunction(potion.getFoo)).toBeFalsy();
-            expect(alchemy.isFunction(potion.setFoo)).toBeFalsy();
             expect(result).toBe('bar');
         });
 
         it('allows to override attribute getter/setter', function () {
             // prepare
-            var potion = alchemy.brew({
-                attributes: {
-                    foo: {
-                        get: 'getFoo',
-                    }
-                },
+            var potion1 = alchemy.brew({
                 overrides: {
+                    foo: alchemy.defineProperty({get: true}),
                     getFoo: function () {
                         return 'foo';
                     }
                 }
             });
-            alchemy.override(potion, {
-                getFoo: alchemy.hocuspocus(function (_super) {
-                    return function () {
-                        return _super.call(this) + ' - bar';
-                    };
-                })
+            var potion2 = alchemy.brew({
+                extend: potion1,
+                overrides: {
+                    getFoo: alchemy.hocuspocus(function (_super) {
+                        return function () {
+                            return _super.call(this) + ' - bar';
+                        };
+                    })
+                }
             });
             // excute
-            var result = potion.foo;
+            var result = potion2.foo;
             // verify
             expect(result).toBe('foo - bar');
         });
