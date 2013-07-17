@@ -47,7 +47,7 @@ describe('Ingredient', function () {
                 ptype: testIngredient
             }],
             overrides: {
-                foo: alchemy.hocuspocus(function (_super) {
+                foo: alchemy.override(function (_super) {
                     return function () {
                         return _super.call(this) + ' - bar';
                     };

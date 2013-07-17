@@ -526,8 +526,8 @@ describe('alchemy', function () {
             var expectedValue;
             // execute
             alchemy.defineProperty(obj, 'foo', {get: true});
-            alchemy.override(obj, {
-                getFoo: alchemy.hocuspocus(function (_super) {
+            alchemy.extend(obj, {
+                getFoo: alchemy.override(function (_super) {
                     return function () {
                         return 'foo - ' + _super.call(this) + ' - baz';
                     };
@@ -591,8 +591,8 @@ describe('alchemy', function () {
                 get: true,
                 set: true
             });
-            alchemy.override(obj, {
-                setFoo: alchemy.hocuspocus(function (_super) {
+            alchemy.extend(obj, {
+                setFoo: alchemy.override(function (_super) {
                     return function (val) {
                         return _super.call(this, 'foo - ' + val + ' - baz');
                     };
@@ -610,8 +610,8 @@ describe('alchemy', function () {
         });
     });
 
-    /** @name TEST_override */
-    describe('override', function () {
+    /** @name TEST_extend */
+    describe('extend', function () {
         it('allows overriding multiple methods at once', function () {
             // prepare
             var f1 = function () { return 'override-1'; };
@@ -624,7 +624,7 @@ describe('alchemy', function () {
                 f4: function () { return 'origin-4'; },
             };
             // execute
-            alchemy.override(obj, {
+            alchemy.extend(obj, {
                 f1: f1,
                 f2: f2,
                 f3: f3
@@ -644,15 +644,15 @@ describe('alchemy', function () {
                 }
             };
             // execute
-            alchemy.override(obj, {
-                foo: alchemy.hocuspocus(function (_super) {
+            alchemy.extend(obj, {
+                foo: alchemy.override(function (_super) {
                     return function () {
                         return _super.call(this) + ' - bar';
                     };
                 })
             });
-            alchemy.override(obj, {
-                foo: alchemy.hocuspocus(function (_super) {
+            alchemy.extend(obj, {
+                foo: alchemy.override(function (_super) {
                     return function () {
                         return _super.call(this) + ' - baz';
                     };
@@ -670,14 +670,14 @@ describe('alchemy', function () {
             var obj = {
                 constructor: orgCtor
             };
-            var newCtor = alchemy.hocuspocus(function (_super) {
+            var newCtor = alchemy.override(function (_super) {
                 return function () {
                     this.bar = 'bar';
                     _super.call(this);
                 };
             });
             //execute
-            alchemy.override(obj, {
+            alchemy.extend(obj, {
                 constructor: newCtor
             });
             obj.constructor();
@@ -693,7 +693,7 @@ describe('alchemy', function () {
                 bar: 'bar'
             };
             // execute
-            obj = alchemy.override(obj, {
+            obj = alchemy.extend(obj, {
                 bar: 'baz',
                 ping: 'pong'
             });
@@ -711,8 +711,8 @@ describe('alchemy', function () {
             var obj = {
                 foo: orgFoo
             };
-            alchemy.override(obj, {
-                foo: alchemy.hocuspocus(function (_super) {
+            alchemy.extend(obj, {
+                foo: alchemy.override(function (_super) {
                     return function () {
                         _super.call(this);
                     };
@@ -733,8 +733,8 @@ describe('alchemy', function () {
                 foo: function () {}
             };
             // execute
-            alchemy.override(obj, {
-                foo: alchemy.hocuspocus(function () {
+            alchemy.extend(obj, {
+                foo: alchemy.override(function () {
                     return function () {
                         actualScopeObj = expectedScopeObj;
                     };
@@ -749,7 +749,7 @@ describe('alchemy', function () {
             // prepare
             var obj = {};
             // execute
-            alchemy.override(obj, {
+            alchemy.extend(obj, {
                 foo: alchemy.defineProperty({
                     value: 'foo'
                 }),
@@ -784,7 +784,7 @@ describe('alchemy', function () {
                 setFoo: jasmine.createSpy('setFoo'),
             };
             // execute
-            alchemy.override(obj, {
+            alchemy.extend(obj, {
                 foo: alchemy.defineProperty({
                     get: true,
                     set: true
@@ -859,7 +859,7 @@ describe('alchemy', function () {
             var potion2 = alchemy.brew({
                 extend: potion1,
                 overrides: {
-                    foo: alchemy.hocuspocus(function (_super) {
+                    foo: alchemy.override(function (_super) {
                         return function () {
                             return _super.call(this) + ' - bar';
                         };
@@ -869,7 +869,7 @@ describe('alchemy', function () {
             var potion3 = alchemy.brew({
                 extend: potion2,
                 overrides: {
-                    foo: alchemy.hocuspocus(function (_super) {
+                    foo: alchemy.override(function (_super) {
                         return function () {
                             return _super.call(this) + ' - baz';
                         };
@@ -902,7 +902,7 @@ describe('alchemy', function () {
             var potion1 = alchemy.brew({
                 extend: base,
                 overrides: {
-                    foo: alchemy.hocuspocus(function (_super) {
+                    foo: alchemy.override(function (_super) {
                         return function () {
                             return _super.call(this) + ' - foo';
                         };
@@ -912,7 +912,7 @@ describe('alchemy', function () {
             var potion2 = alchemy.brew({
                 extend: base,
                 overrides: {
-                    foo: alchemy.hocuspocus(function (_super) {
+                    foo: alchemy.override(function (_super) {
                         return function () {
                             return _super.call(this) + ' - bar';
                         };
@@ -922,7 +922,7 @@ describe('alchemy', function () {
             var potion3 = alchemy.brew({
                 extend: base,
                 overrides: {
-                    foo: alchemy.hocuspocus(function (_super) {
+                    foo: alchemy.override(function (_super) {
                         return function () {
                             return _super.call(this) + ' - baz';
                         };
@@ -933,7 +933,7 @@ describe('alchemy', function () {
             var potion2Sub = alchemy.brew({
                 extend: potion2,
                 overrides: {
-                    foo: alchemy.hocuspocus(function (_super) {
+                    foo: alchemy.override(function (_super) {
                         return function () {
                             return _super.call(this) + ' - sub';
                         };
@@ -943,7 +943,7 @@ describe('alchemy', function () {
             var potion3Sub = alchemy.brew({
                 extend: potion3,
                 overrides: {
-                    foo: alchemy.hocuspocus(function (_super) {
+                    foo: alchemy.override(function (_super) {
                         return function () {
                             return _super.call(this) + ' - sub';
                         };
@@ -1013,7 +1013,7 @@ describe('alchemy', function () {
             var potion2 = alchemy.brew({
                 extend: potion1,
                 overrides: {
-                    getFoo: alchemy.hocuspocus(function (_super) {
+                    getFoo: alchemy.override(function (_super) {
                         return function () {
                             return _super.call(this) + ' - bar';
                         };
