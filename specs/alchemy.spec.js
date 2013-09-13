@@ -1026,5 +1026,19 @@ describe('alchemy', function () {
             expect(result).toBe('foo - bar');
         });
     });
+
+    /** @name TEST_now */
+    describe('now', function () {
+        it('returns a number >= 0', function () {
+            expect(alchemy.isNumber(alchemy.now())).toBeTruthy();
+            expect(alchemy.now() >= 0).toBeTruthy();
+        });
+
+        it('is monoton', function () {
+            var n1 = alchemy.now();
+            var n2 = alchemy.now();
+            expect(n2 >= n1).toBeTruthy();
+        });
+    });
 });
 
