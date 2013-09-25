@@ -5,175 +5,16 @@ describe('Oculus', function () {
 
     beforeEach(function () {
         this.oculus = alchemy('alchemy.core.Oculus').brew();
+        this.observable = alchemy('alchemy.core.Observari').brew();
     });
 
     afterEach(function () {
         this.oculus.dispose();
+        this.observable.dispose();
     });
 
-    describe('Listeners and event trigger', function () {
-        it('allows to add listener', function () {
-            // prepare
-            var spy = jasmine.createSpy('test');
-            var data = {foo: 'bar'};
-            this.oculus.on('myEvent', spy);
-            // execute
-            this.oculus.trigger('myEvent', data);
-            // verify
-            expect(spy).toHaveBeenCalled();
-            expect(spy.mostRecentCall.args[0]).toBe(data);
-        });
-
-        it('allows to add mutiple listeners for the same event', function () {
-            // prepare
-            var spy1 = jasmine.createSpy('listener 1');
-            var spy2 = jasmine.createSpy('listener 2');
-            var spy3 = jasmine.createSpy('listener 3');
-            this.oculus.on('myEvent', spy1);
-            this.oculus.on('myEvent', spy2);
-            this.oculus.on('myEvent', spy3);
-            // execute
-            this.oculus.trigger('myEvent');
-            // verify
-            expect(spy1).toHaveBeenCalled();
-            expect(spy2).toHaveBeenCalled();
-            expect(spy3).toHaveBeenCalled();
-        });
-
-        it('calls the listener in the correct scope', function () {
-            // prepare
-            var spy = jasmine.createSpy('listener').andCallFake(function () {
-                actualScope = this;
-            });
-            var expectedScope = {};
-            var actualScope;
-            this.oculus.on('myEvent', spy, expectedScope);
-            // execute
-            this.oculus.trigger('myEvent');
-            // verify
-            expect(actualScope).toBe(expectedScope);
-        });
-
-        it('provides an event object', function () {
-            var eventname;
-            var handler = function (data, event) {
-                eventname = event.name;
-            };
-            this.oculus.on('myFirstEvent', handler);
-            this.oculus.on('mySecondEvent', handler);
-
-            // first trigger with params
-            this.oculus.trigger('myFirstEvent', {foo: 'bar'});
-            expect(eventname).toBe('myFirstEvent');
-            eventname = 0;
-
-            // second trigger without params
-            this.oculus.trigger('mySecondEvent');
-            expect(eventname).toBe('mySecondEvent');
-        });
-
-        it('supports event namespaces', function () {
-        });
-    });
-
-    describe('removing listeners', function () {
-        var specialEvent = 'specialEvent';
-        var events = [specialEvent, 'event2', 'event3'];
-        var specialScope = {};
-        var listeners = [{
-            event: specialEvent,
-            fn: jasmine.createSpy('listener1'),
-            scope: specialScope
-        }, {
-            event: specialEvent,
-            fn: jasmine.createSpy('listener2'),
-            scope: {}
-        }, {
-            event: events[1],
-            fn: jasmine.createSpy('listener3'),
-            scope: specialScope
-        }, {
-            event: events[2],
-            fn: jasmine.createSpy('listener4'),
-            scope: {}
-        }];
-
-        beforeEach(function () {
-            listeners.forEach(function (l) {
-                l.fn.reset();
-                this.oculus.on(l.event, l.fn, l.scope);
-            }, this);
-        });
-
-        it('can remove a single listener', function () {
-            // prepare
-            this.oculus.off(listeners[0].event, listeners[0].fn, listeners[0].scope);
-            // execute
-            events.forEach(this.oculus.trigger, this.oculus);
-            // verify
-            expect(listeners[0].fn).not.toHaveBeenCalled();
-            expect(listeners[1].fn).toHaveBeenCalled();
-            expect(listeners[2].fn).toHaveBeenCalled();
-            expect(listeners[3].fn).toHaveBeenCalled();
-        });
-
-        it('can remove all listeners for an event', function () {
-            // prepare
-            this.oculus.off(specialEvent);
-            // execute
-            events.forEach(this.oculus.trigger, this.oculus);
-            // verify
-            expect(listeners[0].fn).not.toHaveBeenCalled();
-            expect(listeners[1].fn).not.toHaveBeenCalled();
-            expect(listeners[2].fn).toHaveBeenCalled();
-            expect(listeners[3].fn).toHaveBeenCalled();
-        });
-
-        it('can remove all listeners for a handler function', function () {
-            // prepare
-            this.oculus.off(null, listeners[1].fn);
-            // execute
-            events.forEach(this.oculus.trigger, this.oculus);
-            // verify
-            expect(listeners[0].fn).toHaveBeenCalled();
-            expect(listeners[1].fn).not.toHaveBeenCalled();
-            expect(listeners[2].fn).toHaveBeenCalled();
-            expect(listeners[3].fn).toHaveBeenCalled();
-        });
-
-        it('can remove all listeners for given scope', function () {
-            // prepare
-            this.oculus.off(null, null, specialScope);
-            // execute
-            events.forEach(this.oculus.trigger, this.oculus);
-            // verify
-            expect(listeners[0].fn).not.toHaveBeenCalled();
-            expect(listeners[1].fn).toHaveBeenCalled();
-            expect(listeners[2].fn).not.toHaveBeenCalled();
-            expect(listeners[3].fn).toHaveBeenCalled();
-        });
-
-        it('can remove all listeners at once', function () {
-            // prepare
-            this.oculus.off();
-            // execute
-            events.forEach(this.oculus.trigger, this.oculus);
-            // verify
-            expect(listeners[0].fn).not.toHaveBeenCalled();
-            expect(listeners[1].fn).not.toHaveBeenCalled();
-            expect(listeners[2].fn).not.toHaveBeenCalled();
-            expect(listeners[3].fn).not.toHaveBeenCalled();
-            expect(this.oculus.events).toEqual({});
-        });
-    });
-
+    /** @name TEST_observe */
     describe('observe', function () {
-        beforeEach(function () {
-            this.observable = alchemy('Oculus').brew();
-        });
-        afterEach(function () {
-            this.observable.dispose();
-        });
 
         it('allows to add handler to other observeable objects', function () {
             // prepare
@@ -214,32 +55,31 @@ describe('Oculus', function () {
         });
     });
 
-    describe('once', function () {
-        it('allows to add an one-time listener', function () {
+    /** @name TEST_mixin */
+    describe('observable aspect', function () {
+        it('give any existing potion to observe other objects', function () {
             // prepare
-            var spy = jasmine.createSpy('handler');
-            this.oculus.once('party', spy);
+            var anyObj = alchemy('MateriaPrima').brew();
             // execute
-            this.oculus.trigger('party');
-            this.oculus.trigger('party');
-            this.oculus.trigger('party');
+            anyObj.addIngredient('observer', this.oculus);
             // verify
-            expect(spy).toHaveBeenCalled();
-            expect(spy.callCount).toBe(1);
+            expect(typeof anyObj.observe).toBe('function');
+            expect(typeof anyObj.isObservable).toBe('function');
         });
 
-        it('calls the listener in the correct scope', function () {
+        it('give new potion to observe other object', function () {
             // prepare
-            var spy = jasmine.createSpy('listener').andCallFake(function () {
-                actualScope = this;
-            });
-            var expectedScope = {};
-            var actualScope;
-            this.oculus.once('myEvent', spy, expectedScope);
             // execute
-            this.oculus.trigger('myEvent');
+            var anyPotion = alchemy.brew({
+                ingredients: [{
+                    key: 'observer',
+                    ptype: 'Oculus'
+                }]
+            });
             // verify
-            expect(actualScope).toBe(expectedScope);
+            expect(typeof anyPotion.observe).toBe('function');
+            expect(typeof anyPotion.isObservable).toBe('function');
         });
     });
+
 });

@@ -564,7 +564,7 @@ describe('alchemy.core.Collectum', function () {
 
         it('acts as a proxy for all events of a stored item', function () {
             // prepare
-            var item = alchemy('alchemy.core.Oculus').brew();
+            var item = alchemy('alchemy.core.Observari').brew();
             var handler1 = jasmine.createSpy('foo');
             var handler2 = jasmine.createSpy('bar');
             this.collectum.add(item);
@@ -584,7 +584,7 @@ describe('alchemy.core.Collectum', function () {
 
         it('can proxy events without event data', function () {
             // prepare
-            var item = alchemy('alchemy.core.Oculus').brew();
+            var item = alchemy('alchemy.core.Observari').brew();
             var handler1 = jasmine.createSpy('foo');
             this.collectum.add(item);
             this.collectum.on('foo', handler1);
