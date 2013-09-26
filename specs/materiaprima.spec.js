@@ -1,8 +1,8 @@
 describe('MateriaPrima', function () {
     'use strict';
 
-    var alchemy = require('../../alchemy.js'),
-        mp;
+    var alchemy = require('../../alchemy.js');
+    var mp;
 
     beforeEach(function () {
         mp = alchemy('alchemy.core.MateriaPrima').brew();
@@ -10,9 +10,9 @@ describe('MateriaPrima', function () {
 
     afterEach(function () {
         mp.dispose();
-        mp = null;
     });
 
+    /** @name TEST_meta */
     describe('Meta attributes', function () {
         it('can return meta attributes of a prototype', function () {
             expect(mp.meta('name')).toBe('alchemy.core.MateriaPrima');
@@ -31,15 +31,16 @@ describe('MateriaPrima', function () {
         });
     });
 
+    /** @name TEST_brew */
     describe('brew', function () {
         it('can create instances over instances', function () {
             var i1 = mp.brew(),
                 i2 = i1.brew();
 
             expect(mp.isPrototypeOf(i1)).toBeTruthy();
-            expect(i1.meta('basetype')).toBe(mp);
+            expect(i1.meta('prototype')).toBe(mp);
             expect(i1.isPrototypeOf(i2)).toBeTruthy();
-            expect(i2.meta('basetype')).toBe(i1);
+            expect(i2.meta('prototype')).toBe(i1);
         });
 
         it('calls the constructor', function () {
@@ -86,6 +87,7 @@ describe('MateriaPrima', function () {
         });
     });
 
+    /** @name TEST_addIngerdient */
     describe('addIngredient', function () {
         beforeEach(function () {
             this.ingredient = alchemy.brew({
@@ -134,6 +136,47 @@ describe('MateriaPrima', function () {
             mp.addIngredient('test', this.ingredient);
             // verify
             expect(mp.meta('ingredients').test).toBe(this.ingredient);
+        });
+    });
+
+    /** @name TEST_dispose */
+    describe('dispose', function () {
+        it('removes references of the meta properties', function () {
+            // prepare
+            var ingredients = {};
+            mp.meta('ingredients', ingredients);
+            expect(mp.meta('prototype')).toBe(alchemy('MateriaPrima'));
+            expect(mp.meta('ingredients')).toBe(ingredients);
+            // execute
+            mp.dispose();
+            // verify
+            expect(mp.meta('prototype')).toBe(null);
+            expect(mp.meta('ingredients')).toBe(null);
+        });
+
+        it('cleans all ingredients', function () {
+            // prepare
+            var i1 = alchemy.brew({
+                extend: 'alchemy.core.Ingredient',
+                overrides: {
+                    publics: [],
+                    dispose: jasmine.createSpy('dispose1')
+                }
+            });
+            var i2 = alchemy.brew({
+                extend: 'alchemy.core.Ingredient',
+                overrides: {
+                    publics: [],
+                    dispose: jasmine.createSpy('dispose2')
+                }
+            });
+            mp.addIngredient('i1', i1);
+            mp.addIngredient('i2', i2);
+            // execute
+            mp.dispose();
+            // verify
+            expect(i1.dispose).toHaveBeenCalled();
+            expect(i2.dispose).toHaveBeenCalled();
         });
     });
 });
