@@ -45,20 +45,13 @@ describe('MateriaPrima', function () {
 
         it('calls the constructor', function () {
             // prepare
-            var arg0 = {},
-                arg1 = {},
-                arg2 = {},
-                call, i;
-
+            var cfg = {};
+            var i;
             spyOn(mp, 'constructor');
             // execute
-            i = mp.brew(arg0, arg1, arg2);
+            i = mp.brew(cfg);
             // verify
-            call = i.constructor.mostRecentCall;
-            expect(i.constructor).toHaveBeenCalled();
-            expect(call.args[0]).toBe(arg0);
-            expect(call.args[1]).toBe(arg1);
-            expect(call.args[2]).toBe(arg2);
+            expect(i.constructor).toHaveBeenCalledWith(cfg);
         });
 
         it('allows the default constructor to call the the init method', function () {
@@ -84,6 +77,53 @@ describe('MateriaPrima', function () {
             // verify
             expect(i.foo).toBe(foo);
             expect(i.bar).toBe(bar);
+        });
+
+        it('initializes the ingredients with the given config', function () {
+            // prepare
+            var ingr = alchemy.brew({
+                extend: 'alchemy.core.Ingredient',
+                overrides: {
+                    publics: [],
+                    constructor: jasmine.createSpy(),
+                }
+            });
+            var mp = alchemy.brew({
+                ingredients: [{
+                    key: 'test',
+                    ptype: ingr
+                }]
+            });
+            var cfg = {};
+            // execute
+            mp.brew(cfg);
+            // verify
+            expect(ingr.constructor).toHaveBeenCalledWith(cfg);
+        });
+
+        it('initializes the ingredients with a conflict free config', function () {
+            // prepare
+            var ingr = alchemy.brew({
+                extend: 'alchemy.core.Ingredient',
+                overrides: {
+                    publics: [],
+                    constructor: jasmine.createSpy(),
+                }
+            });
+            var mp = alchemy.brew({
+                ingredients: [{
+                    key: 'test',
+                    ptype: ingr
+                }]
+            });
+            var testConfig = {};
+            var cfg = {
+                test: testConfig
+            };
+            // execute
+            mp.brew(cfg);
+            // verify
+            expect(ingr.constructor).toHaveBeenCalledWith(testConfig);
         });
     });
 
