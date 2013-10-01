@@ -71,10 +71,9 @@ describe('Oculus', function () {
             // prepare
             // execute
             var anyPotion = alchemy.brew({
-                ingredients: [{
-                    key: 'observer',
-                    ptype: 'Oculus'
-                }]
+                ingredients: {
+                    observer: 'Oculus'
+                }
             });
             // verify
             expect(typeof anyPotion.observe).toBe('function');

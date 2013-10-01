@@ -216,10 +216,9 @@ describe('Observari', function () {
             // prepare
             // execute
             var anyPotion = alchemy.brew({
-                ingredients: [{
-                    key: 'obs',
-                    ptype: 'Observari'
-                }]
+                ingredients: {
+                    observable: 'Observari'
+                }
             });
             // verify
             expect(typeof anyPotion.on).toBe('function');

@@ -804,7 +804,7 @@ describe('alchemy', function () {
         it('can load formulas', function () {
             // prepare
             // execute
-            var mp = alchemy('MateriaPrima');
+            var mp = alchemy('alchemy.core.MateriaPrima');
             // verify
             expect(mp).toBeDefined();
             expect(typeof mp.brew).toBe('function');
@@ -1024,6 +1024,32 @@ describe('alchemy', function () {
             var result = potion2.foo;
             // verify
             expect(result).toBe('foo - bar');
+        });
+
+        it('allows the overrides to be a function wich is called with the super type', function () {
+            // prepare
+            var p1 = alchemy.brew({
+                overrides: {
+                    foo: function () {
+                        return 'foo';
+                    },
+                },
+            });
+            // execute
+            var overrides = jasmine.createSpy('overrides').andCallFake(function (_super) {
+                return {
+                    foo: function () {
+                        return _super.foo() + ' - bar';
+                    },
+                };
+            });
+            var p2 = alchemy.brew({
+                extend: p1,
+                overrides: overrides
+            });
+            // verify
+            expect(overrides).toHaveBeenCalledWith(p1);
+            expect(p2.foo()).toBe('foo - bar');
         });
     });
 
