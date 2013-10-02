@@ -196,6 +196,23 @@ describe('Observari', function () {
             // verify
             expect(actualScope).toBe(expectedScope);
         });
+
+        it('does not cause a crash when used with other listeners', function () {
+            // prepare
+            var onetimeListener = jasmine.createSpy();
+            var otherListener1 = jasmine.createSpy();
+            var otherListener2 = jasmine.createSpy();
+            this.observari.once('myEvent', onetimeListener);
+            this.observari.on('myEvent', otherListener1);
+            this.observari.on('myEvent', otherListener2);
+            // execute
+            this.observari.trigger('myEvent');
+            this.observari.trigger('myEvent');
+            // verify
+            expect(onetimeListener.callCount).toBe(1);
+            expect(otherListener1.callCount).toBe(2);
+            expect(otherListener2.callCount).toBe(2);
+        });
     });
 
     /** @name TEST_mixin */
