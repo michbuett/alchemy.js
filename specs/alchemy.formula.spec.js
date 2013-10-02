@@ -56,4 +56,23 @@ describe('alchemy.formula', function () {
             formula.add({foo: 'bar'});
         }).toThrow('Missing required property "name"');
     });
+
+    it('can determine the unresolve dependencies', function () {
+        formula.add({
+            name: 'Formula',
+            extend: 'BaseFormula',
+            requires: [
+                'RequiredFomula1',
+                'RequiredFomula2'
+            ],
+            ingredients: {
+                ingr1: 'Ingredient1',
+                ingr2: {
+                    potion: 'Ingredient2'
+                }
+            }
+        });
+        var unresolve = formula.dependencies();
+        expect(unresolve).toEqual(['BaseFormula', 'RequiredFomula1', 'RequiredFomula2', 'Ingredient1', 'Ingredient2']);
+    });
 });
