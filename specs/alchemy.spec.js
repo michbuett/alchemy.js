@@ -49,8 +49,8 @@ describe('alchemy', function () {
 
         it('can detect objects', function () {
             expect(alchemy.isObject({})).toBeTruthy();
-            expect(alchemy.isObject(function () {})).toBeFalsy();
-            expect(alchemy.isObject([])).toBeFalsy();
+            expect(alchemy.isObject(function () {})).toBeTruthy();
+            expect(alchemy.isObject([])).toBeTruthy();
             expect(alchemy.isObject(true)).toBeFalsy();
             expect(alchemy.isObject('Foo bar baz')).toBeFalsy();
             expect(alchemy.isObject(0)).toBeFalsy();
