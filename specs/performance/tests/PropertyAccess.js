@@ -75,7 +75,7 @@
                             name: 'instance of Potion A',
                             setup: function () {
                                 return {
-                                    args: [potionA.brew()]
+                                    args: [potionA.brew({x: 1, y: 1})]
                                 };
                             },
                             test: test,
@@ -83,7 +83,7 @@
                             name: 'instance of Potion B',
                             setup: function () {
                                 return {
-                                    args: [potionB.brew()]
+                                    args: [potionB.brew({x: 1, y: 1})]
                                 };
                             },
                             test: test,

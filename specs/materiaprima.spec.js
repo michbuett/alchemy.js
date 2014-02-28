@@ -47,11 +47,12 @@ describe('MateriaPrima', function () {
             // prepare
             var cfg = {};
             var i;
-            spyOn(mp, 'constructor');
+            var ctor = jasmine.createSpy('constructor');
+            mp.constructor = ctor;
             // execute
             i = mp.brew(cfg);
             // verify
-            expect(i.constructor).toHaveBeenCalledWith(cfg);
+            expect(ctor).toHaveBeenCalledWith(cfg);
         });
 
         it('allows the default constructor to call the the init method', function () {
