@@ -20,7 +20,6 @@
         "jasmine", "describe", "it", "beforeEach", "afterEach", "spyOn", "waits", "waitsFor", "runs", "expect"
     ],
 
-    "es5"           : true,   // Allow ECMAScript 5 syntax.
     "strict"        : true,   // Require "use strict" pragma  in every file.
     "bitwise"       : true,   // Prohibit bitwise operators (&, |, ^, etc.).
     "curly"         : true,   // Require {} for every new block or scope.
