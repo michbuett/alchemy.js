@@ -1,11 +1,20 @@
 {
-    "name": "alchemy.js",
-    "description": "A framework for those who seek to master the dark arts of javascript development",
-    "author": "Michael Büttner <michbuett@gmx.de>",
-    "version": "0.2.0",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/michbuett/alchemy.js.git"
-    },
-    "main": "lib/core/Alchemy.js"
+  "name": "alchemy.js",
+  "description": "A framework for those who seek to master the dark arts of javascript development",
+  "author": "Michael Büttner <michbuett@gmx.de>",
+  "version": "0.3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/michbuett/alchemy.js.git"
+  },
+  "main": "lib/core/Alchemy.js",
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "grunt-contrib-jshint": "~0.10.0",
+    "grunt-contrib-watch": "~0.5.1",
+    "grunt-contrib-jasmine": "~0.7.0",
+    "grunt-available-tasks": "~0.5.0",
+    "grunt-jsonlint": "~1.0.0",
+    "grunt-jasmine-node-new": "~0.3.2"
+  }
 }

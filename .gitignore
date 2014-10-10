@@ -1,4 +1,5 @@
 docs
 tags
-.sass-cache
-arena.css
+node_modules/
+.grunt/
+_SpecRunner.html

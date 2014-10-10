@@ -1,7 +1,7 @@
 describe('alchemy.formula', function () {
     'use strict';
 
-    var alchemy = require('../../alchemy.js');
+    var alchemy = require('./../lib/core/Alchemy.js');
     var formula = alchemy.formula;
 
     it('allows to get the formulas of the core module', function () {

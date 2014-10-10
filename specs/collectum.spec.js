@@ -1,7 +1,7 @@
 describe('alchemy.core.Collectum', function () {
     'use strict';
 
-    var alchemy = require('../../alchemy.js');
+    var alchemy = require('./../lib/core/Alchemy.js');
     var data1 = {
         id: 'id-1',
         foo: 'foo'
