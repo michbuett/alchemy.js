@@ -1,7 +1,7 @@
 describe('alchemy.core.Collectum', function () {
     'use strict';
 
-    var alchemy = require('./../lib/core/Alchemy.js');
+    var alchemy = require('./../../lib/core/Alchemy.js');
     var data1 = {
         id: 'id-1',
         foo: 'foo'
@@ -604,13 +604,14 @@ describe('alchemy.core.Collectum', function () {
             // execute
             this.collectum.each(cb);
             // verify
+            var calls = cb.getCalls();
             expect(cb.callCount).toBe(3);
-            expect(cb.calls[0].args[0]).toBe(data1);
-            expect(cb.calls[0].args[1]).toBe(0);
-            expect(cb.calls[1].args[0]).toBe(data2);
-            expect(cb.calls[1].args[1]).toBe(1);
-            expect(cb.calls[2].args[0]).toBe(data3);
-            expect(cb.calls[2].args[1]).toBe(2);
+            expect(calls[0].args[0]).toBe(data1);
+            expect(calls[0].args[1]).toBe(0);
+            expect(calls[1].args[0]).toBe(data2);
+            expect(calls[1].args[1]).toBe(1);
+            expect(calls[2].args[0]).toBe(data3);
+            expect(calls[2].args[1]).toBe(2);
         });
 
         it('calls the given callback with the correct scope', function () {
@@ -620,9 +621,10 @@ describe('alchemy.core.Collectum', function () {
             // execute
             this.collectum.each(cb, scope);
             // verify
-            expect(cb.calls[0].object).toBe(scope);
-            expect(cb.calls[1].object).toBe(scope);
-            expect(cb.calls[2].object).toBe(scope);
+            var calls = cb.getCalls();
+            expect(calls[0].object).toBe(scope);
+            expect(calls[1].object).toBe(scope);
+            expect(calls[2].object).toBe(scope);
         });
 
         it('passes the additional arguments to the callback', function () {
@@ -633,12 +635,13 @@ describe('alchemy.core.Collectum', function () {
             // execute
             this.collectum.each(cb, null, [arg1, arg2]);
             // verify
-            expect(cb.calls[0].args[2]).toBe(arg1);
-            expect(cb.calls[0].args[3]).toBe(arg2);
-            expect(cb.calls[1].args[2]).toBe(arg1);
-            expect(cb.calls[1].args[3]).toBe(arg2);
-            expect(cb.calls[2].args[2]).toBe(arg1);
-            expect(cb.calls[2].args[3]).toBe(arg2);
+            var calls = cb.getCalls();
+            expect(calls[0].args[2]).toBe(arg1);
+            expect(calls[0].args[3]).toBe(arg2);
+            expect(calls[1].args[2]).toBe(arg1);
+            expect(calls[1].args[3]).toBe(arg2);
+            expect(calls[2].args[2]).toBe(arg1);
+            expect(calls[2].args[3]).toBe(arg2);
         });
     });
 });

@@ -37,10 +37,9 @@ module.exports = function (grunt) {
                 ],
                 options: {
                     keepRunner: true,
-                    specs: 'specs/**/*.spec.js',
-                    template: 'tests/helper/SpecRunner.tpl',
+                    specs: 'tests/specs/**/*.spec.js',
                     helpers: [
-                        'tests/helper/**/*.js'
+                        'tests/helper/compatibility.helper.js'
                     ],
                 },
             },
@@ -52,9 +51,13 @@ module.exports = function (grunt) {
                 match: '.',
                 matchall: false,
                 extensions: 'js',
+                useHelpers: true,
                 specNameMatcher: 'spec',
             },
-            all: ['specs/']
+            all: [
+                'tests/helper/',
+                'tests/specs/'
+            ]
         },
 
         // ////////////////////////////////////////////////////////////////////
@@ -67,7 +70,7 @@ module.exports = function (grunt) {
 
             js: {
                 files: ['**/*.js'],
-                tasks: ['jshint', 'jasmine'],
+                tasks: ['jshint', 'jasmine', 'jasmine_node'],
             },
         },
     });
@@ -83,6 +86,6 @@ module.exports = function (grunt) {
 
     // define aliases
     grunt.registerTask('lint', ['jsonlint', 'jshint']);
-    grunt.registerTask('test', ['jsonlint', 'jshint']);
+    grunt.registerTask('test', ['lint', 'jasmine', 'jasmine_node']);
     grunt.registerTask('default', ['availabletasks']);
 };

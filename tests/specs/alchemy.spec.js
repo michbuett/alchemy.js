@@ -2,7 +2,7 @@
 describe('alchemy', function () {
     'use strict';
 
-    var alchemy = require('./../lib/core/Alchemy.js');
+    var alchemy = require('./../../lib/core/Alchemy.js');
 
     describe('general utility methods', function () {
         it('can detect numbers', function () {
@@ -207,13 +207,14 @@ describe('alchemy', function () {
             expect(spy).toHaveBeenCalled();
             expect(spy.callCount).toBe(array.length);
             expect(actualScope).toBe(expectedScope);
+
+            var calls = spy.getCalls();
             for (var i = 0; i < array.length; i++) {
-                var call = spy.calls[i];
-                expect(call.args[0]).toBe(array[i]);
-                expect(call.args[1]).toBe(i);
-                expect(call.args[2]).toBe(args[0]);
-                expect(call.args[3]).toBe(args[1]);
-                expect(call.args[4]).toBe(args[2]);
+                expect(calls[i].args[0]).toBe(array[i]);
+                expect(calls[i].args[1]).toBe(i);
+                expect(calls[i].args[2]).toBe(args[0]);
+                expect(calls[i].args[3]).toBe(args[1]);
+                expect(calls[i].args[4]).toBe(args[2]);
             }
         });
 
@@ -230,16 +231,16 @@ describe('alchemy', function () {
             expect(spy).toHaveBeenCalled();
             expect(spy.callCount).toBe(3);
             expect(actualScope).toBe(expectedScope);
+            var calls = spy.getCalls();
             for (var i = 0; i < 3; i++) {
-                var call = spy.calls[i];
                 var key = 'key' + i;
                 var value = 'value' + i;
 
-                expect(call.args[0]).toBe(value);
-                expect(call.args[1]).toBe(key);
-                expect(call.args[2]).toBe(args[0]);
-                expect(call.args[3]).toBe(args[1]);
-                expect(call.args[4]).toBe(args[2]);
+                expect(calls[i].args[0]).toBe(value);
+                expect(calls[i].args[1]).toBe(key);
+                expect(calls[i].args[2]).toBe(args[0]);
+                expect(calls[i].args[3]).toBe(args[1]);
+                expect(calls[i].args[4]).toBe(args[2]);
             }
         });
 
@@ -707,22 +708,22 @@ describe('alchemy', function () {
 
         it('allows wrapping methods manually', function () {
             // prepare
-            var orgFoo = jasmine.createSpy('original obj.foo');
             var obj = {
-                foo: orgFoo
+                foo: function (val) {
+                    this.val = val;
+                }
             };
             alchemy.extend(obj, {
                 foo: alchemy.override(function (_super) {
-                    return function () {
-                        _super.call(this);
+                    return function (val) {
+                        _super.call(this, val + ' - xtended!!!');
                     };
                 })
             });
-            spyOn(obj, 'foo').andCallThrough();
             // execute
-            obj.foo();
+            obj.foo('foo');
             // verify
-            expect(orgFoo).toHaveBeenCalled();
+            expect(obj.val).toBe('foo - xtended!!!');
         });
 
         it('does not change the closure scope', function () {

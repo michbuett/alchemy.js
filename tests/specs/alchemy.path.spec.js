@@ -2,7 +2,7 @@
 describe('alchemy.path', function () {
     'use strict';
 
-    var alchemy = require('./../lib/core/Alchemy.js');
+    var alchemy = require('./../../lib/core/Alchemy.js');
     var initialSettings = alchemy.path.get();
 
     afterEach(function () {
