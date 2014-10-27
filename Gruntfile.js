@@ -63,14 +63,9 @@ module.exports = function (grunt) {
         // ////////////////////////////////////////////////////////////////////
         // configure watcher
         watch: {
-            json: {
-                files: ['**/*.json'],
-                tasks: ['jsonlint'],
-            },
-
-            js: {
-                files: ['**/*.js'],
-                tasks: ['jshint', 'jasmine', 'jasmine_node'],
+            all: {
+                files: ['**/*.js', '**/.json'],
+                tasks: ['test'],
             },
         },
     });
@@ -86,6 +81,6 @@ module.exports = function (grunt) {
 
     // define aliases
     grunt.registerTask('lint', ['jsonlint', 'jshint']);
-    grunt.registerTask('test', ['lint', 'jasmine', 'jasmine_node']);
+    grunt.registerTask('test', ['lint', 'jasmine_node', 'jasmine']);
     grunt.registerTask('default', ['availabletasks']);
 };
