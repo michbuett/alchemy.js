@@ -2,7 +2,7 @@
     'use strict';
 
     // console.log('tests.InstanceCreation', __dirname);
-    var alchemy = require('../../../../alchemy.js');
+    var alchemy = require('../../../lib/core/Alchemy.js');
 
     /**
      * Description

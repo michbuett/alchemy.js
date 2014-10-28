@@ -2,7 +2,7 @@
     'use strict';
 
     var root = '../../';
-    var alchemy = require(root + '../alchemy.js');
+    var alchemy = require(root + 'lib/core/Alchemy.js');
 
     alchemy.heatUp({
         path: {

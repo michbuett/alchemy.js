@@ -2,7 +2,7 @@
     'use strict';
 
     // console.log('tests.PropertyAccess', __dirname);
-    var alchemy = require('../../../../alchemy.js');
+    var alchemy = require('../../../lib/core/Alchemy.js');
 
     /**
      * Description
@@ -15,44 +15,39 @@
         name: 'tests.PropertyAccess',
         extend: 'alchemy.core.MateriaPrima',
         overrides: function () {
-            function ClassA(x, y) {
-                this.x = x;
-                this.y = y;
-            }
-
-            function ClassB(x, y) {
-                ClassA.prototype.constructor.call(this, x, y);
-            }
-            ClassB.prototype = Object.create(ClassA.prototype);
-
-            function Hash(x, y) {
-                this.x = x;
-                delete this.x;
-                this.x = x;
-                this.y = y;
-            }
-
-            var potionA = alchemy.brew({
-            });
-
-            var potionB = alchemy.brew({
-                extend: potionA,
-            });
-
-            function test(obj) {
-                // return obj.x += obj.y;
-                var x, y;
-                for (var i = 0; i < 1000; ++i) {
-                    x = obj.x;
-                    y = obj.y;
-                }
-            }
-
-
             return {
                 /** @lends test.InstanceCreation.prototype */
 
                 getTestSuite: function () {
+                    var ClassA = function (x, y) {
+                        this.x = x;
+                        this.y = y;
+                    };
+
+                    var ClassB = function(x, y) {
+                        ClassA.prototype.constructor.call(this, x, y);
+                    };
+
+                    ClassB.prototype = Object.create(ClassA.prototype);
+
+                    var Hash = function (x, y) {
+                        this.x = x;
+                        delete this.x;
+                        this.x = x;
+                        this.y = y;
+                    };
+
+                    var potionA = alchemy.brew({});
+                    var potionB = alchemy.brew({extend: potionA});
+
+                    function test(obj) {
+                        var x, y;
+                        for (var i = 0; i < 1000; ++i) {
+                            x = obj.x;
+                            y = obj.y;
+                        }
+                    }
+
                     return {
                         name: 'Access object properties',
                         tests: [{
