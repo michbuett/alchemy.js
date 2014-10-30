@@ -1,7 +1,7 @@
 describe('Immutatio', function () {
     'use strict';
 
-    var alchemy = require('./../../lib/core/Alchemy.js');
+    var alchemy = require('./../../../lib/core/Alchemy.js');
 
     beforeEach(function () {
     });
