@@ -7,7 +7,7 @@
     alchemy.heatUp({
         path: {
             alchemy: root + 'lib',
-            tests: root + 'specs/performance/tests'
+            tests: root + 'tests/performance/specs'
         },
 
         require: [
