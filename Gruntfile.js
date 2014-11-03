@@ -30,14 +30,29 @@ module.exports = function (grunt) {
         // ////////////////////////////////////////////////////////////////////
         // configure unit tests
         jasmine: {
-            all: {
+            core: {
                 src: [
                     'lib/core/Alchemy.js',
                     'lib/core/*.js',
                 ],
                 options: {
                     keepRunner: true,
-                    specs: 'tests/specs/**/*.spec.js',
+                    specs: 'tests/specs/core/**/*.spec.js',
+                    helpers: [
+                        'tests/helper/compatibility.helper.js'
+                    ],
+                },
+            },
+
+            web: {
+                src: [
+                    'lib/core/Alchemy.js',
+                    'lib/core/*.js',
+                    'lib/web/*.js',
+                ],
+                options: {
+                    keepRunner: true,
+                    specs: 'tests/specs/web/**/*.spec.js',
                     helpers: [
                         'tests/helper/compatibility.helper.js'
                     ],
@@ -54,18 +69,33 @@ module.exports = function (grunt) {
                 useHelpers: true,
                 specNameMatcher: 'spec',
             },
-            all: [
+            core: [
                 'tests/helper/',
-                'tests/specs/'
+                'tests/specs/core/'
             ]
         },
 
         // ////////////////////////////////////////////////////////////////////
         // configure watcher
         watch: {
-            all: {
-                files: ['**/*.js', '**/.json'],
-                tasks: ['test'],
+            jsonlint: {
+                files: ['**/.json'],
+                tasks: ['jsonlint'],
+            },
+
+            jshint: {
+                files: ['**/*.js'],
+                tasks: ['jshint'],
+            },
+
+            jsCore: {
+                files: ['lib/core/**/*.js', 'tests/specs/core/**/*.js'],
+                tasks: ['jasmine_node', 'jasmine'],
+            },
+
+            jsWeb: {
+                files: ['lib/web/**/*.js', 'tests/specs/web/**/*.js'],
+                tasks: ['jasmine:web'],
             },
         },
     });
