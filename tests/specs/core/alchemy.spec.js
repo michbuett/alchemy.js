@@ -284,6 +284,45 @@ describe('alchemy', function () {
             alchemy.each(true, spy);
             expect(spy).not.toHaveBeenCalled();
         });
+
+        it('allows to map arrays', function () {
+            expect(alchemy.each([1, 2, 3, 4], function (val) {
+                return 2 * val + 1;
+            })).toEqual([3, 5, 7, 9]);
+        });
+
+        it('allows to filter arrays', function () {
+            expect(alchemy.each([1, 2, 3, 4], function (val) {
+                return (val % 2 === 0) ? val : undefined;
+            })).toEqual([2, 4]);
+        });
+
+        it('allows to map objects', function () {
+            expect(alchemy.each({
+                foo: 1,
+                bar: 2,
+                baz: 3,
+            }, function (val) {
+                return 2 * val + 1;
+            })).toEqual({
+                foo: 3,
+                bar: 5,
+                baz: 7
+            });
+        });
+
+        it('allows to filter objects', function () {
+            expect(alchemy.each({
+                foo: 1,
+                bar: 2,
+                baz: 3,
+            }, function (val) {
+                return (val % 2 !== 0) ? val : undefined;
+            })).toEqual({
+                foo: 1,
+                baz: 3,
+            });
+        });
     });
 
     /** @name TEST_mix */
