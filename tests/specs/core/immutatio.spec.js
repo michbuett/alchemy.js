@@ -30,6 +30,12 @@ describe('Handling of immutable data', function () {
                 expectImmutable(immutatio.makeImmutable('foo'));
                 expectImmutable(immutatio.makeImmutable(function () {}));
             });
+
+            it('returns the input when passing an immutable', function () {
+                var immutable = immutatio.makeImmutable('foo');
+                var result = immutatio.makeImmutable(immutable);
+                expect(result).toBe(immutable);
+            });
         });
 
         describe('find', function () {
@@ -138,6 +144,20 @@ describe('Handling of immutable data', function () {
                 // verify
                 expect(struct.val()).toEqual({foo: 'foo'});
                 expect(struct.sub('foo').val()).toBe('foo');
+            });
+
+            it('handles immutable input correctly', function () {
+                // prepare
+                var immutable1 = immutatio.makeImmutable('foo');
+                var immutable2 = immutatio.makeImmutable('bar');
+
+                // execute
+                var immutable3 = immutable1.set(immutable1);
+                var immutable4 = immutable1.set(immutable2);
+
+                // verify
+                expect(immutable3).toBe(immutable1);
+                expect(immutable4).toBe(immutable2);
             });
         });
     });
@@ -259,6 +279,20 @@ describe('Handling of immutable data', function () {
                 expect(list.val()).toEqual(['foo']);
                 expect(list.sub(0).val()).toBe('foo');
             });
+
+            it('handles immutable input correctly', function () {
+                // prepare
+                var immutable1 = immutatio.makeImmutable({foo: 'bar'});
+                var immutable2 = immutatio.makeImmutable('bar');
+
+                // execute
+                var immutable3 = immutable1.set(immutable1);
+                var immutable4 = immutable1.set(immutable2);
+
+                // verify
+                expect(immutable3).toBe(immutable1);
+                expect(immutable4).toBe(immutable2);
+            });
         });
     });
 
@@ -351,6 +385,20 @@ describe('Handling of immutable data', function () {
                 // verify
                 expect(struct.val()).toEqual({foo: 'foo'});
                 expect(struct.sub('foo').val()).toBe('foo');
+            });
+
+            it('handles immutable input correctly', function () {
+                // prepare
+                var immutable1 = immutatio.makeImmutable([1, 2, 3]);
+                var immutable2 = immutatio.makeImmutable('bar');
+
+                // execute
+                var immutable3 = immutable1.set(immutable1);
+                var immutable4 = immutable1.set(immutable2);
+
+                // verify
+                expect(immutable3).toBe(immutable1);
+                expect(immutable4).toBe(immutable2);
             });
         });
     });
