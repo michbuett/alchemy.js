@@ -92,6 +92,16 @@ describe('Handling of immutable data', function () {
                     expect(immutatio.makeImmutable(item).val()).toBe(item);
                 });
             });
+
+            it('can return the value of computed properties', function () {
+                var value = immutatio.makeImmutable('foo', {
+                    size: function (val) {
+                        return val.length;
+                    }
+                });
+
+                expect(value.val('size')).toBe(3);
+            });
         });
 
         describe('sub', function () {
@@ -185,6 +195,23 @@ describe('Handling of immutable data', function () {
 
                 // verify
                 expect(value).toEqual(testData);
+            });
+
+            it('can return the value of a sub', function () {
+                var struct = immutatio.makeImmutable(testData);
+
+                expect(struct.val('foo')).toEqual(testData.foo);
+                expect(struct.val('bar')).toEqual(testData.bar);
+            });
+
+            it('can return the value of computed properties', function () {
+                var struct = immutatio.makeImmutable(testData, {
+                    size: function (val) {
+                        return Object.keys(val).length;
+                    }
+                });
+
+                expect(struct.val('size')).toBe(2);
             });
         });
 
@@ -294,6 +321,22 @@ describe('Handling of immutable data', function () {
                 expect(immutable4).toBe(immutable2);
             });
         });
+
+        describe('each', function () {
+            it('allows to change the value of each sub', function () {
+                // prepare
+                var struct1 = immutatio.makeImmutable({foo: 1, bar: 2, baz: 3});
+
+                // execute
+                var struct2 = struct1.each(function (sub) {
+                    return 2 * sub.val();
+                });
+
+                // verify
+                expect(struct1.val()).toEqual({foo: 1, bar: 2, baz: 3});
+                expect(struct2.val()).toEqual({foo: 2, bar: 4, baz: 6});
+            });
+        });
     });
 
     /** @name TEST_List */
@@ -310,6 +353,24 @@ describe('Handling of immutable data', function () {
 
                 // verify
                 expect(value).toEqual(testData);
+            });
+
+            it('can return the value of a sub', function () {
+                var list = immutatio.makeImmutable(testData);
+
+                expect(list.val(0)).toBe('foo');
+                expect(list.val(1)).toBe('bar');
+                expect(list.val(2)).toBe('baz');
+            });
+
+            it('can return the value of computed properties', function () {
+                var list = immutatio.makeImmutable(testData, {
+                    size: function (val) {
+                        return val.length;
+                    }
+                });
+
+                expect(list.val('size')).toBe(testData.length);
             });
         });
 
@@ -399,6 +460,38 @@ describe('Handling of immutable data', function () {
                 // verify
                 expect(immutable3).toBe(immutable1);
                 expect(immutable4).toBe(immutable2);
+            });
+        });
+
+        describe('each', function () {
+            it('allows to change the value of each sub', function () {
+                // prepare
+                var list1 = immutatio.makeImmutable([1, 2, 3]);
+
+                // execute
+                var list2 = list1.each(function (num) {
+                    return 2 * num.val();
+                });
+
+                // verify
+                expect(list1.val()).toEqual([1, 2, 3]);
+                expect(list2.val()).toEqual([2, 4, 6]);
+            });
+
+            it('allows to filter subs', function () {
+                // prepare
+                var list1 = immutatio.makeImmutable([1, 2, 3, 4]);
+
+                // execute
+                var list2 = list1.each(function (num) {
+                    if (num.val() % 2) {
+                        return num;
+                    }
+                });
+
+                // verify
+                expect(list1.val()).toEqual([1, 2, 3, 4]);
+                expect(list2.val()).toEqual([1, 3]);
             });
         });
     });
