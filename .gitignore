@@ -1,5 +1,6 @@
 docs
 tags
 node_modules/
+reports/
 .grunt/
 _SpecRunner.html

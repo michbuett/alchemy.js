@@ -30,17 +30,21 @@ module.exports = function (grunt) {
         // ////////////////////////////////////////////////////////////////////
         // configure unit tests
         jasmine: {
+            options: {
+                keepRunner: true,
+                display: 'short',
+                helpers: [
+                    'tests/helper/compatibility.helper.js'
+                ],
+            },
+
             core: {
                 src: [
                     'lib/core/Alchemy.js',
                     'lib/core/*.js',
                 ],
                 options: {
-                    keepRunner: true,
                     specs: 'tests/specs/core/**/*.spec.js',
-                    helpers: [
-                        'tests/helper/compatibility.helper.js'
-                    ],
                 },
             },
 
@@ -51,13 +55,32 @@ module.exports = function (grunt) {
                     'lib/web/*.js',
                 ],
                 options: {
-                    keepRunner: true,
                     specs: 'tests/specs/web/**/*.spec.js',
-                    helpers: [
-                        'tests/helper/compatibility.helper.js'
-                    ],
                 },
             },
+
+            coverage: {
+                src: [
+                    'lib/core/Alchemy.js',
+                    'lib/core/*.js',
+                    'lib/web/*.js',
+                ],
+                options: {
+                    display: 'none',
+                    specs: 'tests/specs/**/*.spec.js',
+                    template: require('grunt-template-jasmine-istanbul'),
+                    templateOptions: {
+                        coverage: 'reports/coverage.json',
+                        report: 'reports',
+                        thresholds: {
+                            lines: 85,
+                            statements: 85,
+                            branches: 80,
+                            functions: 90
+                        }
+                    }
+                },
+            }
         },
 
         jasmine_node: {
@@ -90,7 +113,7 @@ module.exports = function (grunt) {
 
             jsCore: {
                 files: ['lib/core/**/*.js', 'tests/specs/core/**/*.js'],
-                tasks: ['jasmine_node', 'jasmine'],
+                tasks: ['jasmine_node', 'jasmine:core'],
             },
 
             jsWeb: {
