@@ -33,12 +33,6 @@ describe('alchemy.formula', function () {
         expect(formula.get('foo')).toBe(f2);
     });
 
-    it('throws an exception when trying to get an unknown formula', function () {
-        expect(function () {
-            formula.get('PhilosophersStone');
-        }).toThrow('Cannot load formula: PhilosophersStone');
-    });
-
     it('throws an exception when trying to add invalid formulas', function () {
         expect(function () {
             formula.add();
