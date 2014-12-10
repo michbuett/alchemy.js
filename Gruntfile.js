@@ -20,7 +20,15 @@ module.exports = function (grunt) {
         },
 
         jshint: {
-            files: ['Gruntfile.js', 'lib/**/*.js', 'tests/**/*.js'],
+            files: [
+                'Gruntfile.js',
+                'lib/**/*.js',
+                'tests/**/*.js',
+                // no check for 3rd party libs
+                '!lib/web/virtualDom.js',
+                '!tests/helper/jasmine-jquery.js',
+                '!tests/helper/jquery-2.0.3.js',
+            ],
             options: {
                 jshintrc: '.jshintrc'
             }
@@ -34,7 +42,9 @@ module.exports = function (grunt) {
                 keepRunner: true,
                 display: 'short',
                 helpers: [
-                    'tests/helper/compatibility.helper.js'
+                    'tests/helper/compatibility.helper.js',
+                    'tests/helper/jquery-2.0.3.js',
+                    'tests/helper/jasmine-jquery.js'
                 ],
             },
 
