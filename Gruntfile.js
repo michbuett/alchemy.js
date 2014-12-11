@@ -2,6 +2,22 @@
 module.exports = function (grunt) {
     'use strict';
 
+    var coreSrc = ['lib/core/Alchemy.js', 'lib/core/*.js'];
+    var coreHelper = ['tests/helper/compatibility.helper.js'];
+    var webSrc = ['lib/web/*.js'];
+    var webHelper = coreSrc.concat(coreHelper, [
+        'tests/vendor/jquery-2.0.3.js',
+        'tests/vendor/*.js',
+        'lib/vendor/*.js'
+    ]);
+
+    var coverageThresholds = {
+        lines: 85,
+        statements: 85,
+        branches: 80,
+        functions: 90
+    };
+
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
 
@@ -25,9 +41,8 @@ module.exports = function (grunt) {
                 'lib/**/*.js',
                 'tests/**/*.js',
                 // no check for 3rd party libs
-                '!lib/web/virtualDom.js',
-                '!tests/helper/jasmine-jquery.js',
-                '!tests/helper/jquery-2.0.3.js',
+                '!lib/vendor/**/*.js',
+                '!tests/vendor/**/*.js',
             ],
             options: {
                 jshintrc: '.jshintrc'
@@ -41,56 +56,53 @@ module.exports = function (grunt) {
             options: {
                 keepRunner: true,
                 display: 'short',
-                helpers: [
-                    'tests/helper/compatibility.helper.js',
-                    'tests/helper/jquery-2.0.3.js',
-                    'tests/helper/jasmine-jquery.js'
-                ],
             },
 
             core: {
-                src: [
-                    'lib/core/Alchemy.js',
-                    'lib/core/*.js',
-                ],
+                src: coreSrc,
                 options: {
                     specs: 'tests/specs/core/**/*.spec.js',
+                    helpers: coreHelper,
                 },
             },
 
             web: {
-                src: [
-                    'lib/core/Alchemy.js',
-                    'lib/core/*.js',
-                    'lib/web/*.js',
-                ],
+                src: webSrc,
                 options: {
                     specs: 'tests/specs/web/**/*.spec.js',
+                    helpers: webHelper,
                 },
             },
 
-            coverage: {
-                src: [
-                    'lib/core/Alchemy.js',
-                    'lib/core/*.js',
-                    'lib/web/*.js',
-                ],
+            core_coverage: {
+                src: coreSrc,
                 options: {
+                    helpers: coreHelper,
                     display: 'none',
-                    specs: 'tests/specs/**/*.spec.js',
+                    specs: 'tests/specs/core/**/*.spec.js',
                     template: require('grunt-template-jasmine-istanbul'),
                     templateOptions: {
-                        coverage: 'reports/coverage.json',
-                        report: 'reports',
-                        thresholds: {
-                            lines: 85,
-                            statements: 85,
-                            branches: 80,
-                            functions: 90
-                        }
+                        coverage: 'reports/core/coverage.json',
+                        report: 'reports/core',
+                        thresholds: coverageThresholds
                     }
                 },
-            }
+            },
+
+            web_coverage: {
+                src: webSrc,
+                options: {
+                    helpers: webHelper,
+                    display: 'none',
+                    specs: 'tests/specs/web/**/*.spec.js',
+                    template: require('grunt-template-jasmine-istanbul'),
+                    templateOptions: {
+                        coverage: 'reports/web/coverage.json',
+                        report: 'reports/web',
+                        thresholds: coverageThresholds
+                    }
+                },
+            },
         },
 
         jasmine_node: {
@@ -144,6 +156,7 @@ module.exports = function (grunt) {
 
     // define aliases
     grunt.registerTask('lint', ['jsonlint', 'jshint']);
-    grunt.registerTask('test', ['lint', 'jasmine_node', 'jasmine']);
+    grunt.registerTask('test', ['lint', 'jasmine_node', 'jasmine:core', 'jasmine:web']);
+    grunt.registerTask('coverage', ['jasmine:core_coverage', 'jasmine:web_coverage']);
     grunt.registerTask('default', ['availabletasks']);
 };
