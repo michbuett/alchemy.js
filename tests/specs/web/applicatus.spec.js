@@ -171,4 +171,45 @@ describe('alchemy.web.Applicatus', function () {
             expect(app.shutdown).toHaveBeenCalled();
         });
     });
+
+    describe('wireUp', function () {
+        it('throws an error if no controller object is given', function () {
+            var app = createApp();
+            expect(function () {
+                app.wireUp(null);
+            }).toThrow('Invalid input: Empty value');
+        });
+
+        it('throws an error if an object without messages property is given', function () {
+            var app = createApp();
+            expect(function () {
+                app.wireUp({});
+            }).toThrow('Invalid input: Message map missing');
+        });
+
+        it('delegates messages to the controller', function () {
+            // prepare
+            var controller = {
+                messages: {
+                    foo: 'onFoo',
+                    bar: 'onBar',
+                    baz: 'onBaz',
+                },
+                onFoo: jasmine.createSpy(),
+                onBar: jasmine.createSpy(),
+                onBaz: jasmine.createSpy(),
+            };
+            var app = createApp();
+            app.wireUp(controller);
+
+            // execute
+            app.messages.trigger('foo');
+            app.messages.trigger('bar');
+
+            // verify
+            expect(controller.onFoo).toHaveBeenCalled();
+            expect(controller.onBar).toHaveBeenCalled();
+            expect(controller.onBaz).not.toHaveBeenCalled();
+        });
+    });
 });
