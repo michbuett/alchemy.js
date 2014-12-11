@@ -22,6 +22,12 @@ describe('alchemy.web.Applicatus', function () {
         return app;
     }
 
+    describe('init', function () {
+        it('provides a message bus', function () {
+            expect(createApp().messages).toBeDefined();
+        });
+    });
+
     describe('launch', function () {
         it('makes the application running', function () {
             // prepare
@@ -116,6 +122,53 @@ describe('alchemy.web.Applicatus', function () {
             // verify
             expect(onAppStop).not.toHaveBeenCalled();
             expect(app.onShutdown).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('finish', function () {
+        it('stops the animation loop if it has been started', function () {
+            // prepare
+            var app1 = createLaunchedApp({
+                requestAnimationFrame: function () {
+                    return 42;
+                }
+            });
+            var app2 = createLaunchedApp({
+                requestAnimationFrame: function () {
+                    return false;
+                }
+            });
+
+            // execute
+            app1.dispose();
+            app2.dispose();
+
+            // verify
+            expect(app1.cancelAnimationFrame).toHaveBeenCalled();
+            expect(app2.cancelAnimationFrame).not.toHaveBeenCalled();
+        });
+
+        it('clears the message bus', function () {
+            // prepare
+            var app = createLaunchedApp();
+
+            // execute
+            app.dispose();
+
+            // verify
+            expect(app.messages).toBeFalsy();
+        });
+
+        it('shuts the app down', function () {
+            // prepare
+            var app = createLaunchedApp();
+            app.shutdown = jasmine.createSpy();
+
+            // execute
+            app.dispose();
+
+            // verify
+            expect(app.shutdown).toHaveBeenCalled();
         });
     });
 });

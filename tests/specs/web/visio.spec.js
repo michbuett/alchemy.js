@@ -43,5 +43,35 @@ describe('alchemy.web.Visio', function () {
             expect(this.sandboxEl).toContainElement('div#foo');
             expect(this.sandboxEl).toContainElement('div#bar');
         });
+
+        it('delegates drawing to sub components if state has not changed', function () {
+            // prepare
+            var visio = alchemy('alchemy.web.Visio').brew({
+                root: this.sandboxEl,
+                subs: [
+                    alchemy('alchemy.web.Visio').brew({
+                        id: 'foo',
+                        render: function () {
+                            return this.h('div#' + this.id, null, this.state.foo);
+                        }
+                    }),
+                ],
+                updateState: function (state) {
+                    return this.state || state;
+                }
+            });
+            var state1 = { foo: 'bar' };
+            var state2 = { foo: 'baz' };
+            visio.draw(state1);
+            var htmlBefore = this.sandboxEl.innerHTML;
+
+            // execute
+            visio.draw(state2);
+            var htmlAfter = this.sandboxEl.innerHTML;
+
+            // verify
+            expect(htmlBefore).toBe('<div id="foo">bar</div>');
+            expect(htmlAfter).toBe('<div id="foo">baz</div>');
+        });
     });
 });
