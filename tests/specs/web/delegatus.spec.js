@@ -69,6 +69,23 @@ describe('alchemy.web.Delegatus', function () {
             // verify
             expect(handler).not.toHaveBeenCalled();
         });
+
+        it('reuses event handlers', function () {
+            var el = document.getElementById('foo');
+            var delegatus = alchemy('alchemy.web.Delegatus').brew({
+                root: document.getElementById('sandbox')
+            });
+            var handler = function () {};
+            var scope = {};
+
+            // execute
+            delegatus.delegate(el, 'click', handler, scope);
+            delegatus.delegate(el, 'click', handler, scope);
+            delegatus.delegate(el, 'click', handler, scope);
+
+            // verify
+            expect(delegatus.events.click.length).toBe(1);
+        });
     });
 
     describe('dispose', function () {
