@@ -1,3 +1,4 @@
+/* global $ */
 describe('alchemy.web.Visio', function () {
     'use strict';
 
@@ -72,6 +73,45 @@ describe('alchemy.web.Visio', function () {
             // verify
             expect(htmlBefore).toBe('<div id="foo">bar</div>');
             expect(htmlAfter).toBe('<div id="foo">baz</div>');
+        });
+
+        it('allows to delegate dom events', function () {
+            // prepare
+            var handleClickFoo = jasmine.createSpy();
+            var handleClickBar = jasmine.createSpy();
+            var handleClickBaz = jasmine.createSpy();
+            var visio = alchemy('alchemy.web.Visio').brew({
+                root: this.sandboxEl,
+                render: function () {
+                    return this.h('div#foo', null, [
+                        this.h('div#bar'),
+                        this.h('div#baz'),
+                    ]);
+                },
+
+                events: {
+                    'click': 'handleClickFoo',
+                    'click #bar': 'handleClickBar',
+                },
+
+                handleClickFoo: handleClickFoo,
+                handleClickBar: handleClickBar,
+                handleClickBaz: handleClickBaz,
+
+                delegator: alchemy('alchemy.web.Delegatus').brew({
+                    root: document.body,
+                })
+            });
+            visio.draw();
+
+            // execute
+            $('#foo').click();
+            $('#bar').click();
+
+            // verify
+            expect(handleClickFoo).toHaveBeenCalled();
+            expect(handleClickBar).toHaveBeenCalled();
+            expect(handleClickBaz).not.toHaveBeenCalled();
         });
     });
 });

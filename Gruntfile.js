@@ -55,12 +55,13 @@ module.exports = function (grunt) {
         jasmine: {
             options: {
                 keepRunner: true,
-                display: 'short',
+                display: 'none',
             },
 
             core: {
                 src: coreSrc,
                 options: {
+                    display: 'short',
                     specs: 'tests/specs/core/**/*.spec.js',
                     helpers: coreHelper,
                 },
@@ -70,6 +71,7 @@ module.exports = function (grunt) {
                 src: webSrc,
                 options: {
                     specs: 'tests/specs/web/**/*.spec.js',
+                    display: 'full',
                     helpers: webHelper,
                 },
             },
@@ -78,7 +80,6 @@ module.exports = function (grunt) {
                 src: coreSrc,
                 options: {
                     helpers: coreHelper,
-                    display: 'none',
                     specs: 'tests/specs/core/**/*.spec.js',
                     template: require('grunt-template-jasmine-istanbul'),
                     templateOptions: {
@@ -93,7 +94,6 @@ module.exports = function (grunt) {
                 src: webSrc,
                 options: {
                     helpers: webHelper,
-                    display: 'none',
                     specs: 'tests/specs/web/**/*.spec.js',
                     template: require('grunt-template-jasmine-istanbul'),
                     templateOptions: {
