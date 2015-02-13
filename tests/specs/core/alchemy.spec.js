@@ -1027,5 +1027,19 @@ describe('alchemy', function () {
             expect(n2 >= n1).toBeTruthy();
         });
     });
+
+    /** @name TEST_uuid */
+    describe('uuid', function () {
+        it('returns a UUID', function () {
+            var uuid = alchemy.uuid();
+            expect(/^\w{8}-\w{4}-4\w{3}-\w{4}-\w{12}$/.test(uuid)).toBeTruthy();
+        });
+
+        it('returns a different one each time', function () {
+            var uuid1 = alchemy.uuid();
+            var uuid2 = alchemy.uuid();
+            expect(uuid1).not.toEqual(uuid2);
+        });
+    });
 });
 
