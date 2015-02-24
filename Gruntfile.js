@@ -4,7 +4,7 @@ module.exports = function (grunt) {
 
     var coreSrc = ['lib/core/Alchemy.js', 'lib/core/*.js'];
     var coreHelper = ['tests/helper/compatibility.helper.js'];
-    var webSrc = ['lib/web/*.js'];
+    var webSrc = ['lib/web/*.js', 'lib/ecs/*.js'];
     var webHelper = coreSrc.concat(coreHelper, [
         'tests/vendor/jquery-2.0.3.js',
         'tests/vendor/*.js',
@@ -70,7 +70,10 @@ module.exports = function (grunt) {
             web: {
                 src: webSrc,
                 options: {
-                    specs: 'tests/specs/web/**/*.spec.js',
+                    specs: [
+                        'tests/specs/web/**/*.spec.js',
+                        'tests/specs/ecs/**/*.spec.js',
+                    ],
                     display: 'full',
                     helpers: webHelper,
                 },
@@ -94,7 +97,10 @@ module.exports = function (grunt) {
                 src: webSrc,
                 options: {
                     helpers: webHelper,
-                    specs: 'tests/specs/web/**/*.spec.js',
+                    specs: [
+                        'tests/specs/web/**/*.spec.js',
+                        'tests/specs/ecs/**/*.spec.js',
+                    ],
                     template: require('grunt-template-jasmine-istanbul'),
                     templateOptions: {
                         coverage: 'reports/web/coverage.json',
@@ -139,7 +145,12 @@ module.exports = function (grunt) {
             },
 
             jsWeb: {
-                files: ['lib/web/**/*.js', 'tests/specs/web/**/*.js'],
+                files: [
+                    'lib/ecs/**/*.js',
+                    'lib/web/**/*.js',
+                    'tests/specs/ecs/**/*.js',
+                    'tests/specs/web/**/*.js',
+                ],
                 tasks: ['jasmine:web'],
             },
         },
