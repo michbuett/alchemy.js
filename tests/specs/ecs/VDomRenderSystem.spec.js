@@ -1,5 +1,5 @@
 /* global $ */
-describe('alchemy.web.Visio', function () {
+describe('alchemy.web.VDomRenderSystem', function () {
     'use strict';
 
     var alchemy = require('./../../../lib/core/Alchemy.js');
@@ -15,7 +15,7 @@ describe('alchemy.web.Visio', function () {
 
     it('renders the entities to the DOM', function () {
         // prepare
-        var renderer = alchemy('alchemy.ecs.Visio').brew({
+        var renderer = alchemy('alchemy.ecs.VDomRenderSystem').brew({
             entities: this.apothecarius
         });
 
@@ -32,7 +32,7 @@ describe('alchemy.web.Visio', function () {
 
     it('renders the update when changing the state', function () {
         // prepare
-        var renderer = alchemy('alchemy.ecs.Visio').brew({
+        var renderer = alchemy('alchemy.ecs.VDomRenderSystem').brew({
             entities: this.apothecarius
         });
         renderer.update();
@@ -92,7 +92,7 @@ describe('alchemy.web.Visio', function () {
     function initEntities(apothecarius) {
         apothecarius.createEntity({
             id: 'foo',
-            dom: {
+            vdom: {
                 root: document.getElementById('sandbox'),
                 renderer: 'FooRenderer'
             },
@@ -103,7 +103,7 @@ describe('alchemy.web.Visio', function () {
 
         apothecarius.createEntity({
             id: 'bar',
-            dom: {
+            vdom: {
                 renderer: 'BarRenderer'
             },
             children: {
@@ -117,21 +117,21 @@ describe('alchemy.web.Visio', function () {
 
         apothecarius.createEntity({
             id: 'baz',
-            dom: {
+            vdom: {
                 renderer: 'BazRenderer'
             },
         });
 
         apothecarius.createEntity({
             id: 'ping',
-            dom: {
+            vdom: {
                 renderer: 'BazRenderer'
             }
         });
 
         apothecarius.createEntity({
             id: 'pong',
-            dom: {
+            vdom: {
                 renderer: 'BazRenderer'
             }
         });
