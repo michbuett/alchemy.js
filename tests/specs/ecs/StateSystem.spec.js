@@ -1,29 +1,112 @@
-describe('alchemy.web.StateSystem', function () {
+describe('alchemy.ecs.StateSystem', function () {
     'use strict';
 
     var alchemy = require('./../../../lib/core/Alchemy.js');
 
     beforeEach(function () {
-        setFixtures(sandbox());
-
-        this.apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
-
-        initEntities(this.apothecarius);
+        this.state = initState();
+        this.apothecarius = initEntities();
     });
 
-    it('TODO: name test', function () {
+    it('updates the entity states according application state', function () {
         // prepare
         var testSubject = alchemy('alchemy.ecs.StateSystem').brew({
-            entites: this.apothecarius
+            entities: this.apothecarius
         });
 
         // execute
-        testSubject.update();
+        testSubject.update(this.state);
 
         // verify
+        var fooState = this.apothecarius.getComponent('foo', 'state').current;
+        var barState = this.apothecarius.getComponent('bar', 'state').current;
+        expect(fooState.val()).toEqual({
+            'foo': 'foo-value-1',
+            'foo-bar': {
+                ping: 'bar-value-1',
+                pong: 'bar-value-2',
+            },
+        });
+        expect(barState.val()).toEqual({
+            'ping-of-bar': 'bar-value-1',
+            'pong-of-bar': 'bar-value-2',
+        });
     });
 
+    it('ignores entities if they do not have a "globalToLocal" property', function () {
+        // prepare
+        var testSubject = alchemy('alchemy.ecs.StateSystem').brew({
+            entities: this.apothecarius
+        });
 
-    function initEntities(apothecarius) {
+        // execute
+        var stateBefore = this.apothecarius.getComponent('baz', 'state').current;
+        testSubject.update(this.state);
+        var stateAfter = this.apothecarius.getComponent('baz', 'state').current;
+
+        // verify
+        expect(stateBefore).toBe(stateAfter);
+    });
+
+    it('does nothing if application state has no changed', function () {
+        // prepare
+        var testSubject = alchemy('alchemy.ecs.StateSystem').brew({
+            entities: this.apothecarius
+        });
+        var stateBefore = {};
+        this.apothecarius.getComponent('foo', 'state').current = stateBefore;
+
+        // execute
+        testSubject.update(this.state, this.state);
+        var stateAfter = this.apothecarius.getComponent('foo', 'state').current;
+
+        // verify
+        expect(stateBefore).toBe(stateAfter);
+    });
+
+    function initState(state) {
+        return alchemy('alchemy.core.Immutatio').makeImmutable(state || {
+            foo: 'foo-value-1',
+            bar: {
+                ping: 'bar-value-1',
+                pong: 'bar-value-2',
+            }
+
+        });
+    }
+
+    function initEntities() {
+        var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+
+        apothecarius.createEntity({
+            id: 'foo',
+            state: {
+                globalToLocal: {
+                    foo: 'foo',
+                    bar: 'foo-bar'
+                }
+            },
+        });
+
+        apothecarius.createEntity({
+            id: 'bar',
+            state: {
+                globalToLocal: {
+                    'bar.ping': 'ping-of-bar',
+                    'bar.pong': 'pong-of-bar'
+                }
+            },
+        });
+
+        apothecarius.createEntity({
+            id: 'baz',
+            state: {
+                current: {
+                    baz: 'baz-value'
+                }
+            },
+        });
+
+        return apothecarius;
     }
 });
