@@ -1,0 +1,80 @@
+describe('alchemy.ecs.StaticTreeSystem', function () {
+    'use strict';
+
+    var alchemy = require('./../../../lib/core/Alchemy.js');
+
+    beforeEach(function () {
+        this.apothecarius = initEntities(this.apothecarius);
+    });
+
+    it('can create entities', function () {
+        // prepare
+        var testSubject = alchemy('alchemy.ecs.StaticTreeSystem').brew({
+            entities: this.apothecarius
+        });
+
+        // execute
+        testSubject.update();
+
+        // verify
+        expect(this.apothecarius.getAllComponentsOfEntity('id-bar')).toEqual({
+            ping: {id: 'id-bar', value: 'ping-bar'},
+            pong: {id: 'id-bar', value: 'pong-bar'},
+        });
+    });
+
+    it('fills the "children"-component', function () {
+        // prepare
+        var testSubject = alchemy('alchemy.ecs.StaticTreeSystem').brew({
+            entities: this.apothecarius
+        });
+
+        // execute
+        testSubject.update();
+
+        // verify
+        var ce = this.apothecarius.getComponent('foo', 'children');
+        expect(alchemy.isObject(ce)).toBeTruthy();
+        expect(ce.current.val()).toEqual({
+            bar: 'id-bar',
+            baz: 'id-baz',
+        });
+    });
+
+    it('clears the "staticTree"-component', function () {
+        // prepare
+        var testSubject = alchemy('alchemy.ecs.StaticTreeSystem').brew({
+            entities: this.apothecarius
+        });
+
+        // execute
+        testSubject.update();
+
+        // verify
+        expect(this.apothecarius.getComponent('foo', 'staticTree')).toBeFalsy();
+    });
+
+    function initEntities() {
+        var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+
+        apothecarius.createEntity({
+            id: 'foo',
+            staticTree: {
+                children: {
+                    bar: {
+                        id: 'id-bar',
+                        ping: {value: 'ping-bar'},
+                        pong: {value: 'pong-bar'},
+                    },
+                    baz: {
+                        id: 'id-baz',
+                        ping: {value: 'ping-baz'},
+                        pong: {value: 'pong-baz'},
+                    },
+                }
+            },
+        });
+
+        return apothecarius;
+    }
+});
