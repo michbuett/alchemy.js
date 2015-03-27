@@ -3,8 +3,8 @@ describe('alchemy.ecs.Apothecarius', function () {
 
     var alchemy = require('./../../../lib/core/Alchemy.js');
 
+    /** @name TEST_createEntity */
     describe('createEntity', function () {
-
         it('returns an entity id', function () {
             // prepare
             var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
@@ -91,6 +91,93 @@ describe('alchemy.ecs.Apothecarius', function () {
         });
     });
 
+    /** @name TEST_defineEntityType */
+    describe('defineEntityType', function () {
+        it('allows to define defaults for an entity', function () {
+            // prepare
+            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            var defaults = {
+                foo: {
+                    key: 'key-foo',
+                    value: 'value-foo',
+                },
+                bar: {
+                    key: 'key-bar',
+                    value: 'value-bar',
+                },
+            };
+
+            // execute
+            apothecarius.defineEntityType('foobar', defaults);
+
+            // verify
+            var entityId = apothecarius.createEntity('foobar');
+            expect(apothecarius.getAllComponentsOfEntity(entityId)).toEqual({
+                foo: {
+                    id: entityId,
+                    key: 'key-foo',
+                    value: 'value-foo',
+                },
+                bar: {
+                    id: entityId,
+                    key: 'key-bar',
+                    value: 'value-bar',
+                },
+            });
+        });
+
+        it('allows to override component defaults', function () {
+            // prepare
+            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            var defaults = {
+                foo: {
+                    key: 'key-foo',
+                    value: 'value-foo',
+                },
+                bar: {
+                    key: 'key-bar',
+                    value: 'value-bar',
+                },
+            };
+            apothecarius.defineEntityType('foobar', defaults);
+
+            // execute
+            var entityId = apothecarius.createEntity({
+                type: 'foobar',
+                foo: {
+                    value: 'value-foo-new'
+                }
+            });
+
+            // verify
+            expect(apothecarius.getAllComponentsOfEntity(entityId)).toEqual({
+                foo: {
+                    id: entityId,
+                    key: 'key-foo',
+                    value: 'value-foo-new',
+                },
+                bar: {
+                    id: entityId,
+                    key: 'key-bar',
+                    value: 'value-bar',
+                },
+            });
+        });
+        it('throws an exception when trying to define the same type twice', function () {
+            // prepare
+            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            apothecarius.defineEntityType('foo', {});
+
+            // execute/verify
+            expect(function () {
+                apothecarius.defineEntityType('foo', {});
+
+            // verify
+            }).toThrow('The entity type "foo" is already defined!');
+        });
+    });
+
+    /** @name TEST_addComponent */
     describe('addComponent', function () {
         it('allows to remove a component from a given entity', function () {
             // prepare
