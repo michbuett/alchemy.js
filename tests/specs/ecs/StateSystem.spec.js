@@ -50,14 +50,15 @@ describe('alchemy.ecs.StateSystem', function () {
 
     it('does nothing if application state has no changed', function () {
         // prepare
+        var stateBefore = {};
         var testSubject = alchemy('alchemy.ecs.StateSystem').brew({
             entities: this.apothecarius
         });
-        var stateBefore = {};
+        testSubject.update(this.state);
         this.apothecarius.getComponent('foo', 'state').current = stateBefore;
 
         // execute
-        testSubject.update(this.state, this.state);
+        testSubject.update(this.state);
         var stateAfter = this.apothecarius.getComponent('foo', 'state').current;
 
         // verify

@@ -38,7 +38,7 @@ describe('alchemy.ecs.EventSystem', function () {
         spyOn(entityDescriptor, 'getEventHandler').andCallThrough();
 
         // execute
-        testSubject.defineEntity(entityDescriptor);
+        testSubject.defineEntity('foo', entityDescriptor);
 
         // verify
         expect(entityDescriptor.getEventHandler).toHaveBeenCalled();
@@ -47,7 +47,7 @@ describe('alchemy.ecs.EventSystem', function () {
     it('ignores entity descriptors which do not provide new handle', function () {
         expect(function () {
             var testSubject = alchemy('alchemy.ecs.EventSystem').brew();
-            testSubject.defineEntity({});
+            testSubject.defineEntity('foo', {});
         }).not.toThrow();
     });
 

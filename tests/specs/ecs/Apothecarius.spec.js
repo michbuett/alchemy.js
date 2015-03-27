@@ -108,7 +108,11 @@ describe('alchemy.ecs.Apothecarius', function () {
             };
 
             // execute
-            apothecarius.defineEntityType('foobar', defaults);
+            apothecarius.defineEntityType('foobar', {
+                getComponents: function () {
+                    return defaults;
+                },
+            });
 
             // verify
             var entityId = apothecarius.createEntity('foobar');
@@ -139,7 +143,11 @@ describe('alchemy.ecs.Apothecarius', function () {
                     value: 'value-bar',
                 },
             };
-            apothecarius.defineEntityType('foobar', defaults);
+            apothecarius.defineEntityType('foobar', {
+                getComponents: function () {
+                    return defaults;
+                },
+            });
 
             // execute
             var entityId = apothecarius.createEntity({
@@ -163,14 +171,20 @@ describe('alchemy.ecs.Apothecarius', function () {
                 },
             });
         });
+
         it('throws an exception when trying to define the same type twice', function () {
             // prepare
             var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
-            apothecarius.defineEntityType('foo', {});
+            var provider = {
+                getComponents: function () {
+                    return {};
+                }
+            };
+            apothecarius.defineEntityType('foo', provider);
 
             // execute/verify
             expect(function () {
-                apothecarius.defineEntityType('foo', {});
+                apothecarius.defineEntityType('foo', provider);
 
             // verify
             }).toThrow('The entity type "foo" is already defined!');
