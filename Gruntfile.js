@@ -74,7 +74,7 @@ module.exports = function (grunt) {
                         'tests/specs/web/**/*.spec.js',
                         'tests/specs/ecs/**/*.spec.js',
                     ],
-                    display: 'full',
+                    display: 'short',
                     helpers: webHelper,
                 },
             },
