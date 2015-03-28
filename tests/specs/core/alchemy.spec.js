@@ -363,6 +363,25 @@ describe('alchemy', function () {
         });
     });
 
+    /** @name TEST_values */
+    describe('values', function () {
+        it('returns the values of an object', function () {
+            expect(alchemy.values({
+                foo: 'value-foo',
+                bar: 'value-bar',
+                baz: 'value-baz',
+            })).toEqual(['value-foo', 'value-bar', 'value-baz']);
+        });
+
+        it('ignores none-object input', function () {
+            expect(alchemy.values()).not.toBeDefined();
+            expect(alchemy.values(null)).not.toBeDefined();
+            expect(alchemy.values(42)).not.toBeDefined();
+            expect(alchemy.values('foo bar')).not.toBeDefined();
+            expect(alchemy.values(function () {})).not.toBeDefined();
+        });
+    });
+
     /** @name TEST_meta */
     describe('meta', function () {
         it('can set meta attributes', function () {
