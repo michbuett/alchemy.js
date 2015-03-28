@@ -345,6 +345,24 @@ describe('alchemy', function () {
         });
     });
 
+    /** @name TEST_unique */
+    describe('unique', function () {
+        it('allows to filter arrays', function () {
+            expect(alchemy.unique([1, 2, 1, 3, 4, 1, 2, 5, 101])).toEqual([1, 2, 3, 4, 5, 101]);
+        });
+
+        it('allows to filter hash objects', function () {
+            expect(alchemy.unique({foo: 'foo', bar: 'foo', baz: 'baz'})).toEqual({foo: 'foo', baz: 'baz'});
+        });
+
+        it('ignores the rest', function () {
+            expect(alchemy.unique()).not.toBeDefined();
+            expect(alchemy.unique(null)).not.toBeDefined();
+            expect(alchemy.unique(42)).not.toBeDefined();
+            expect(alchemy.unique('foo bar baz')).not.toBeDefined();
+        });
+    });
+
     /** @name TEST_meta */
     describe('meta', function () {
         it('can set meta attributes', function () {
