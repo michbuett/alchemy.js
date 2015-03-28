@@ -1,4 +1,4 @@
-describe('alchemy.ecs.StaticTreeSystem', function () {
+describe('alchemy.ecs.StaticChildrenSystem', function () {
     'use strict';
 
     var alchemy = require('./../../../lib/core/Alchemy.js');
@@ -9,7 +9,7 @@ describe('alchemy.ecs.StaticTreeSystem', function () {
 
     it('can create entities', function () {
         // prepare
-        var testSubject = alchemy('alchemy.ecs.StaticTreeSystem').brew({
+        var testSubject = alchemy('alchemy.ecs.StaticChildrenSystem').brew({
             entities: this.apothecarius
         });
 
@@ -25,7 +25,7 @@ describe('alchemy.ecs.StaticTreeSystem', function () {
 
     it('fills the "children"-component', function () {
         // prepare
-        var testSubject = alchemy('alchemy.ecs.StaticTreeSystem').brew({
+        var testSubject = alchemy('alchemy.ecs.StaticChildrenSystem').brew({
             entities: this.apothecarius
         });
 
@@ -41,9 +41,9 @@ describe('alchemy.ecs.StaticTreeSystem', function () {
         });
     });
 
-    it('clears the "staticTree"-component', function () {
+    it('clears the "staticChildren"-component', function () {
         // prepare
-        var testSubject = alchemy('alchemy.ecs.StaticTreeSystem').brew({
+        var testSubject = alchemy('alchemy.ecs.StaticChildrenSystem').brew({
             entities: this.apothecarius
         });
 
@@ -51,7 +51,7 @@ describe('alchemy.ecs.StaticTreeSystem', function () {
         testSubject.update();
 
         // verify
-        expect(this.apothecarius.getComponent('foo', 'staticTree')).toBeFalsy();
+        expect(this.apothecarius.getComponent('foo', 'staticChildren')).toBeFalsy();
     });
 
     function initEntities() {
@@ -59,19 +59,17 @@ describe('alchemy.ecs.StaticTreeSystem', function () {
 
         apothecarius.createEntity({
             id: 'foo',
-            staticTree: {
-                children: {
-                    bar: {
-                        id: 'id-bar',
-                        ping: {value: 'ping-bar'},
-                        pong: {value: 'pong-bar'},
-                    },
-                    baz: {
-                        id: 'id-baz',
-                        ping: {value: 'ping-baz'},
-                        pong: {value: 'pong-baz'},
-                    },
-                }
+            staticChildren: {
+                bar: {
+                    id: 'id-bar',
+                    ping: {value: 'ping-bar'},
+                    pong: {value: 'pong-bar'},
+                },
+                baz: {
+                    id: 'id-baz',
+                    ping: {value: 'ping-baz'},
+                    pong: {value: 'pong-baz'},
+                },
             },
         });
 
