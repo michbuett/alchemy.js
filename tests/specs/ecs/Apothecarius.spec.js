@@ -50,7 +50,7 @@ describe('alchemy.ecs.Apothecarius', function () {
             });
         });
 
-        it('allows retrieve all components of a type', function () {
+        it('allows to retrieve all components of a type', function () {
             // prepare
             var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
             var e1 = apothecarius.createEntity({
@@ -68,14 +68,42 @@ describe('alchemy.ecs.Apothecarius', function () {
             var result = apothecarius.getAllComponentsOfType('foo');
 
             // verify
-            expect(typeof result).toBe('object');
-            expect(result.toData()).toEqual([{
+            expect(alchemy.isArray(result)).toBeTruthy();
+            expect(result).toEqual([{
                 id: e1,
                 value: 'foo-e1',
             }, {
                 id: e2,
                 value: 'foo-e2',
             }]);
+        });
+
+        it('allows to retrieve all components of an entity', function () {
+            // prepare
+            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            var entityId = apothecarius.createEntity({
+                foo: {
+                    key: 'value-foo'
+                },
+                bar: {
+                    key: 'value-bar'
+                },
+            });
+
+            // execute
+            var result = apothecarius.getAllComponentsOfEntity(entityId);
+
+            // verify
+            expect(result).toEqual({
+                foo: {
+                    id: entityId,
+                    key: 'value-foo'
+                },
+                bar: {
+                    id: entityId,
+                    key: 'value-bar'
+                },
+            });
         });
 
         it('throws an exception when trying to create an entity with an id that is already in use', function () {
