@@ -54,6 +54,22 @@ describe('alchemy.ecs.StaticChildrenSystem', function () {
         expect(this.apothecarius.getComponent('foo', 'staticChildren')).toBeFalsy();
     });
 
+    it('allows do add new children to existing ones', function () {
+        // prepare
+        var testSubject = alchemy('alchemy.ecs.StaticChildrenSystem').brew({
+            entities: this.apothecarius
+        });
+
+        // execute
+        testSubject.update();
+
+        // verify
+        expect(this.apothecarius.getComponent('bli', 'children').current.val()).toEqual({
+            bla: 'id-bla',
+            blub: 'id-blub',
+        });
+    });
+
     function initEntities() {
         var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
 
@@ -70,6 +86,22 @@ describe('alchemy.ecs.StaticChildrenSystem', function () {
                     ping: {value: 'ping-baz'},
                     pong: {value: 'pong-baz'},
                 },
+            },
+        });
+
+        apothecarius.createEntity({
+            id: 'bli',
+            staticChildren: {
+                bla: {
+                    id: 'id-bla',
+                    ping: {value: 'ping-bar'},
+                    pong: {value: 'pong-bar'},
+                },
+            },
+            children: {
+                current: alchemy('Immutatio').makeImmutable({
+                    blub: 'id-blub'
+                }),
             },
         });
 

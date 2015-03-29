@@ -49,6 +49,31 @@ describe('alchemy.web.VDomRenderSystem', function () {
         expect($('div#foo div#bar.blub div#pong')).toExist();
     });
 
+    it('binds delegated events handler', function () {
+        // prepare
+        var testHandler = jasmine.createSpy();
+        var delegator = alchemy('alchemy.web.Delegatus').brew();
+        var delegateKey = delegator.delegateHandler('click', testHandler);
+        var renderer = alchemy('alchemy.ecs.VDomRenderSystem').brew({
+            delegator: delegator,
+            entities: this.apothecarius
+        });
+
+        this.apothecarius.addComponent('foo', 'delegatedEvents', {
+            current: alchemy('Immutatio').makeImmutable([{
+                event: 'click',
+                delegate: delegateKey,
+            }]),
+        });
+
+        // execute
+        renderer.update();
+        $('#foo').click();
+
+        // verify
+        expect(testHandler).toHaveBeenCalled();
+    });
+
     function initRenderer() {
         alchemy.brew({
             name: 'FooRenderer',
