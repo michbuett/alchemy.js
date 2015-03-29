@@ -232,7 +232,7 @@ describe('alchemy.ecs.Apothecarius', function () {
 
             // execute
             var allComponentBefore = apothecarius.getAllComponentsOfEntity(entityId);
-            apothecarius.addComponent(entityId, 'bar', {
+            var result = apothecarius.addComponent(entityId, 'bar', {
                 key: 'value-bar'
             });
             var allComponentAfter = apothecarius.getAllComponentsOfEntity(entityId);
@@ -240,6 +240,7 @@ describe('alchemy.ecs.Apothecarius', function () {
             // verify
             expect(Object.keys(allComponentBefore)).toEqual(['foo']);
             expect(Object.keys(allComponentAfter)).toEqual(['foo', 'bar']);
+            expect(result).toBe(apothecarius.getComponent(entityId, 'bar'));
         });
 
         it('throws an exception when trying to add a component to not existent exception', function () {
