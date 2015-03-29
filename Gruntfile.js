@@ -54,14 +54,14 @@ module.exports = function (grunt) {
         // configure unit tests
         jasmine: {
             options: {
+                display: 'short',
                 keepRunner: true,
-                display: 'none',
+                summary: true,
             },
 
             core: {
                 src: coreSrc,
                 options: {
-                    display: 'short',
                     specs: 'tests/specs/core/**/*.spec.js',
                     helpers: coreHelper,
                 },
@@ -74,7 +74,6 @@ module.exports = function (grunt) {
                         'tests/specs/web/**/*.spec.js',
                         'tests/specs/ecs/**/*.spec.js',
                     ],
-                    display: 'short',
                     helpers: webHelper,
                 },
             },
