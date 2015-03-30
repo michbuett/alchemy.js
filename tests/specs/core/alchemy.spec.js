@@ -373,6 +373,12 @@ describe('alchemy', function () {
             })).toEqual(['value-foo', 'value-bar', 'value-baz']);
         });
 
+        it('returns the values of an array', function () {
+            expect(alchemy.values([
+                'value-foo', 'value-bar', 'value-baz',
+            ])).toEqual(['value-foo', 'value-bar', 'value-baz']);
+        });
+
         it('ignores none-object input', function () {
             expect(alchemy.values()).not.toBeDefined();
             expect(alchemy.values(null)).not.toBeDefined();
