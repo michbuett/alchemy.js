@@ -115,6 +115,10 @@ describe('alchemy.web.VDomRenderSystem', function () {
     }
 
     function initEntities(apothecarius) {
+        var fooChildren = alchemy('Immutatio').makeImmutable(['bar', 'baz']);
+        var barChildren = alchemy('Immutatio').makeImmutable(['ping', 'pong']);
+        var barState = alchemy('Immutatio').makeImmutable({'bla': 'bla'});
+
         apothecarius.createEntity({
             id: 'foo',
             vdom: {
@@ -122,7 +126,8 @@ describe('alchemy.web.VDomRenderSystem', function () {
                 renderer: 'FooRenderer'
             },
             children: {
-                current: alchemy('Immutatio').makeImmutable(['bar', 'baz'])
+                current: fooChildren,
+                // last: fooChildren,
             }
         });
 
@@ -132,11 +137,12 @@ describe('alchemy.web.VDomRenderSystem', function () {
                 renderer: 'BarRenderer'
             },
             children: {
-                current: alchemy('Immutatio').makeImmutable(['ping', 'pong'])
+                current: barChildren,
+                last: barChildren,
             },
             state: {
-                current: alchemy('Immutatio').makeImmutable({'bla': 'bla'}),
-                last: null,
+                current: barState,
+                last: barState,
             }
         });
 
