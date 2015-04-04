@@ -156,6 +156,23 @@ describe('alchemy.ecs.EventSystem', function () {
         });
     });
 
+    it('updates the "delegatedEvents" property', function () {
+        // prepare
+        var delegator = alchemy('alchemy.web.Delegatus').brew();
+        var entities = initEntities();
+        var testSubject = alchemy('alchemy.ecs.EventSystem').brew({
+            entities: entities,
+            delegator: delegator,
+        });
+
+        // execute
+        testSubject.update();
+
+        // verify
+        var bazDelegates = entities.getComponent('baz', 'delegatedEvents');
+        expect(bazDelegates.last).toBe(bazDelegates.current);
+    });
+
     function initEntities() {
         var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
         apothecarius.createEntity({
@@ -174,6 +191,13 @@ describe('alchemy.ecs.EventSystem', function () {
                     message: 'fooMessage',
                 }
             },
+            delegatedEvents: {
+                current: alchemy('Immutatio').makeImmutable([])
+            }
+        });
+
+        apothecarius.createEntity({
+            id: 'baz',
             delegatedEvents: {
                 current: alchemy('Immutatio').makeImmutable([])
             }

@@ -33,6 +33,27 @@ describe('alchemy.ecs.StateSystem', function () {
         });
     });
 
+    it('can initialize the state using the "initial" property', function () {
+        // prepare
+        var fooState = this.apothecarius.getComponent('foo', 'state');
+        var testSubject = alchemy('alchemy.ecs.StateSystem').brew({
+            entities: this.apothecarius
+        });
+
+        fooState.globalToLocal = null;
+        fooState.initial = {
+            'foo': 'foo-value-0',
+        };
+
+        // execute
+        testSubject.update(this.state);
+
+        // verify
+        expect(fooState.current.val()).toEqual({
+            'foo': 'foo-value-0',
+        });
+    });
+
     it('ignores entities if they do not have a "globalToLocal" property', function () {
         // prepare
         var testSubject = alchemy('alchemy.ecs.StateSystem').brew({

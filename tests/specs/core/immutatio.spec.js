@@ -102,6 +102,12 @@ describe('Handling of immutable data', function () {
 
                 expect(value.val('size')).toBe(3);
             });
+
+            it('returns "null" for any sub-keys', function () {
+                testData.forEach(function (item) {
+                    expect(immutatio.makeImmutable(item).val('foo')).toBe(null);
+                });
+            });
         });
 
         describe('sub', function () {
@@ -213,6 +219,11 @@ describe('Handling of immutable data', function () {
 
                 expect(struct.val('size')).toBe(2);
             });
+
+            it('returns "null" for any unknown sub-keys', function () {
+                var struct = immutatio.makeImmutable(testData);
+                expect(struct.val('baz')).toBe(null);
+            });
         });
 
         describe('sub', function () {
@@ -235,6 +246,19 @@ describe('Handling of immutable data', function () {
         });
 
         describe('set', function () {
+            it('allows to add keys', function () {
+                // prepare
+                var struct = immutatio.makeImmutable(testData);
+
+                // execute
+                var struct2 = struct.set('baz', 'baz_1');
+
+                // verify
+                expect(struct2.val()).toEqual(alchemy.mix({}, testData, {
+                    baz: 'baz_1'
+                }));
+            });
+
             it('does not change the immutable', function () {
                 // prepare
                 var struct = immutatio.makeImmutable(testData);
@@ -263,9 +287,11 @@ describe('Handling of immutable data', function () {
                 expect(struct.sub('bar')).toBe(struct3.sub('bar'));
             });
 
+
             it('does not create a new immutable if the data was unchanged', function () {
                 // prepare
                 var struct = immutatio.makeImmutable(testData);
+                var sub = struct.sub('foo');
 
                 // execute
                 var struct2 = struct.set({
@@ -278,9 +304,11 @@ describe('Handling of immutable data', function () {
                         bar: 'bar_2',
                     }
                 });
+                var sub2 = sub.set('foo', 'foo_1');
 
                 // verify
                 expect(struct).toBe(struct2);
+                expect(sub).toBe(sub2);
             });
 
             it('allows to changes the struct into a simple value', function () {
@@ -319,6 +347,11 @@ describe('Handling of immutable data', function () {
                 // verify
                 expect(immutable3).toBe(immutable1);
                 expect(immutable4).toBe(immutable2);
+            });
+
+            it('returns itself if now values is passed', function () {
+                var struct = immutatio.makeImmutable({foo: 'bar'});
+                expect(struct.set()).toBe(struct);
             });
         });
 
@@ -372,6 +405,11 @@ describe('Handling of immutable data', function () {
 
                 expect(list.val('size')).toBe(testData.length);
             });
+
+            it('returns "null" for any unknown sub-keys', function () {
+                var list = immutatio.makeImmutable(testData);
+                expect(list.val(42)).toBe(null);
+            });
         });
 
         describe('sub', function () {
@@ -419,9 +457,24 @@ describe('Handling of immutable data', function () {
 
                 // execute
                 var list2 = list.set([testData[0], testData[1], testData[2]]);
+                var list3 = list.set(1, testData[1]);
 
                 // verify
                 expect(list).toBe(list2);
+                expect(list).toBe(list3);
+            });
+
+            it('ignores invalid (<0 or non-numeric) keys', function () {
+                // prepare
+                var list = immutatio.makeImmutable(testData);
+
+                // execute
+                var list2 = list.set('foo', 'ping');
+                var list3 = list.set(-1, 'pong');
+
+                // verify
+                expect(list).toBe(list2);
+                expect(list).toBe(list3);
             });
 
             it('allows to changes the list into a simple value', function () {
@@ -460,6 +513,11 @@ describe('Handling of immutable data', function () {
                 // verify
                 expect(immutable3).toBe(immutable1);
                 expect(immutable4).toBe(immutable2);
+            });
+
+            it('returns itself if now values is passed', function () {
+                var list = immutatio.makeImmutable(['foo', 'bar']);
+                expect(list.set()).toBe(list);
             });
         });
 
