@@ -54,6 +54,32 @@ describe('alchemy.ecs.Administrator', function () {
         expect(testSystem.dispose).toHaveBeenCalled();
     });
 
+    it('allows to define an initial set of entities which have children', function () {
+        // prepare
+        var repo = alchemy('alchemy.ecs.Apothecarius').brew(repo);
+        var testSubject = alchemy('alchemy.ecs.Administrator').brew({ repo: repo, });
+
+        // execute
+        testSubject.initEntities([{
+            id: 'foo',
+            children: {
+                bar: {
+                    id: 'bar',
+                    children: {
+                        baz: {
+                            id: 'baz'
+                        }
+                    }
+                }
+            }
+        }]);
+
+        // verify
+        expect(repo.contains('foo')).toBeTruthy();
+        expect(repo.contains('bar')).toBeTruthy();
+        expect(repo.contains('baz')).toBeTruthy();
+    });
+
     it('allows to define an initial set of entities', function () {
         // prepare
         var repo = alchemy('alchemy.ecs.Apothecarius').brew(repo);

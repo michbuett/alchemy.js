@@ -59,6 +59,7 @@ describe('alchemy.web.VDomRenderSystem', function () {
             entities: this.apothecarius
         });
 
+        renderer.update();
         this.apothecarius.addComponent('foo', 'delegatedEvents', {
             current: alchemy('Immutatio').makeImmutable([{
                 event: 'click',
@@ -72,6 +73,46 @@ describe('alchemy.web.VDomRenderSystem', function () {
 
         // verify
         expect(testHandler).toHaveBeenCalled();
+    });
+
+    it('throws an exception if renderer cannot be determined', function () {
+        // prepare
+        var renderer = alchemy('alchemy.ecs.VDomRenderSystem').brew({
+            entities: this.apothecarius
+        });
+
+        this.apothecarius.createEntity({
+            id: 'invalid-renderer-test',
+            vdom: {}
+        });
+
+        // execute
+        expect(function () {
+            renderer.update();
+
+        // verify
+        }).toThrow('Cannot determine renderer for entity "invalid-renderer-test"!');
+    });
+
+    it('throws an exception if renderer cannot be determined', function () {
+        // prepare
+        var renderer = alchemy('alchemy.ecs.VDomRenderSystem').brew({
+            entities: this.apothecarius
+        });
+
+        this.apothecarius.createEntity({
+            id: 'no-parent-dom',
+            vdom: {
+                renderer: function (c) { return c.h(); },
+            }
+        });
+
+        // execute
+        renderer.update();
+
+        // verify
+        var vdom = this.apothecarius.getComponent('no-parent-dom', 'vdom');
+        expect(vdom.current).toBeFalsy();
     });
 
     function initRenderer() {
@@ -115,8 +156,6 @@ describe('alchemy.web.VDomRenderSystem', function () {
     }
 
     function initEntities(apothecarius) {
-        var fooChildren = alchemy('Immutatio').makeImmutable(['bar', 'baz']);
-        var barChildren = alchemy('Immutatio').makeImmutable(['ping', 'pong']);
         var barState = alchemy('Immutatio').makeImmutable({'bla': 'bla'});
 
         apothecarius.createEntity({
@@ -126,8 +165,8 @@ describe('alchemy.web.VDomRenderSystem', function () {
                 renderer: 'FooRenderer'
             },
             children: {
-                current: fooChildren,
-                // last: fooChildren,
+                bar: 'bar',
+                baz: 'baz',
             }
         });
 
@@ -137,8 +176,8 @@ describe('alchemy.web.VDomRenderSystem', function () {
                 renderer: 'BarRenderer'
             },
             children: {
-                current: barChildren,
-                last: barChildren,
+                ping: 'ping',
+                pong: 'pong',
             },
             state: {
                 current: barState,
@@ -163,7 +202,9 @@ describe('alchemy.web.VDomRenderSystem', function () {
         apothecarius.createEntity({
             id: 'pong',
             vdom: {
-                renderer: 'BazRenderer'
+                renderer: function (context) {
+                    return context.h('div#pong');
+                },
             }
         });
     }
