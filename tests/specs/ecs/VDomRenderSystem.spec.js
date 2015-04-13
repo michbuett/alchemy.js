@@ -94,7 +94,7 @@ describe('alchemy.web.VDomRenderSystem', function () {
         }).toThrow('Cannot determine renderer for entity "invalid-renderer-test"!');
     });
 
-    it('throws an exception if renderer cannot be determined', function () {
+    it('skips entities which have no parent dom element', function () {
         // prepare
         var renderer = alchemy('alchemy.ecs.VDomRenderSystem').brew({
             entities: this.apothecarius
@@ -112,7 +112,7 @@ describe('alchemy.web.VDomRenderSystem', function () {
 
         // verify
         var vdom = this.apothecarius.getComponent('no-parent-dom', 'vdom');
-        expect(vdom.current).toBeFalsy();
+        expect(vdom.last).toBeFalsy();
     });
 
     function initRenderer() {
