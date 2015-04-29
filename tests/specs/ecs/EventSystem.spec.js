@@ -83,7 +83,10 @@ describe('alchemy.ecs.EventSystem', function () {
 
     it('can delegate browser events to messages', function () {
         // prepare
-        var testHandler = jasmine.createSpy();
+        var eventData;
+        var testHandler = jasmine.createSpy().andCallFake(function (data) {
+            eventData = data;
+        });
         var delegator = alchemy('alchemy.web.Delegatus').brew();
         var messages = alchemy('alchemy.core.Observari').brew();
         var entities = initEntities();
@@ -103,6 +106,7 @@ describe('alchemy.ecs.EventSystem', function () {
 
         // verify
         expect(testHandler).toHaveBeenCalled();
+        expect(eventData).toEqual({foo: 'bar'});
     });
 
     it('allows an event handler to update the entities state', function () {
@@ -186,6 +190,10 @@ describe('alchemy.ecs.EventSystem', function () {
 
         apothecarius.createEntity({
             id: 'bar',
+            state: {
+                current: alchemy('Immutatio').makeImmutable({foo: 'bar'}),
+            },
+
             events: {
                 click: {
                     message: 'fooMessage',

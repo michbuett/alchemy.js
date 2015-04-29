@@ -217,6 +217,22 @@ describe('alchemy.ecs.Apothecarius', function () {
             // verify
             }).toThrow('The entity type "foo" is already defined!');
         });
+
+        it('ignores descriptors which don\'t provide the getComponents method', function () {
+            // prepare
+            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            var provider = {
+                getComponents: null
+            };
+            apothecarius.defineEntityType('foo', provider);
+
+            // execute/verify
+            expect(function () {
+                apothecarius.defineEntityType('foo', provider);
+
+            // verify
+            }).not.toThrow();
+        });
     });
 
     /** @name TEST_addComponent */
