@@ -69,6 +69,29 @@ describe('alchemy.ecs.StateSystem', function () {
         expect(stateBefore).toBe(stateAfter);
     });
 
+    it('supports dynamic global-to-local-state mapping', function () {
+        // prepare
+        var testSubject = alchemy('alchemy.ecs.StateSystem').brew({
+            entities: this.apothecarius
+        });
+
+        var stateBefore = this.apothecarius.getComponent('fnTest', 'state').current;
+        var globalToLocalSpy = this.apothecarius.getComponent('fnTest', 'state').globalToLocal;
+
+        // execute
+        testSubject.update(this.state);
+
+        // verify
+        var stateAfter = this.apothecarius.getComponent('fnTest', 'state').current;
+        expect(globalToLocalSpy).toHaveBeenCalledWith(this.state, stateBefore);
+        expect(stateBefore.val()).toEqual({
+            fnTestKey: 'fnTestValue-old',
+        });
+        expect(stateAfter.val()).toEqual({
+            fnTestKey: 'fnTestValue-new',
+        });
+    });
+
     function initState(state) {
         return alchemy('alchemy.core.Immutatio').makeImmutable(state || {
             foo: 'foo-value-1',
@@ -109,6 +132,21 @@ describe('alchemy.ecs.StateSystem', function () {
                 current: {
                     baz: 'baz-value'
                 }
+            },
+        });
+
+        apothecarius.createEntity({
+            id: 'fnTest',
+            state: {
+                globalToLocal: jasmine.createSpy().andCallFake(function () {
+                    return alchemy('Immutatio').makeImmutable({
+                        fnTestKey: 'fnTestValue-new',
+                    });
+                }),
+
+                current: alchemy('Immutatio').makeImmutable({
+                    fnTestKey: 'fnTestValue-old'
+                }),
             },
         });
 
