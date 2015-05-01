@@ -39,7 +39,7 @@ describe('alchemy.ecs.EventSystem', function () {
         spyOn(entityDescriptor, 'getEventHandler').andCallThrough();
 
         // execute
-        testSubject.defineEntity('foo', entityDescriptor);
+        testSubject.defineEntityType('foo', entityDescriptor);
 
         // verify
         expect(entityDescriptor.getEventHandler).toHaveBeenCalled();
@@ -48,7 +48,7 @@ describe('alchemy.ecs.EventSystem', function () {
     it('ignores entity descriptors which do not provide new handle', function () {
         expect(function () {
             var testSubject = alchemy('alchemy.ecs.EventSystem').brew();
-            testSubject.defineEntity('foo', {});
+            testSubject.defineEntityType('foo', {});
         }).not.toThrow();
     });
 
@@ -71,7 +71,7 @@ describe('alchemy.ecs.EventSystem', function () {
         };
 
         // execute
-        testSubject.defineEntity('foo', entityDescriptor);
+        testSubject.defineEntityType('foo', entityDescriptor);
         testSubject.update();
         var del = entities.getComponent('foo', 'delegatedEvents').current.val()[0];
         delegator.delegateKey(del.event, del.delegate, testEl);
@@ -142,7 +142,7 @@ describe('alchemy.ecs.EventSystem', function () {
         });
 
         // execute
-        testSubject.defineEntity('foo', entityDescriptor);
+        testSubject.defineEntityType('foo', entityDescriptor);
         testSubject.update();
         var del = entities.getComponent('foo', 'delegatedEvents').current.val()[0];
         delegator.delegateKey(del.event, del.delegate, testEl);
