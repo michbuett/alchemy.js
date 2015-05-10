@@ -10,7 +10,7 @@ describe('alchemy.ecs.Apothecarius', function () {
             var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
 
             // execute
-            var entityId = apothecarius.createEntity();
+            var entityId = apothecarius.createEntity({});
 
             // verify
             expect(typeof entityId).toBe('string');
@@ -109,129 +109,13 @@ describe('alchemy.ecs.Apothecarius', function () {
         it('throws an exception when trying to create an entity with an id that is already in use', function () {
             // prepare
             var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
-            var entityId = apothecarius.createEntity();
+            var entityId = apothecarius.createEntity({});
             // execute/verify
             expect(function () {
                 apothecarius.createEntity({
                     id: entityId
                 });
             }).toThrow('The id: "' + entityId + '" is already used');
-        });
-    });
-
-    /** @name TEST_defineEntityType */
-    describe('defineEntityType', function () {
-        it('allows to define defaults for an entity', function () {
-            // prepare
-            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
-            var defaults = {
-                foo: {
-                    key: 'key-foo',
-                    value: 'value-foo',
-                },
-                bar: {
-                    key: 'key-bar',
-                    value: 'value-bar',
-                },
-            };
-
-            // execute
-            apothecarius.defineEntityType('foobar', {
-                getComponents: function () {
-                    return defaults;
-                },
-            });
-
-            // verify
-            var entityId = apothecarius.createEntity('foobar');
-            expect(apothecarius.getAllComponentsOfEntity(entityId)).toEqual({
-                foo: {
-                    id: entityId,
-                    key: 'key-foo',
-                    value: 'value-foo',
-                },
-                bar: {
-                    id: entityId,
-                    key: 'key-bar',
-                    value: 'value-bar',
-                },
-            });
-        });
-
-        it('allows to override component defaults', function () {
-            // prepare
-            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
-            var defaults = {
-                foo: {
-                    key: 'key-foo',
-                    value: 'value-foo',
-                },
-                bar: {
-                    key: 'key-bar',
-                    value: 'value-bar',
-                },
-            };
-            apothecarius.defineEntityType('foobar', {
-                getComponents: function () {
-                    return defaults;
-                },
-            });
-
-            // execute
-            var entityId = apothecarius.createEntity({
-                type: 'foobar',
-                foo: {
-                    value: 'value-foo-new'
-                }
-            });
-
-            // verify
-            expect(apothecarius.getAllComponentsOfEntity(entityId)).toEqual({
-                foo: {
-                    id: entityId,
-                    key: 'key-foo',
-                    value: 'value-foo-new',
-                },
-                bar: {
-                    id: entityId,
-                    key: 'key-bar',
-                    value: 'value-bar',
-                },
-            });
-        });
-
-        it('throws an exception when trying to define the same type twice', function () {
-            // prepare
-            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
-            var provider = {
-                getComponents: function () {
-                    return {};
-                }
-            };
-            apothecarius.defineEntityType('foo', provider);
-
-            // execute/verify
-            expect(function () {
-                apothecarius.defineEntityType('foo', provider);
-
-            // verify
-            }).toThrow('The entity type "foo" is already defined!');
-        });
-
-        it('ignores descriptors which don\'t provide the getComponents method', function () {
-            // prepare
-            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
-            var provider = {
-                getComponents: null
-            };
-            apothecarius.defineEntityType('foo', provider);
-
-            // execute/verify
-            expect(function () {
-                apothecarius.defineEntityType('foo', provider);
-
-            // verify
-            }).not.toThrow();
         });
     });
 
@@ -352,9 +236,9 @@ describe('alchemy.ecs.Apothecarius', function () {
         it('can remove all entities at once', function () {
             // prepare
             var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
-            var entity1 = apothecarius.createEntity();
-            var entity2 = apothecarius.createEntity();
-            var entity3 = apothecarius.createEntity();
+            var entity1 = apothecarius.createEntity({});
+            var entity2 = apothecarius.createEntity({});
+            var entity3 = apothecarius.createEntity({});
 
             // execute
             var containsBefore1 = apothecarius.contains(entity1);

@@ -19,26 +19,6 @@ describe('alchemy.ecs.Administrator', function () {
         expect(testSystem.update).toHaveBeenCalledWith(state);
     });
 
-    it('delegates newly defines entity types', function () {
-        // prepare
-        var entityDescriptor;
-        var testSubject = alchemy('alchemy.ecs.Administrator').brew({
-            repo: { defineEntityType: jasmine.createSpy(), },
-        });
-        var testSystem = {
-            defineEntityType: jasmine.createSpy()
-        };
-        testSubject.addSystem(testSystem);
-        testSubject.addSystem({});
-
-        // execute
-        testSubject.defineEntityType('foo', entityDescriptor);
-
-        // verify
-        expect(testSubject.repo.defineEntityType).toHaveBeenCalledWith('foo', entityDescriptor);
-        expect(testSubject.repo.defineEntityType).toHaveBeenCalledWith('foo', entityDescriptor);
-    });
-
     it('disposes all component systems when disposing app', function () {
         // prepare
         var testSubject = alchemy('alchemy.ecs.Administrator').brew();
@@ -135,5 +115,82 @@ describe('alchemy.ecs.Administrator', function () {
         expect(repo.contains('foo')).toBeFalsy();
         expect(repo.contains('bar')).toBeTruthy();
         expect(repo.contains('baz')).toBeTruthy();
+    });
+
+    it('allows to define default componentss for an entity type', function () {
+        // prepare
+        var repo = alchemy('alchemy.ecs.Apothecarius').brew(repo);
+        var testSubject = alchemy('alchemy.ecs.Administrator').brew({ repo: repo, });
+
+        testSubject.setEntityDefaults('foobar', {
+            foo: {
+                key: 'key-foo',
+                value: 'value-foo',
+            },
+
+            bar: {
+                key: 'key-bar',
+                value: 'value-bar',
+            },
+        });
+
+        // execute
+        var entityId = testSubject.createEntity({
+            type: 'foobar'
+        });
+
+        // verify
+        expect(repo.getAllComponentsOfEntity(entityId)).toEqual({
+            foo: {
+                id: entityId,
+                key: 'key-foo',
+                value: 'value-foo',
+            },
+            bar: {
+                id: entityId,
+                key: 'key-bar',
+                value: 'value-bar',
+            },
+        });
+    });
+
+    it('allows to override component defaults', function () {
+        // prepare
+        var repo = alchemy('alchemy.ecs.Apothecarius').brew(repo);
+        var testSubject = alchemy('alchemy.ecs.Administrator').brew({ repo: repo, });
+
+        testSubject.setEntityDefaults('foobar', {
+            foo: {
+                key: 'key-foo',
+                value: 'value-foo',
+            },
+
+            bar: {
+                key: 'key-bar',
+                value: 'value-bar',
+            },
+        });
+
+        // execute
+        var entityId = testSubject.createEntity({
+            type: 'foobar',
+            foo: {
+                value: 'value-foo-new'
+            }
+        });
+
+        // verify
+        expect(repo.getAllComponentsOfEntity(entityId)).toEqual({
+            foo: {
+                id: entityId,
+                key: 'key-foo',
+                value: 'value-foo-new',
+            },
+            bar: {
+                id: entityId,
+                key: 'key-bar',
+                value: 'value-bar',
+            },
+        });
     });
 });
