@@ -19,7 +19,7 @@
                 function ClassA(cfg) {
                     cfg = cfg || {};
                     cfg.id = cfg.id || alchemy.id();
-                    alchemy.extend(this, cfg);
+                    alchemy.override(this, cfg);
                 }
 
                 function ClassB(cfg) {

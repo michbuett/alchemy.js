@@ -530,7 +530,7 @@ describe('alchemy', function () {
             var expectedValue;
             // execute
             alchemy.defineProperty(obj, 'foo', {get: true});
-            alchemy.extend(obj, {
+            alchemy.override(obj, {
                 getFoo: alchemy.override(function (_super) {
                     return function () {
                         return 'foo - ' + _super.call(this) + ' - baz';
@@ -595,7 +595,7 @@ describe('alchemy', function () {
                 get: true,
                 set: true
             });
-            alchemy.extend(obj, {
+            alchemy.override(obj, {
                 setFoo: alchemy.override(function (_super) {
                     return function (val) {
                         return _super.call(this, 'foo - ' + val + ' - baz');
@@ -616,6 +616,24 @@ describe('alchemy', function () {
 
     /** @name TEST_extend */
     describe('extend', function () {
+        it('allows extending prototypes', function () {
+            // prepare
+            var parent = {
+                foo: 'foo'
+            };
+
+            var child = alchemy.extend(parent, {
+                bar: 'bar'
+            });
+
+            expect(parent.isPrototypeOf(child)).toBeTruthy();
+            expect(child.foo).toBe('foo');
+            expect(child.bar).toBe('bar');
+        });
+    });
+
+    /** @name TEST_override */
+    describe('override', function () {
         it('allows overriding multiple methods at once', function () {
             // prepare
             var f1 = function () { return 'override-1'; };
@@ -628,7 +646,7 @@ describe('alchemy', function () {
                 f4: function () { return 'origin-4'; },
             };
             // execute
-            alchemy.extend(obj, {
+            alchemy.override(obj, {
                 f1: f1,
                 f2: f2,
                 f3: f3
@@ -648,14 +666,14 @@ describe('alchemy', function () {
                 }
             };
             // execute
-            alchemy.extend(obj, {
+            alchemy.override(obj, {
                 foo: alchemy.override(function (_super) {
                     return function () {
                         return _super.call(this) + ' - bar';
                     };
                 })
             });
-            alchemy.extend(obj, {
+            alchemy.override(obj, {
                 foo: alchemy.override(function (_super) {
                     return function () {
                         return _super.call(this) + ' - baz';
@@ -681,7 +699,7 @@ describe('alchemy', function () {
                 };
             });
             //execute
-            alchemy.extend(obj, {
+            alchemy.override(obj, {
                 constructor: newCtor
             });
             obj.constructor();
@@ -697,7 +715,7 @@ describe('alchemy', function () {
                 bar: 'bar'
             };
             // execute
-            obj = alchemy.extend(obj, {
+            obj = alchemy.override(obj, {
                 bar: 'baz',
                 ping: 'pong'
             });
@@ -716,7 +734,7 @@ describe('alchemy', function () {
                     this.val = val;
                 }
             };
-            alchemy.extend(obj, {
+            alchemy.override(obj, {
                 foo: alchemy.override(function (_super) {
                     return function (val) {
                         _super.call(this, val + ' - xtended!!!');
@@ -737,7 +755,7 @@ describe('alchemy', function () {
                 foo: function () {}
             };
             // execute
-            alchemy.extend(obj, {
+            alchemy.override(obj, {
                 foo: alchemy.override(function () {
                     return function () {
                         actualScopeObj = expectedScopeObj;
@@ -753,7 +771,7 @@ describe('alchemy', function () {
             // prepare
             var obj = {};
             // execute
-            alchemy.extend(obj, {
+            alchemy.override(obj, {
                 foo: alchemy.defineProperty({
                     value: 'foo'
                 }),
@@ -788,7 +806,7 @@ describe('alchemy', function () {
                 setFoo: jasmine.createSpy('setFoo'),
             };
             // execute
-            alchemy.extend(obj, {
+            alchemy.override(obj, {
                 foo: alchemy.defineProperty({
                     get: true,
                     set: true
@@ -1039,6 +1057,7 @@ describe('alchemy', function () {
                     },
                 },
             });
+
             // execute
             var overrides = jasmine.createSpy('overrides').andCallFake(function (_super) {
                 return {
@@ -1049,11 +1068,72 @@ describe('alchemy', function () {
             });
             var p2 = alchemy.brew({
                 extend: p1,
+                requires: [
+                    'alchemy.core.Oculus',
+                    'alchemy.core.Observari',
+                ],
                 overrides: overrides
             });
+
             // verify
-            expect(overrides).toHaveBeenCalledWith(p1);
+            expect(overrides).toHaveBeenCalledWith(p1, alchemy('Oculus'), alchemy('Observari'));
             expect(p2.foo()).toBe('foo - bar');
+        });
+
+        it('supports api verion 2', function () {
+            // prepare
+            var fooV2 = alchemy.brew({
+                name: 'name-fooV2',
+                alias: 'alias-fooV2',
+                api: 'v2',
+            });
+
+            var barV2Overrides = jasmine.createSpy().andCallFake(function (foo) {
+                return alchemy.extend(foo);
+            });
+
+            // execute
+            var barV2 = alchemy.brew({
+                requires: [ 'alias-fooV2' ],
+                api: 'v2',
+                overrides: barV2Overrides
+            });
+
+            // verify
+            expect(typeof fooV2).toBe('object');
+            expect(typeof barV2).toBe('object');
+            expect(fooV2.isPrototypeOf(barV2)).toBeTruthy();
+            expect(barV2Overrides).toHaveBeenCalledWith(fooV2);
+        });
+
+        it('adds a default constructor method in api version 2', function () {
+            var potion = alchemy.brew({ api: 'v2', });
+
+            var sub = new potion.constructor({
+                foo: 'foo',
+                bar: 'bar',
+            });
+
+            expect(potion.constructor).not.toBe(Object.prototype.constructor);
+            expect(sub.foo).toBe('foo');
+            expect(sub.bar).toBe('bar');
+        });
+
+        it('adds a default factory method "brew" in api version 2', function () {
+            var potion = alchemy.brew({ api: 'v2', });
+
+            var sub = potion.brew({
+                foo: 'foo',
+                bar: 'bar',
+            });
+
+            var sub2 = sub.brew();
+
+            expect(typeof potion.brew).toBe('function');
+            expect(sub.foo).toBe('foo');
+            expect(sub.bar).toBe('bar');
+            expect(potion.isPrototypeOf(sub)).toBeTruthy();
+            expect(sub.isPrototypeOf(sub2)).toBeTruthy();
         });
     });
 

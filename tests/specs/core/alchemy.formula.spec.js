@@ -66,7 +66,37 @@ describe('alchemy.formula', function () {
                 }
             }
         });
+
         var unresolve = formula.dependencies();
-        expect(unresolve).toEqual(['BaseFormula', 'RequiredFomula1', 'RequiredFomula2', 'Ingredient1', 'Ingredient2']);
+
+        expect(unresolve).toEqual([
+            'BaseFormula',
+            'RequiredFomula1',
+            'RequiredFomula2',
+            'Ingredient1',
+            'Ingredient2'
+        ]);
+    });
+
+    it('supports api v2', function () {
+        // prepare
+        var source = {
+            foo: 'foo',
+            bar: 'bar',
+        };
+
+        var spy = jasmine.createSpy().andReturn(source);
+
+        // execute
+        alchemy.formula.define('formula-v2', [
+            'alchemy.core.Oculus',
+            'alchemy.core.Observari',
+        ], spy);
+
+        // verify
+        var potion = alchemy('formula-v2');
+        expect(potion.foo).toBe('foo');
+        expect(potion.bar).toBe('bar');
+        expect(spy).toHaveBeenCalledWith(alchemy('Oculus'), alchemy('Observari'));
     });
 });
