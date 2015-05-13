@@ -154,6 +154,31 @@ describe('alchemy.ecs.CssRenderSystem', function () {
             // verify
             }).not.toThrow();
         });
+
+        it('allows to render static (state-independent) css', function () {
+            // prepare
+            var apothecarius = initEntities();
+            var testSubject = alchemy('alchemy.ecs.CssRenderSystem').brew({
+                entities: apothecarius,
+            });
+
+            apothecarius.addComponent('foo', 'staticCss', {
+                rules: {
+                    '#foo': {'color': '#FF0000'},
+                    '#bar': {'color': '#00FF00'},
+                    '#baz': {'color': '#0000FF'},
+                },
+            });
+
+            // execute
+            testSubject.update();
+
+            // verify
+            expect($('div#foo')).toHaveCss({color: 'rgb(255, 0, 0)'});
+            expect($('div#bar')).toHaveCss({color: 'rgb(0, 255, 0)'});
+            expect($('div#baz')).toHaveCss({color: 'rgb(0, 0, 255)'});
+        });
+
     });
 
     function initEntities() {
