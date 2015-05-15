@@ -291,6 +291,7 @@ describe('alchemy', function () {
     });
 
 
+    /** @name TEST_extract */
     describe('extract', function () {
         it('reduces an array of objects to an array of object values', function () {
             expect(alchemy.extract([{
@@ -302,6 +303,16 @@ describe('alchemy', function () {
             }, {
                 kez: 'bam'
             }], 'key')).toEqual(['foo', 'bar', 'baz', undefined]);
+        });
+
+        it('ignores non-objects in source list', function () {
+            expect(alchemy.extract([{
+                key: 'foo'
+            }, {
+                key: 'bar'
+            }, null, 1, 'xyz', {
+                key: 'baz'
+            }], 'key')).toEqual(['foo', 'bar', 'baz']);
         });
 
         it('reduces an object of objects to an array of object values', function () {
@@ -627,6 +638,24 @@ describe('alchemy', function () {
             });
 
             expect(parent.isPrototypeOf(child)).toBeTruthy();
+            expect(child.foo).toBe('foo');
+            expect(child.bar).toBe('bar');
+        });
+
+        it('supports a function as second argument which is called with the parent', function () {
+            // prepare
+            var parent = {
+                foo: 'foo'
+            };
+            var spy = jasmine.createSpy().andReturn({
+                bar: 'bar'
+            });
+
+            // execute
+            var child = alchemy.extend(parent, spy);
+
+            expect(parent.isPrototypeOf(child)).toBeTruthy();
+            expect(spy).toHaveBeenCalledWith(parent);
             expect(child.foo).toBe('foo');
             expect(child.bar).toBe('bar');
         });
@@ -1096,7 +1125,7 @@ describe('alchemy', function () {
             var barV2 = alchemy.brew({
                 requires: [ 'alias-fooV2' ],
                 api: 'v2',
-                overrides: barV2Overrides
+                potion: barV2Overrides
             });
 
             // verify
@@ -1106,34 +1135,21 @@ describe('alchemy', function () {
             expect(barV2Overrides).toHaveBeenCalledWith(fooV2);
         });
 
-        it('adds a default constructor method in api version 2', function () {
-            var potion = alchemy.brew({ api: 'v2', });
-
-            var sub = new potion.constructor({
-                foo: 'foo',
-                bar: 'bar',
+        it('adds no magic stuff in api version 2', function () {
+            // prepare
+            // execute
+            var potion = alchemy.brew({
+                api: 'v2',
+                potion: {
+                    foo: 'foo',
+                    bar: 'bar',
+                }
             });
 
-            expect(potion.constructor).not.toBe(Object.prototype.constructor);
-            expect(sub.foo).toBe('foo');
-            expect(sub.bar).toBe('bar');
-        });
-
-        it('adds a default factory method "brew" in api version 2', function () {
-            var potion = alchemy.brew({ api: 'v2', });
-
-            var sub = potion.brew({
-                foo: 'foo',
-                bar: 'bar',
-            });
-
-            var sub2 = sub.brew();
-
-            expect(typeof potion.brew).toBe('function');
-            expect(sub.foo).toBe('foo');
-            expect(sub.bar).toBe('bar');
-            expect(potion.isPrototypeOf(sub)).toBeTruthy();
-            expect(sub.isPrototypeOf(sub2)).toBeTruthy();
+            // verify
+            expect(potion.foo).toBe('foo');
+            expect(potion.bar).toBe('bar');
+            expect(Object.keys(potion)).toEqual(['foo', 'bar']);
         });
     });
 

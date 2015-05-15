@@ -143,6 +143,11 @@ module.exports = function (grunt) {
                 tasks: ['jasmine_node', 'jasmine:core'],
             },
 
+            jsNode: {
+                files: ['lib/node/**/*.js'],
+                tasks: ['jasmine_node'],
+            },
+
             jsWeb: {
                 files: [
                     'lib/ecs/**/*.js',

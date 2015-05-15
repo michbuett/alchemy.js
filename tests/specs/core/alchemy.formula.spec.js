@@ -63,7 +63,11 @@ describe('alchemy.formula', function () {
                 ingr1: 'Ingredient1',
                 ingr2: {
                     potion: 'Ingredient2'
-                }
+                },
+                ingr3: {
+                    fooBar: 'Ingredient3'
+                },
+                ingr4: null,
             }
         });
 
