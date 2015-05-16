@@ -22,8 +22,8 @@ describe('alchemy.ecs.EventSystem', function () {
         testSubject.update();
 
         // verify
-        expect(apothecarius.getComponent('foo', 'events')).toBeFalsy();
-        expect(apothecarius.getComponent('foo', 'delegatedEvents').current.val()).toEqual([{
+        expect(apothecarius.getComponentData('foo', 'events')).toBeFalsy();
+        expect(apothecarius.getComponentData('foo', 'delegatedEvents')).toEqual([{
             event: 'click',
             delegate: 0,
         }]);
@@ -73,7 +73,7 @@ describe('alchemy.ecs.EventSystem', function () {
         // execute
         testSubject.defineEntityType('foo', entityDescriptor);
         testSubject.update();
-        var del = entities.getComponent('foo', 'delegatedEvents').current.val()[0];
+        var del = entities.getComponentData('foo', 'delegatedEvents')[0];
         delegator.delegateKey(del.event, del.delegate, testEl);
         $(testEl).click();
 
@@ -100,7 +100,7 @@ describe('alchemy.ecs.EventSystem', function () {
 
         // execute
         testSubject.update();
-        var del = entities.getComponent('bar', 'delegatedEvents').current.val()[0];
+        var del = entities.getComponentData('bar', 'delegatedEvents')[0];
         delegator.delegateKey(del.event, del.delegate, testEl);
         $(testEl).click();
 
@@ -122,65 +122,57 @@ describe('alchemy.ecs.EventSystem', function () {
             getEventHandler: function () {
                 return {
                     fooClick: function (event, state) {
-                        return state.set({
+                        return {
                             foo: 'foo-2',
                             bar: 'bar-2',
-                        });
+                        };
 
                     },
                 };
             },
         };
-        var state = alchemy('Immutatio').makeImmutable({
+
+        entities.setComponent('foo', 'state', {
             foo: 'foo-1',
             bar: 'bar-1',
-        });
-
-        entities.addComponent('foo', 'state', {
-            current: state,
-            last: state,
         });
 
         // execute
         testSubject.defineEntityType('foo', entityDescriptor);
         testSubject.update();
-        var del = entities.getComponent('foo', 'delegatedEvents').current.val()[0];
+        var del = entities.getComponentData('foo', 'delegatedEvents')[0];
         delegator.delegateKey(del.event, del.delegate, testEl);
         $(testEl).click();
 
         // verify
-        var actualState = entities.getComponent('foo', 'state');
-        expect(actualState.last.val()).toEqual({
-            foo: 'foo-1',
-            bar: 'bar-1',
-        });
-        expect(actualState.current.val()).toEqual({
+        expect(entities.getComponentData('foo', 'state')).toEqual({
             foo: 'foo-2',
             bar: 'bar-2',
         });
     });
 
-    it('updates the "delegatedEvents" property', function () {
+    it('removes references when being disposed', function () {
         // prepare
-        var delegator = alchemy('alchemy.web.Delegatus').brew();
-        var entities = initEntities();
         var testSubject = alchemy('alchemy.ecs.EventSystem').brew({
-            entities: entities,
-            delegator: delegator,
+            entities: initEntities(),
+            delegator: alchemy('alchemy.web.Delegatus').brew(),
+            messages: alchemy('alchemy.core.Observari').brew(),
         });
 
         // execute
-        testSubject.update();
+        testSubject.dispose();
 
         // verify
-        var bazDelegates = entities.getComponent('baz', 'delegatedEvents');
-        expect(bazDelegates.last).toBe(bazDelegates.current);
+        expect(testSubject.entities).toBeFalsy();
+        expect(testSubject.delegator).toBeFalsy();
+        expect(testSubject.messages).toBeFalsy();
     });
 
     function initEntities() {
         var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
         apothecarius.createEntity({
             id: 'foo',
+
             events: {
                 click: {
                     handler: 'fooClick',
@@ -191,7 +183,7 @@ describe('alchemy.ecs.EventSystem', function () {
         apothecarius.createEntity({
             id: 'bar',
             state: {
-                current: alchemy('Immutatio').makeImmutable({foo: 'bar'}),
+                foo: 'bar',
             },
 
             events: {
@@ -199,16 +191,14 @@ describe('alchemy.ecs.EventSystem', function () {
                     message: 'fooMessage',
                 }
             },
-            delegatedEvents: {
-                current: alchemy('Immutatio').makeImmutable([])
-            }
+
+            delegatedEvents: []
         });
 
         apothecarius.createEntity({
             id: 'baz',
-            delegatedEvents: {
-                current: alchemy('Immutatio').makeImmutable([])
-            }
+
+            delegatedEvents: []
         });
         return apothecarius;
     }

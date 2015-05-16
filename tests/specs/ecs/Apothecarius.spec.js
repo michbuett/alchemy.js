@@ -33,8 +33,8 @@ describe('alchemy.ecs.Apothecarius', function () {
             // execute
             var entityId = apothecarius.createEntity(testComponents);
             var allComponent = apothecarius.getAllComponentsOfEntity(entityId);
-            var fooComponent = apothecarius.getComponent(entityId, 'foo');
-            var barComponent = apothecarius.getComponent(entityId, 'bar');
+            var fooComponent = apothecarius.getComponentData(entityId, 'foo');
+            var barComponent = apothecarius.getComponentData(entityId, 'bar');
 
             // verify
             expect(typeof entityId).toBe('string');
@@ -105,11 +105,29 @@ describe('alchemy.ecs.Apothecarius', function () {
                 });
             }).toThrow('The id: "' + entityId + '" is already used');
         });
+
+        it('allows to define non-object components', function () {
+            // prepare
+            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            var cfg = {
+                foo: 'foo',
+                bar: ['bar'],
+                baz: function baz() {},
+            };
+
+            // execute
+            var entityId = apothecarius.createEntity(cfg);
+
+            // verify
+            expect(apothecarius.getComponentData(entityId, 'foo')).toEqual(cfg.foo);
+            expect(apothecarius.getComponentData(entityId, 'bar')).toEqual(cfg.bar);
+            expect(apothecarius.getComponentData(entityId, 'baz')).toEqual(cfg.baz);
+        });
     });
 
-    /** @name TEST_addComponent */
-    describe('addComponent', function () {
-        it('allows to remove a component from a given entity', function () {
+    /** @name TEST_setComponent */
+    describe('setComponent', function () {
+        it('allows to add a component from a given entity', function () {
             // prepare
             var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
             var entityId = apothecarius.createEntity({
@@ -120,7 +138,7 @@ describe('alchemy.ecs.Apothecarius', function () {
 
             // execute
             var allComponentBefore = apothecarius.getAllComponentsOfEntity(entityId);
-            var result = apothecarius.addComponent(entityId, 'bar', {
+            var result = apothecarius.setComponent(entityId, 'bar', {
                 key: 'value-bar'
             });
             var allComponentAfter = apothecarius.getAllComponentsOfEntity(entityId);
@@ -128,7 +146,26 @@ describe('alchemy.ecs.Apothecarius', function () {
             // verify
             expect(Object.keys(allComponentBefore)).toEqual(['foo']);
             expect(Object.keys(allComponentAfter)).toEqual(['foo', 'bar']);
-            expect(result).toBe(apothecarius.getComponent(entityId, 'bar'));
+            expect(result).toBe(apothecarius.getComponentData(entityId, 'bar'));
+        });
+
+        it('allows to update a component from a given entity', function () {
+            // prepare
+            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            var entityId = apothecarius.createEntity({
+                foo: {
+                    key1: 'value1',
+                    key2: 'value2',
+                },
+            });
+
+            // execute
+            var before = apothecarius.getComponentData(entityId, 'foo');
+            var after = apothecarius.setComponent(entityId, 'foo', { key1: 'value1-modified' });
+
+            // verify
+            expect(before).toEqual({ key1: 'value1', key2: 'value2'});
+            expect(after).toEqual({ key1: 'value1-modified', key2: 'value2'});
         });
 
         it('throws an exception when trying to add a component to not existent exception', function () {
@@ -136,7 +173,7 @@ describe('alchemy.ecs.Apothecarius', function () {
             var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
             // execute/verify
             expect(function () {
-                apothecarius.addComponent('foo', 'bar', {});
+                apothecarius.setComponent('foo', 'bar', {});
             }).toThrow('Unknown entity: "foo"');
         });
     });
@@ -156,12 +193,18 @@ describe('alchemy.ecs.Apothecarius', function () {
 
             // execute
             var allComponentBefore = apothecarius.getAllComponentsOfEntity(entityId);
+            var allOfTypeBefore = apothecarius.getAllComponentsOfType('bar');
+
             apothecarius.removeComponent(entityId, 'bar');
+
             var allComponentAfter = apothecarius.getAllComponentsOfEntity(entityId);
+            var allOfTypeAfter = apothecarius.getAllComponentsOfType('bar');
 
             // verify
             expect(Object.keys(allComponentBefore)).toEqual(['foo', 'bar']);
             expect(Object.keys(allComponentAfter)).toEqual(['foo']);
+            expect(Object.keys(allOfTypeBefore)).toEqual([entityId]);
+            expect(Object.keys(allOfTypeAfter)).toEqual([]);
         });
 
         it('ignores unknown components', function () {
@@ -196,6 +239,7 @@ describe('alchemy.ecs.Apothecarius', function () {
         });
     });
 
+    /** @name TEST_removeEntity */
     describe('removeEntity', function () {
         it('can remove a single entity', function () {
             // prepare
@@ -218,8 +262,21 @@ describe('alchemy.ecs.Apothecarius', function () {
             expect(containsBefore).toBeTruthy();
             expect(containsAfter).toBeFalsy();
         });
+
+        it('ignores non-existing entities', function () {
+            // prepare
+            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+
+            // execute
+            expect(function () {
+                apothecarius.removeEntity('some-unknown-entity');
+
+            // verify
+            }).not.toThrow();
+        });
     });
 
+    /** @name TEST_removeAllEntities */
     describe('removeAllEntities', function () {
         it('can remove all entities at once', function () {
             // prepare
@@ -247,6 +304,7 @@ describe('alchemy.ecs.Apothecarius', function () {
         });
     });
 
+    /** @name TEST_dispose */
     describe('dispose', function () {
         it('clears all stored entities when being disposed', function () {
             // prepare

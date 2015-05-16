@@ -67,18 +67,16 @@ describe('alchemy.ecs.CssRenderSystem', function () {
                 id: 'foo',
 
                 state: {
-                    current: alchemy('Immutatio').makeImmutable({
-                        fg: '#00FF00',
-                        bg: '#FF00FF',
-                    }),
+                    fg: '#00FF00',
+                    bg: '#FF00FF',
                 },
 
                 css: {
                     renderer: function (state) {
                         return {
                             '#foo': {
-                                'color': state.val('fg'),
-                                'background-color': state.val('bg'),
+                                'color': state.fg,
+                                'background-color': state.bg,
                             },
                         };
                     }
@@ -101,15 +99,13 @@ describe('alchemy.ecs.CssRenderSystem', function () {
 
         it('ignores entities where state was unchanged', function () {
             // prepare
-            var state = alchemy('Immutatio').makeImmutable({'foo': 'bar'});
             var renderSpy = jasmine.createSpy();
             var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
             apothecarius.createEntity({
                 id: 'foo',
 
                 state: {
-                    current: state,
-                    last: state,
+                    foo: 'bar',
                 },
 
                 css: {
@@ -120,6 +116,9 @@ describe('alchemy.ecs.CssRenderSystem', function () {
             var testSubject = alchemy('alchemy.ecs.CssRenderSystem').brew({
                 entities: apothecarius
             });
+
+            testSubject.update();
+            renderSpy.reset();
 
             // execute
             testSubject.update();
@@ -135,7 +134,7 @@ describe('alchemy.ecs.CssRenderSystem', function () {
                 id: 'foo',
 
                 state: {
-                    current: alchemy('Immutatio').makeImmutable({fg: '#00FF00'})
+                    fg: '#00FF00'
                 },
 
                 css: {
@@ -162,7 +161,7 @@ describe('alchemy.ecs.CssRenderSystem', function () {
                 entities: apothecarius,
             });
 
-            apothecarius.addComponent('foo', 'staticCss', {
+            apothecarius.setComponent('foo', 'staticCss', {
                 rules: {
                     '#foo': {'color': '#FF0000'},
                     '#bar': {'color': '#00FF00'},
@@ -179,6 +178,21 @@ describe('alchemy.ecs.CssRenderSystem', function () {
             expect($('div#baz')).toHaveCss({color: 'rgb(0, 0, 255)'});
         });
 
+    });
+
+    describe('dispose', function () {
+        it('removes the reference to the apothecarius', function () {
+            // prepare
+            var testSubject = alchemy('alchemy.ecs.CssRenderSystem').brew({
+                entities: initEntities()
+            });
+
+            // execute
+            testSubject.dispose();
+
+            // verify
+            expect(testSubject.entities).toBeFalsy();
+        });
     });
 
     function initEntities() {

@@ -117,7 +117,7 @@ describe('alchemy.ecs.Administrator', function () {
         expect(repo.contains('baz')).toBeTruthy();
     });
 
-    it('allows to define default componentss for an entity type', function () {
+    it('allows to define default components for an entity type', function () {
         // prepare
         var repo = alchemy('alchemy.ecs.Apothecarius').brew(repo);
         var testSubject = alchemy('alchemy.ecs.Administrator').brew({ repo: repo, });

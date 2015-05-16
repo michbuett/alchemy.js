@@ -1,5 +1,5 @@
 /* global $ */
-describe('alchemy.web.VDomRenderSystem', function () {
+describe('alchemy.ecs.VDomRenderSystem', function () {
     'use strict';
 
     var alchemy = require('./../../../lib/core/Alchemy.js');
@@ -35,12 +35,14 @@ describe('alchemy.web.VDomRenderSystem', function () {
         var renderer = alchemy('alchemy.ecs.VDomRenderSystem').brew({
             entities: this.apothecarius
         });
+
         renderer.update();
-        var barState = this.apothecarius.getComponent('bar', 'state');
+
+        this.apothecarius.setComponent('bar', 'state', {
+            bla: 'blub'
+        });
 
         // execute
-        barState.last = barState.current;
-        barState.current = barState.current.set('bla', 'blub');
         renderer.update();
 
         // verify
@@ -60,12 +62,10 @@ describe('alchemy.web.VDomRenderSystem', function () {
         });
 
         renderer.update();
-        this.apothecarius.addComponent('foo', 'delegatedEvents', {
-            current: alchemy('Immutatio').makeImmutable([{
-                event: 'click',
-                delegate: delegateKey,
-            }]),
-        });
+        this.apothecarius.setComponent('foo', 'delegatedEvents', [{
+            event: 'click',
+            delegate: delegateKey,
+        }]);
 
         // execute
         renderer.update();
@@ -111,8 +111,23 @@ describe('alchemy.web.VDomRenderSystem', function () {
         renderer.update();
 
         // verify
-        var vdom = this.apothecarius.getComponent('no-parent-dom', 'vdom');
+        var vdom = this.apothecarius.getComponentData('no-parent-dom', 'vdom');
         expect(vdom.last).toBeFalsy();
+    });
+
+    it('removes references when being disposed', function () {
+        // prepare
+        var testSubject = alchemy('alchemy.ecs.VDomRenderSystem').brew({
+            delegator: alchemy('alchemy.web.Delegatus').brew(),
+            entities: this.apothecarius
+        });
+
+        // execute
+        testSubject.dispose();
+
+        // verify
+        expect(testSubject.entities).toBeFalsy();
+        expect(testSubject.delegator).toBeFalsy();
     });
 
     function initRenderer() {
@@ -156,8 +171,6 @@ describe('alchemy.web.VDomRenderSystem', function () {
     }
 
     function initEntities(apothecarius) {
-        var barState = alchemy('Immutatio').makeImmutable({'bla': 'bla'});
-
         apothecarius.createEntity({
             id: 'foo',
             vdom: {
@@ -178,10 +191,10 @@ describe('alchemy.web.VDomRenderSystem', function () {
             children: {
                 ping: 'ping',
                 pong: 'pong',
+                fail: 'unknown-entity',
             },
             state: {
-                current: barState,
-                last: barState,
+                bla: 'bla',
             }
         });
 
