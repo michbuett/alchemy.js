@@ -142,12 +142,10 @@ describe('alchemy.ecs.Administrator', function () {
         // verify
         expect(repo.getAllComponentsOfEntity(entityId)).toEqual({
             foo: {
-                id: entityId,
                 key: 'key-foo',
                 value: 'value-foo',
             },
             bar: {
-                id: entityId,
                 key: 'key-bar',
                 value: 'value-bar',
             },
@@ -182,12 +180,10 @@ describe('alchemy.ecs.Administrator', function () {
         // verify
         expect(repo.getAllComponentsOfEntity(entityId)).toEqual({
             foo: {
-                id: entityId,
                 key: 'key-foo',
                 value: 'value-foo-new',
             },
             bar: {
-                id: entityId,
                 key: 'key-bar',
                 value: 'value-bar',
             },

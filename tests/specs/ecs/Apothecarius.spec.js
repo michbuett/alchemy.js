@@ -40,14 +40,8 @@ describe('alchemy.ecs.Apothecarius', function () {
             expect(typeof entityId).toBe('string');
             expect(allComponent.foo).toBe(fooComponent);
             expect(allComponent.bar).toBe(barComponent);
-            expect(fooComponent).toEqual({
-                id: entityId,
-                key: 'value-foo',
-            });
-            expect(barComponent).toEqual({
-                id: entityId,
-                key: 'value-bar',
-            });
+            expect(fooComponent).toEqual({ key: 'value-foo', });
+            expect(barComponent).toEqual({ key: 'value-bar', });
         });
 
         it('allows to retrieve all components of a type', function () {
@@ -63,19 +57,15 @@ describe('alchemy.ecs.Apothecarius', function () {
                     value: 'foo-e2'
                 }
             });
+            var expectedResult = {};
+            expectedResult[e1] = { value: 'foo-e1', };
+            expectedResult[e2] = { value: 'foo-e2', };
 
             // execute
             var result = apothecarius.getAllComponentsOfType('foo');
 
             // verify
-            expect(alchemy.isArray(result)).toBeTruthy();
-            expect(result).toEqual([{
-                id: e1,
-                value: 'foo-e1',
-            }, {
-                id: e2,
-                value: 'foo-e2',
-            }]);
+            expect(result).toEqual(expectedResult);
         });
 
         it('allows to retrieve all components of an entity', function () {
@@ -96,11 +86,9 @@ describe('alchemy.ecs.Apothecarius', function () {
             // verify
             expect(result).toEqual({
                 foo: {
-                    id: entityId,
                     key: 'value-foo'
                 },
                 bar: {
-                    id: entityId,
                     key: 'value-bar'
                 },
             });
