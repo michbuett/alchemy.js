@@ -72,11 +72,11 @@ describe('alchemy.ecs.CssRenderSystem', function () {
                 },
 
                 css: {
-                    renderer: function (state) {
+                    renderer: function (ctx) {
                         return {
                             '#foo': {
-                                'color': state.fg,
-                                'background-color': state.bg,
+                                'color': ctx.state.val('fg'),
+                                'background-color': ctx.state.val('bg'),
                             },
                         };
                     }
