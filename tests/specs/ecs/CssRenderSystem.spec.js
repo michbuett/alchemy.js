@@ -72,12 +72,10 @@ describe('alchemy.ecs.CssRenderSystem', function () {
                 },
 
                 css: {
-                    renderer: function (ctx) {
+                    entityRules: function (state) {
                         return {
-                            '#foo': {
-                                'color': ctx.state.val('fg'),
-                                'background-color': ctx.state.val('bg'),
-                            },
+                            'color': state.val('fg'),
+                            'background-color': state.val('bg'),
                         };
                     }
                 }
@@ -99,7 +97,7 @@ describe('alchemy.ecs.CssRenderSystem', function () {
 
         it('ignores entities where state was unchanged', function () {
             // prepare
-            var renderSpy = jasmine.createSpy();
+            var renderSpy = jasmine.createSpy().andReturn({padding: 0});
             var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
             apothecarius.createEntity({
                 id: 'foo',
@@ -109,7 +107,7 @@ describe('alchemy.ecs.CssRenderSystem', function () {
                 },
 
                 css: {
-                    renderer: renderSpy
+                    entityRules: renderSpy
                 }
             });
 
@@ -127,33 +125,6 @@ describe('alchemy.ecs.CssRenderSystem', function () {
             expect(renderSpy).not.toHaveBeenCalled();
         });
 
-        it('ignores css components without renderer', function () {
-            // prepare
-            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
-            apothecarius.createEntity({
-                id: 'foo',
-
-                state: {
-                    fg: '#00FF00'
-                },
-
-                css: {
-                    renderer: null
-                }
-            });
-
-            var testSubject = alchemy('alchemy.ecs.CssRenderSystem').brew({
-                entities: apothecarius
-            });
-
-            // execute
-            expect(function () {
-                testSubject.update();
-
-            // verify
-            }).not.toThrow();
-        });
-
         it('allows to render static (state-independent) css', function () {
             // prepare
             var apothecarius = initEntities();
@@ -161,8 +132,8 @@ describe('alchemy.ecs.CssRenderSystem', function () {
                 entities: apothecarius,
             });
 
-            apothecarius.setComponent('foo', 'staticCss', {
-                rules: {
+            apothecarius.setComponent('foo', 'css', {
+                typeRules: {
                     '#foo': {'color': '#FF0000'},
                     '#bar': {'color': '#00FF00'},
                     '#baz': {'color': '#0000FF'},
