@@ -149,6 +149,26 @@ describe('alchemy.ecs.CssRenderSystem', function () {
             expect($('div#baz')).toHaveCss({color: 'rgb(0, 0, 255)'});
         });
 
+        it('allows to render static (state-independent) entity css', function () {
+            // prepare
+            var apothecarius = initEntities();
+            var testSubject = alchemy('alchemy.ecs.CssRenderSystem').brew({
+                entities: apothecarius,
+            });
+
+            apothecarius.setComponent('foo', 'css', {
+                entityRules: {
+                    'color': 'rgb(1, 2, 3)'
+                },
+            });
+
+            // execute
+            testSubject.update();
+
+            // verify
+            expect($('div#foo')).toHaveCss({color: 'rgb(1, 2, 3)'});
+        });
+
     });
 
     describe('dispose', function () {
