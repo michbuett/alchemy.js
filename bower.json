@@ -1,0 +1,19 @@
+{
+  "name": "michbuett-alchemy",
+  "version": "0.4.0",
+  "homepage": "https://github.com/michbuett/alchemy.js",
+  "authors": [
+    "Michael Buettner <michael.buettner@gmx.net>"
+  ],
+  "description": "A framework for functional and data-driven app development",
+  "main": "lib/core/Alchemy.js",
+  "moduleType": ["global", "node"],
+  "license": "LICENSE",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "reports",
+    "tests"
+  ]
+}
