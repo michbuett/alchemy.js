@@ -51,7 +51,32 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
         expect($('div#foo div#bar.blub div#pong')).toExist();
     });
 
-    it('binds delegated events handler', function () {
+    it('binds delegated events handler with selector', function () {
+        // prepare
+        var testHandler = jasmine.createSpy();
+        var delegator = alchemy('alchemy.web.Delegatus').brew();
+        var delegateKey = delegator.delegateHandler('click', testHandler);
+        var renderer = alchemy('alchemy.ecs.VDomRenderSystem').brew({
+            delegator: delegator,
+            entities: this.apothecarius
+        });
+
+        renderer.update();
+        this.apothecarius.setComponent('foo', 'delegatedEvents', [{
+            event: 'click',
+            selector: '#baz',
+            delegate: delegateKey,
+        }]);
+
+        // execute
+        renderer.update();
+        $('#baz').click();
+
+        // verify
+        expect(testHandler).toHaveBeenCalled();
+    });
+
+    it('binds delegated events handler without selector', function () {
         // prepare
         var testHandler = jasmine.createSpy();
         var delegator = alchemy('alchemy.web.Delegatus').brew();

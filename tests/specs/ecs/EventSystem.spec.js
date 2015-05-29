@@ -24,6 +24,7 @@ describe('alchemy.ecs.EventSystem', function () {
         // verify
         expect(apothecarius.getComponentData('foo', 'events')).toBeFalsy();
         expect(apothecarius.getComponentData('foo', 'delegatedEvents')).toEqual([{
+            selector: '#foo',
             event: 'click',
             delegate: 0,
         }]);
@@ -175,6 +176,7 @@ describe('alchemy.ecs.EventSystem', function () {
 
             events: {
                 click: {
+                    selector: '#foo',
                     handler: 'fooClick',
                 }
             },
