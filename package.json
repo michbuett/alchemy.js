@@ -2,7 +2,7 @@
   "name": "alchemy.js",
   "description": "A framework for those who seek to master the dark arts of javascript development",
   "author": "Michael Büttner <michbuett@gmx.de>",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "repository": {
     "type": "git",
     "url": "https://github.com/michbuett/alchemy.js.git"
