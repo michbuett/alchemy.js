@@ -30,6 +30,35 @@ describe('alchemy.ecs.EventSystem', function () {
         }]);
     });
 
+    it('supports backbone-style even definition', function () {
+        // prepare
+        var testSubject = alchemy('alchemy.ecs.EventSystem').brew({
+            delegator: alchemy('alchemy.web.Delegatus').brew(),
+            entities: alchemy('alchemy.ecs.Apothecarius').brew(),
+        });
+
+        var entityId = testSubject.entities.createEntity({
+            events: {
+                'click .foo .bar': function () {},
+                'click #baz': function () {},
+            }
+        });
+
+        // execute
+        testSubject.update();
+
+        // verify
+        expect(testSubject.entities.getComponentData(entityId, 'delegatedEvents')).toEqual([{
+            selector: '.foo .bar',
+            event: 'click',
+            delegate: 0,
+        }, {
+            selector: '#baz',
+            event: 'click',
+            delegate: 1,
+        }]);
+    });
+
     it('allows to register custom handler functions when defining entity types', function () {
         // prepare
         var testSubject = alchemy('alchemy.ecs.EventSystem').brew();
