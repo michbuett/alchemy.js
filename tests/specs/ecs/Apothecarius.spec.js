@@ -178,11 +178,13 @@ describe('alchemy.ecs.Apothecarius', function () {
         });
     });
 
+    /** @name TEST_removeComponent */
     describe('removeComponent', function () {
         it('allows to remove a component from a given entity', function () {
             // prepare
             var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
             var entityId = apothecarius.createEntity({
+                id: 'test',
                 foo: {
                     key: 'value-foo'
                 },
@@ -205,6 +207,10 @@ describe('alchemy.ecs.Apothecarius', function () {
             expect(Object.keys(allComponentAfter)).toEqual(['foo']);
             expect(Object.keys(allOfTypeBefore)).toEqual([entityId]);
             expect(Object.keys(allOfTypeAfter)).toEqual([]);
+            expect(apothecarius.getAllComponentsOfType('foo')).toEqual({
+                test: {key: 'value-foo',}
+            });
+            expect(apothecarius.getAllComponentsOfType('bar')).toEqual({});
         });
 
         it('ignores unknown components', function () {
