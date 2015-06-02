@@ -1,4 +1,4 @@
-[![build status][1]][2]
+[![Build Status](https://travis-ci.org/michbuett/alchemy.js.svg?branch=master)](https://travis-ci.org/michbuett/alchemy.js)
 
 alchemy.js
 ==========
