@@ -17,5 +17,8 @@
     "grunt-jasmine-node-new": "~0.3.2",
     "grunt-jsonlint": "~1.0.0",
     "grunt-template-jasmine-istanbul": "^0.3.0"
+  },
+  "scripts": {
+        "test": "grunt test"
   }
 }
