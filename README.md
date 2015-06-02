@@ -1,8 +1,10 @@
+[![build status][1]][2]
+
 alchemy.js
 ==========
 It is the framework for every ambitious young developer who wants to master the occult arts of Javascript.
-Well, it is going to be. First of all it is a playgound where I can test my ideas and where I can improve my 
-programmer skills. 
+Well, it is going to be. First of all it is a playgound where I can test my ideas and where I can improve my
+programmer skills.
 
 So far I was able to come up with:
 * ... an advanced <a href="https://github.com/michbuett/alchemy.js/wiki/Potions">type system</a>, incuding mixins and a convenient way to call an overridden method
