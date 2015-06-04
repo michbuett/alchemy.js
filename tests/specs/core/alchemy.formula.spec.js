@@ -2,14 +2,10 @@ describe('alchemy.formula', function () {
     'use strict';
 
     var alchemy = require('./../../../lib/core/Alchemy.js');
-    var formula = alchemy.formula;
+    var formula;
 
-    it('allows to get the formulas of the core module', function () {
-        expect(formula.get('alchemy.core.MateriaPrima')).toBeDefined();
-        expect(formula.get('alchemy.core.Oculus')).toBeDefined();
-        expect(formula.get('alchemy.core.Observari')).toBeDefined();
-        expect(formula.get('alchemy.core.Modelum')).toBeDefined();
-        expect(formula.get('alchemy.core.Collectum')).toBeDefined();
+    beforeEach(function () {
+        formula = new alchemy.FormulaModule();
     });
 
     it('allows to store new formulas', function () {

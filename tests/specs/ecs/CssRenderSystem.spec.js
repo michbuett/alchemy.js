@@ -5,6 +5,8 @@ describe('alchemy.ecs.CssRenderSystem', function () {
     var alchemy = require('./../../../lib/core/Alchemy.js');
 
     beforeEach(function () {
+        this.stylus = alchemy('alchemy.web.Stylus').brew();
+
         setFixtures([
             '<div id="foo">FOO',
                 '<div id="bar">BAR',
@@ -14,10 +16,16 @@ describe('alchemy.ecs.CssRenderSystem', function () {
         ].join());
     });
 
+    afterEach(function () {
+        this.stylus.dispose();
+        this.stylus = null;
+    });
+
     describe('defineEntityType', function () {
         it('allows to render entity type specific css', function () {
             // prepare
             var testSubject = alchemy('alchemy.ecs.CssRenderSystem').brew({
+                stylus: this.stylus,
                 entities: initEntities()
             });
 
@@ -43,6 +51,7 @@ describe('alchemy.ecs.CssRenderSystem', function () {
         it('ignores descriptors which don\'t provide "getStaticCss" method', function () {
             // prepare
             var testSubject = alchemy('alchemy.ecs.CssRenderSystem').brew({
+                stylus: this.stylus,
                 entities: initEntities()
             });
 
@@ -82,6 +91,7 @@ describe('alchemy.ecs.CssRenderSystem', function () {
             });
 
             var testSubject = alchemy('alchemy.ecs.CssRenderSystem').brew({
+                stylus: this.stylus,
                 entities: apothecarius
             });
 
@@ -112,6 +122,7 @@ describe('alchemy.ecs.CssRenderSystem', function () {
             });
 
             var testSubject = alchemy('alchemy.ecs.CssRenderSystem').brew({
+                stylus: this.stylus,
                 entities: apothecarius
             });
 
@@ -129,6 +140,7 @@ describe('alchemy.ecs.CssRenderSystem', function () {
             // prepare
             var apothecarius = initEntities();
             var testSubject = alchemy('alchemy.ecs.CssRenderSystem').brew({
+                stylus: this.stylus,
                 entities: apothecarius,
             });
 
@@ -153,6 +165,7 @@ describe('alchemy.ecs.CssRenderSystem', function () {
             // prepare
             var apothecarius = initEntities();
             var testSubject = alchemy('alchemy.ecs.CssRenderSystem').brew({
+                stylus: this.stylus,
                 entities: apothecarius,
             });
 
@@ -175,6 +188,7 @@ describe('alchemy.ecs.CssRenderSystem', function () {
         it('removes the reference to the apothecarius', function () {
             // prepare
             var testSubject = alchemy('alchemy.ecs.CssRenderSystem').brew({
+                stylus: this.stylus,
                 entities: initEntities()
             });
 
