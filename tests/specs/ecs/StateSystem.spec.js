@@ -56,6 +56,36 @@ describe('alchemy.ecs.StateSystem', function () {
         });
     });
 
+    it('does nothing if application state has not changed', function () {
+        // prepare
+        var apothecarius = jasmine.createSpyObj(['getAllComponentsOfType']);
+        var testSubject = alchemy('alchemy.ecs.StateSystem').brew({
+            entities: apothecarius
+        });
+
+        testSubject.update(this.state);
+        apothecarius.getAllComponentsOfType.reset();
+
+        // execute
+        testSubject.update(this.state);
+
+        // verify
+        expect(apothecarius.getAllComponentsOfType).not.toHaveBeenCalled();
+    });
+
+    it('removes the reference to the apothecarius', function () {
+        // prepare
+        var testSubject = alchemy('alchemy.ecs.StateSystem').brew({
+            entities: this.apothecarius
+        });
+
+        // execute
+        testSubject.dispose();
+
+        // verify
+        expect(testSubject.entities).toBeFalsy();
+    });
+
     function initState(state) {
         return alchemy('alchemy.core.Immutatio').makeImmutable(state || {
             foo: 'foo-value-1',
