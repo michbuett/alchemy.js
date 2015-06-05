@@ -21,53 +21,6 @@ describe('alchemy.ecs.CssRenderSystem', function () {
         this.stylus = null;
     });
 
-    describe('defineEntityType', function () {
-        it('allows to render entity type specific css', function () {
-            // prepare
-            var testSubject = alchemy('alchemy.ecs.CssRenderSystem').brew({
-                stylus: this.stylus,
-                entities: initEntities()
-            });
-
-            testSubject.defineEntityType('someEntity', {
-                getStaticCss: function () {
-                    return {
-                        '#foo': {'color': '#FF0000'},
-                        '#bar': {'color': '#00FF00'},
-                        '#baz': {'color': '#0000FF'},
-                    };
-                },
-            });
-
-            // execute
-            testSubject.update();
-
-            // verify
-            expect($('div#foo')).toHaveCss({color: 'rgb(255, 0, 0)'});
-            expect($('div#bar')).toHaveCss({color: 'rgb(0, 255, 0)'});
-            expect($('div#baz')).toHaveCss({color: 'rgb(0, 0, 255)'});
-        });
-
-        it('ignores descriptors which don\'t provide "getStaticCss" method', function () {
-            // prepare
-            var testSubject = alchemy('alchemy.ecs.CssRenderSystem').brew({
-                stylus: this.stylus,
-                entities: initEntities()
-            });
-
-            // execute
-            expect(function () {
-                testSubject.defineEntityType('someEntity', {
-                    getStaticCss: null
-                });
-
-                testSubject.defineEntityType('someOtherEntity', {});
-
-            // verify
-            }).not.toThrow();
-        });
-    });
-
     describe('update', function () {
         it('allows to render entity specific css', function () {
             // prepare

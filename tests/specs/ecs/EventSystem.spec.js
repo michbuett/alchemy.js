@@ -59,29 +59,6 @@ describe('alchemy.ecs.EventSystem', function () {
         }]);
     });
 
-    it('allows to register custom handler functions when defining entity types', function () {
-        // prepare
-        var testSubject = alchemy('alchemy.ecs.EventSystem').brew();
-        var entityDescriptor = {
-            getEventHandler: function () {
-            },
-        };
-        spyOn(entityDescriptor, 'getEventHandler').andCallThrough();
-
-        // execute
-        testSubject.defineEntityType('foo', entityDescriptor);
-
-        // verify
-        expect(entityDescriptor.getEventHandler).toHaveBeenCalled();
-    });
-
-    it('ignores entity descriptors which do not provide new handle', function () {
-        expect(function () {
-            var testSubject = alchemy('alchemy.ecs.EventSystem').brew();
-            testSubject.defineEntityType('foo', {});
-        }).not.toThrow();
-    });
-
     it('can delegate browser events to handler methods', function () {
         // prepare
         var testHandler = jasmine.createSpy();
@@ -92,16 +69,9 @@ describe('alchemy.ecs.EventSystem', function () {
             delegator: delegator,
         });
         var testEl = document.getElementById('foo');
-        var entityDescriptor = {
-            getEventHandler: function () {
-                return {
-                    fooClick: testHandler
-                };
-            },
-        };
 
         // execute
-        testSubject.defineEntityType('foo', entityDescriptor);
+        testSubject.addHandler('fooClick', testHandler);
         testSubject.update();
         var del = entities.getComponentData('foo', 'delegatedEvents')[0];
         delegator.delegateKey(del.event, del.delegate, testEl);
@@ -148,27 +118,19 @@ describe('alchemy.ecs.EventSystem', function () {
             delegator: delegator,
         });
         var testEl = document.getElementById('foo');
-        var entityDescriptor = {
-            getEventHandler: function () {
-                return {
-                    fooClick: function (event, state) {
-                        return {
-                            foo: 'foo-2',
-                            bar: 'bar-2',
-                        };
 
-                    },
-                };
-            },
-        };
-
+        testSubject.addHandler('fooClick', function (event, state) {
+            return {
+                foo: 'foo-2',
+                bar: 'bar-2',
+            };
+        });
         entities.setComponent('foo', 'state', {
             foo: 'foo-1',
             bar: 'bar-1',
         });
 
         // execute
-        testSubject.defineEntityType('foo', entityDescriptor);
         testSubject.update();
         var del = entities.getComponentData('foo', 'delegatedEvents')[0];
         delegator.delegateKey(del.event, del.delegate, testEl);
