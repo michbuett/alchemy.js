@@ -20,9 +20,17 @@ Creation's wellsprings I'll reveal!”
   ― Johann Wolfgang von Goethe, Faust: First Part
 
 This is the framework for every ambitious young developer who wants to master the occult arts of Javascript.
-Well, it is going to be. First of all it is a playgound where I can test my ideas and where I can improve my
-programmer skills.
+Well, it is going to be. First and foremost it is a playgound where I can test my ideas and where I hone my developer skills.
 
+So far it provides (among other things):
+- A simple yet very powerful prototype based type system
+- An easy and flexible event system
+- Immutable data structures
+- Component systems for DOM updates, CSS creation and event delegation
+
+Planned:
+- Support or AMD-modules
+- Plug-In support
 
 ## How can I get it?
 It is available at [npm](https://www.npmjs.com/package/alchemy.js)
@@ -34,7 +42,7 @@ or [bower](http://bower.io/)
 bower install michbuett-alchemy
 ```
 
-
 ## How do I use it?
 You can take look at the examples:
 - [todo-ecs](https://github.com/michbuett/todo-ecs) - The [TodoMVC](http://todomvc.com/) application built using an [Entity-Component-System](http://entity-systems.wikidot.com/)
+- [alchemy-todo](https://github.com/michbuett/alchemy-todo) - A more tradional, MVC-based approach that also features some FRP mechanisms
