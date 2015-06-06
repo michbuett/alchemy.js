@@ -8,6 +8,10 @@
     "url": "https://github.com/michbuett/alchemy.js.git"
   },
   "main": "lib/core/Alchemy.js",
+  "keywords": [
+    "entity-system", "web", "frontend"
+  ],
+  "license": "LICENSE",
   "devDependencies": {
     "grunt": "~0.4.5",
     "grunt-available-tasks": "~0.5.0",
