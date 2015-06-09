@@ -46,3 +46,8 @@ bower install michbuett-alchemy
 You can take look at the examples:
 - [todo-ecs](https://github.com/michbuett/todo-ecs) - The [TodoMVC](http://todomvc.com/) application built using an [Entity-Component-System](http://entity-systems.wikidot.com/)
 - [alchemy-todo](https://github.com/michbuett/alchemy-todo) - A more tradional, MVC-based approach that also features some FRP mechanisms
+
+## What is with the deal with the naming?
+5%  - All the good names where taken and I had to pick something? 
+10% - Philosophy (thinking the unthinkable, to "... know what makes the world revolve")
+85% - Nerdy bullshit (no excuses)
