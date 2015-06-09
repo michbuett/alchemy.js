@@ -27,9 +27,10 @@ So far it provides (among other things):
 - An easy and flexible event system
 - Immutable data structures
 - Component systems for DOM updates, CSS creation and event delegation
+- A module loader
 
 Planned:
-- Support or AMD-modules
+- Support for AMD-modules - or maybe I drop it altogether. Something still feels wrong there. 
 - Plug-In support
 
 ## How can I get it?
@@ -47,7 +48,10 @@ You can take look at the examples:
 - [todo-ecs](https://github.com/michbuett/todo-ecs) - The [TodoMVC](http://todomvc.com/) application built using an [Entity-Component-System](http://entity-systems.wikidot.com/)
 - [alchemy-todo](https://github.com/michbuett/alchemy-todo) - A more tradional, MVC-based approach that also features some FRP mechanisms
 
+However, please be aware that its purpose is to unravel the mysteries of development, not to power any production environment - not yet. You are messing with dark powers. Don't complain when your application is haunted - but feel free to file an issue.
+
 ## What is with the deal with the naming?
-5%  - All the good names where taken and I had to pick something? 
-10% - Philosophy (thinking the unthinkable, to "... know what makes the world revolve")
-85% - Nerdy bullshit (no excuses)
+It is ...
+- 5%  - All the good names where taken and I had to pick something?  
+- 10% - Philosophy (thinking the unthinkable, to "... know what makes the world revolve")
+- 85% - Nerdy bullshit (no excuses)
