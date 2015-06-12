@@ -50,7 +50,7 @@ You can take look at the examples:
 
 However, please be aware that its purpose is to unravel the mysteries of development, not to power any production environment - not yet. You are messing with dark powers. Don't complain when your application is haunted - but feel free to file an issue.
 
-## What is with the deal with the naming?
+## What's the deal with the naming?
 It is ...
 - 5%  - All the good names where taken and I had to pick something?  
 - 10% - Philosophy (thinking the unthinkable, to "... know what makes the world revolve")
