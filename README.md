@@ -1,4 +1,5 @@
-# alchemy.js [![Build Status](https://travis-ci.org/michbuett/alchemy.js.svg?branch=master)](https://travis-ci.org/michbuett/alchemy.js)
+# alchemy.js 
+[![Build Status](https://travis-ci.org/michbuett/alchemy.js.svg?branch=master)](https://travis-ci.org/michbuett/alchemy.js) [![npm version](https://badge.fury.io/js/alchemy.js.svg)](http://badge.fury.io/js/alchemy.js) [![Bower version](https://badge.fury.io/bo/michbuett-alchemy.svg)](http://badge.fury.io/bo/michbuett-alchemy)
 
 > “Medicine, and Law, and Philosophy -  
 You've worked your way through every school,  
