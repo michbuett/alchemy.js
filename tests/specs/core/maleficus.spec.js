@@ -2,7 +2,11 @@ describe('Maleficus', function () {
     'use strict';
 
     var alchemy = require('./../../../lib/core/Alchemy.js');
-    var subject = alchemy('alchemy.core.Maleficus');
+    var subject;
+
+    beforeEach(function () {
+        subject = alchemy('alchemy.core.Maleficus').brew();
+    });
 
     describe('render', function () {
         it('can replace data attributes', function () {

@@ -9,7 +9,9 @@
   },
   "main": "lib/core/Alchemy.js",
   "keywords": [
-    "entity-system", "web", "frontend"
+    "entity-system",
+    "web",
+    "frontend"
   ],
   "license": "LICENSE",
   "devDependencies": {
@@ -21,7 +23,8 @@
     "grunt-contrib-watch": "~0.5.1",
     "grunt-jasmine-node-new": "~0.3.2",
     "grunt-jsonlint": "~1.0.0",
-    "grunt-template-jasmine-istanbul": "^0.3.0"
+    "grunt-template-jasmine-istanbul": "^0.3.0",
+    "grunt-template-jasmine-nml": "^1.1.0"
   },
   "scripts": {
     "test": "./node_modules/grunt-cli/bin/grunt test"

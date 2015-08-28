@@ -2,7 +2,7 @@ describe('Handling of immutable data', function () {
     'use strict';
 
     var alchemy = require('./../../../lib/core/Alchemy.js');
-    var immutatio = alchemy('alchemy.core.Immutatio');
+    var immutatio;
 
     function expectImmutable(subject) {
         expect(typeof subject).toBe('object');
@@ -10,6 +10,10 @@ describe('Handling of immutable data', function () {
         expect(typeof subject.set).toBe('function');
         expect(typeof subject.sub).toBe('function');
     }
+
+    beforeEach(function () {
+        immutatio = alchemy('alchemy.core.Immutatio').brew();
+    });
 
     /** @name TEST_Immutatio */
     describe('Immutatio', function () {

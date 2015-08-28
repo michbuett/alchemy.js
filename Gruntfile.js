@@ -61,6 +61,10 @@ module.exports = function (grunt) {
                     'lib/web/*.js',
                     'lib/ecs/*.js',
                 ],
+
+                options: {
+                    template: require('grunt-template-jasmine-nml'),
+                }
             },
 
             coverage: {
@@ -74,6 +78,12 @@ module.exports = function (grunt) {
                 options: {
                     template: require('grunt-template-jasmine-istanbul'),
                     templateOptions: {
+                        template: require('grunt-template-jasmine-nml'),
+                        templateOptions: {
+                            pathmap: {
+                                'lib/': '.grunt/grunt-contrib-jasmine/lib/',
+                            }
+                        },
                         coverage: 'reports/coverage/coverage.json',
                         report: 'reports/coverage',
                         thresholds: {
