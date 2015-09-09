@@ -1,6 +1,7 @@
 describe('alchemy.ecs.StateSystem', function () {
     'use strict';
 
+    var immutable = require('immutabilis');
     var alchemy = require('./../../../lib/core/Alchemy.js');
 
     beforeEach(function () {
@@ -87,7 +88,7 @@ describe('alchemy.ecs.StateSystem', function () {
     });
 
     function initState(state) {
-        return alchemy('alchemy.core.Immutatio').makeImmutable(state || {
+        return immutable.fromJS(state || {
             foo: 'foo-value-1',
             bar: {
                 ping: 'bar-value-1',

@@ -28,5 +28,8 @@
   },
   "scripts": {
     "test": "./node_modules/grunt-cli/bin/grunt test"
+  },
+  "dependencies": {
+    "immutabilis": "^2.0.1"
   }
 }

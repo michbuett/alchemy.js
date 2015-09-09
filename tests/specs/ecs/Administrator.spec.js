@@ -1,11 +1,12 @@
 describe('alchemy.ecs.Administrator', function () {
     'use strict';
 
+    var immutable = require('immutabilis');
     var alchemy = require('./../../../lib/core/Alchemy.js');
 
     it('updates all registered systems', function () {
         // prepare
-        var state = alchemy('alchemy.core.Immutatio').makeImmutable({foo: 'bar'});
+        var state = immutable.fromJS({foo: 'bar'});
         var testSubject = alchemy('alchemy.ecs.Administrator').brew();
         var testSystem = {
             update: jasmine.createSpy()
@@ -84,7 +85,7 @@ describe('alchemy.ecs.Administrator', function () {
         // prepare
         var repo = alchemy('alchemy.ecs.Apothecarius').brew(repo);
         var testSubject = alchemy('alchemy.ecs.Administrator').brew({ repo: repo, });
-        var state = alchemy('alchemy.core.Immutatio').makeImmutable(['foo', 'bar']);
+        var state = immutable.fromJS(['foo', 'bar']);
 
         // execute #1 'init'
         testSubject.initEntities([function (state) {
