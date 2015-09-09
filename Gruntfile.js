@@ -85,7 +85,17 @@ module.exports = function (grunt) {
                             }
                         },
                         coverage: 'reports/coverage/coverage.json',
-                        report: 'reports/coverage',
+                        report: [{
+                            type: 'html',
+                            options: {
+                                dir: 'reports/coverage/html',
+                            }
+                        }, {
+                            type: 'lcovonly',
+                            options: {
+                                dir: 'reports/coverage/lcov',
+                            }
+                        }],
                         thresholds: {
                             lines: 85,
                             statements: 85,
@@ -121,9 +131,20 @@ module.exports = function (grunt) {
             },
 
             js: {
-                files: ['**/*.js'],
+                files: ['Gruntfile.js', 'src/**/*js', 'tests/**/*js'],
                 tasks: ['jshint', 'jasmine_node', 'jasmine:all'],
             },
+        },
+
+        // ////////////////////////////////////////////////////////////////////
+        // export coverage report
+        coveralls: {
+            travis: {
+                src: 'reports/coverage/lcov/*.info',
+                options: {
+                    force: true,
+                }
+            }
         },
     });
 
@@ -135,9 +156,10 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-jasmine');
     grunt.loadNpmTasks('grunt-jasmine-node-new');
     grunt.loadNpmTasks('grunt-jsonlint');
+    grunt.loadNpmTasks('grunt-coveralls');
 
     // define aliases
     grunt.registerTask('lint', ['jsonlint', 'jshint']);
-    grunt.registerTask('test', ['lint', 'jasmine_node', 'jasmine:all']);
+    grunt.registerTask('test', ['lint', 'jasmine_node', 'jasmine:coverage']);
     grunt.registerTask('default', ['availabletasks']);
 };

@@ -1,23 +1,26 @@
-# alchemy.js 
-[![Build Status](https://travis-ci.org/michbuett/alchemy.js.svg?branch=master)](https://travis-ci.org/michbuett/alchemy.js) [![npm version](https://badge.fury.io/js/alchemy.js.svg)](http://badge.fury.io/js/alchemy.js) [![Bower version](https://badge.fury.io/bo/michbuett-alchemy.svg)](http://badge.fury.io/bo/michbuett-alchemy)
+# alchemy.js
+[![Build Status](https://travis-ci.org/michbuett/alchemy.js.svg?branch=master)](https://travis-ci.org/michbuett/alchemy.js)
+[![Coverage Status](https://coveralls.io/repos/michbuett/alchemy.js/badge.svg?branch=master&service=github)](https://coveralls.io/github/michbuett/alchemy.js?branch=master)
+[![npm version](https://badge.fury.io/js/alchemy.js.svg)](http://badge.fury.io/js/alchemy.js)
+[![Bower version](https://badge.fury.io/bo/michbuett-alchemy.svg)](http://badge.fury.io/bo/michbuett-alchemy)
 
-> “Medicine, and Law, and Philosophy -  
-You've worked your way through every school,  
-Even, God help you, Theology,  
-And sweated at it like a fool.   
-Why labour at it any more?  
-You're no wiser now than you were before.  
-...  
-A dog could stand this life no more.  
-And so I've turned to magic lore;  
-The spirit message of this art  
-Some secret knowledge might impart.  
-No longer shall I sweat to teach   
-What always lay beyond my reach;   
-I'll know what makes the world revolve,  
-Its mysteries resolve,  
-No more in empty words I'll deal -  
-Creation's wellsprings I'll reveal!”   
+> “Medicine, and Law, and Philosophy -
+You've worked your way through every school,
+Even, God help you, Theology,
+And sweated at it like a fool.
+Why labour at it any more?
+You're no wiser now than you were before.
+...
+A dog could stand this life no more.
+And so I've turned to magic lore;
+The spirit message of this art
+Some secret knowledge might impart.
+No longer shall I sweat to teach
+What always lay beyond my reach;
+I'll know what makes the world revolve,
+Its mysteries resolve,
+No more in empty words I'll deal -
+Creation's wellsprings I'll reveal!”
   ― Johann Wolfgang von Goethe, Faust: First Part
 
 This is the framework for every ambitious young developer who wants to master the occult arts of Javascript.
@@ -31,7 +34,7 @@ So far it provides (among other things):
 - A module loader
 
 Planned:
-- Support for AMD-modules - or maybe I drop it altogether. Something still feels wrong there. 
+- Support for AMD-modules - or maybe I drop it altogether. Something still feels wrong there.
 - Plug-In support
 
 ## How can I get it?
@@ -53,6 +56,6 @@ However, please be aware that its purpose is to unravel the mysteries of develop
 
 ## What's the deal with the naming?
 It is ...
-- 5%  - All the good names where taken and I had to pick something?  
+- 5%  - All the good names where taken and I had to pick something?
 - 10% - Philosophy (thinking the unthinkable, to "... know what makes the world revolve")
 - 85% - Nerdy bullshit (no excuses)
