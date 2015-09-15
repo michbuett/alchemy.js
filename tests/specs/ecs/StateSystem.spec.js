@@ -2,7 +2,8 @@ describe('alchemy.ecs.StateSystem', function () {
     'use strict';
 
     var immutable = require('immutabilis');
-    var alchemy = require('./../../../lib/core/Alchemy.js');
+    var Apothecarius = require('./../../../lib/ecs/Apothecarius');
+    var StateSystem = require('./../../../lib/ecs/StateSystem');
 
     beforeEach(function () {
         this.state = initState();
@@ -11,7 +12,7 @@ describe('alchemy.ecs.StateSystem', function () {
 
     it('updates the entity states according application state', function () {
         // prepare
-        var testSubject = alchemy('alchemy.ecs.StateSystem').brew({
+        var testSubject = StateSystem.brew({
             entities: this.apothecarius
         });
 
@@ -36,7 +37,7 @@ describe('alchemy.ecs.StateSystem', function () {
 
     it('supports dynamic global-to-local-state mapping', function () {
         // prepare
-        var testSubject = alchemy('alchemy.ecs.StateSystem').brew({
+        var testSubject = StateSystem.brew({
             entities: this.apothecarius
         });
 
@@ -60,7 +61,7 @@ describe('alchemy.ecs.StateSystem', function () {
     it('does nothing if application state has not changed', function () {
         // prepare
         var apothecarius = jasmine.createSpyObj(['getAllComponentsOfType']);
-        var testSubject = alchemy('alchemy.ecs.StateSystem').brew({
+        var testSubject = StateSystem.brew({
             entities: apothecarius
         });
 
@@ -76,7 +77,7 @@ describe('alchemy.ecs.StateSystem', function () {
 
     it('removes the reference to the apothecarius', function () {
         // prepare
-        var testSubject = alchemy('alchemy.ecs.StateSystem').brew({
+        var testSubject = StateSystem.brew({
             entities: this.apothecarius
         });
 
@@ -99,7 +100,7 @@ describe('alchemy.ecs.StateSystem', function () {
     }
 
     function initEntities() {
-        var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+        var apothecarius = Apothecarius.brew();
 
         apothecarius.createEntity({
             id: 'foo',

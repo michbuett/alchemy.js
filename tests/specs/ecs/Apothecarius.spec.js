@@ -1,13 +1,13 @@
 describe('alchemy.ecs.Apothecarius', function () {
     'use strict';
 
-    var alchemy = require('./../../../lib/core/Alchemy.js');
+    var Apothecarius = require('./../../../lib/ecs/Apothecarius');
 
     /** @name TEST_createEntity */
     describe('createEntity', function () {
         it('returns an entity id', function () {
             // prepare
-            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            var apothecarius = Apothecarius.brew();
 
             // execute
             var entityId = apothecarius.createEntity({});
@@ -20,7 +20,7 @@ describe('alchemy.ecs.Apothecarius', function () {
 
         it('allows to define components', function () {
             // prepare
-            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            var apothecarius = Apothecarius.brew();
             var testComponents = {
                 foo: {
                     key: 'value-foo'
@@ -46,7 +46,7 @@ describe('alchemy.ecs.Apothecarius', function () {
 
         it('allows to retrieve all components of a type', function () {
             // prepare
-            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            var apothecarius = Apothecarius.brew();
             var e1 = apothecarius.createEntity({
                 foo: {
                     value: 'foo-e1'
@@ -70,7 +70,7 @@ describe('alchemy.ecs.Apothecarius', function () {
 
         it('allows to retrieve all components of an entity', function () {
             // prepare
-            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            var apothecarius = Apothecarius.brew();
             var entityId = apothecarius.createEntity({
                 foo: {
                     key: 'value-foo'
@@ -96,7 +96,7 @@ describe('alchemy.ecs.Apothecarius', function () {
 
         it('throws an exception when trying to create an entity with an id that is already in use', function () {
             // prepare
-            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            var apothecarius = Apothecarius.brew();
             var entityId = apothecarius.createEntity({});
             // execute/verify
             expect(function () {
@@ -108,7 +108,7 @@ describe('alchemy.ecs.Apothecarius', function () {
 
         it('allows to define non-object components', function () {
             // prepare
-            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            var apothecarius = Apothecarius.brew();
             var cfg = {
                 foo: 'foo',
                 bar: ['bar'],
@@ -129,7 +129,7 @@ describe('alchemy.ecs.Apothecarius', function () {
     describe('setComponent', function () {
         it('allows to add a component from a given entity', function () {
             // prepare
-            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            var apothecarius = Apothecarius.brew();
             var entityId = apothecarius.createEntity({
                 foo: {
                     key: 'value-foo'
@@ -151,7 +151,7 @@ describe('alchemy.ecs.Apothecarius', function () {
 
         it('allows to update a component from a given entity', function () {
             // prepare
-            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            var apothecarius = Apothecarius.brew();
             var entityId = apothecarius.createEntity({
                 foo: {
                     key1: 'value1',
@@ -170,7 +170,7 @@ describe('alchemy.ecs.Apothecarius', function () {
 
         it('throws an exception when trying to add a component to not existent exception', function () {
             // prepare
-            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            var apothecarius = Apothecarius.brew();
             // execute/verify
             expect(function () {
                 apothecarius.setComponent('foo', 'bar', {});
@@ -182,7 +182,7 @@ describe('alchemy.ecs.Apothecarius', function () {
     describe('removeComponent', function () {
         it('allows to remove a component from a given entity', function () {
             // prepare
-            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            var apothecarius = Apothecarius.brew();
             var entityId = apothecarius.createEntity({
                 id: 'test',
                 foo: {
@@ -215,7 +215,7 @@ describe('alchemy.ecs.Apothecarius', function () {
 
         it('ignores unknown components', function () {
             // prepare
-            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            var apothecarius = Apothecarius.brew();
             var entityId = apothecarius.createEntity({
                 foo: {
                     key: 'value-foo'
@@ -237,7 +237,7 @@ describe('alchemy.ecs.Apothecarius', function () {
 
         it('throws an exception when trying to remove a component from a non-existent exception', function () {
             // prepare
-            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            var apothecarius = Apothecarius.brew();
             // execute/verify
             expect(function () {
                 apothecarius.removeComponent('foo', 'bar');
@@ -249,7 +249,7 @@ describe('alchemy.ecs.Apothecarius', function () {
     describe('removeEntity', function () {
         it('can remove a single entity', function () {
             // prepare
-            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            var apothecarius = Apothecarius.brew();
             var entityId = apothecarius.createEntity({
                 foo: {
                     key: 'value-foo'
@@ -271,7 +271,7 @@ describe('alchemy.ecs.Apothecarius', function () {
 
         it('ignores non-existing entities', function () {
             // prepare
-            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            var apothecarius = Apothecarius.brew();
 
             // execute
             expect(function () {
@@ -286,7 +286,7 @@ describe('alchemy.ecs.Apothecarius', function () {
     describe('removeAllEntities', function () {
         it('can remove all entities at once', function () {
             // prepare
-            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            var apothecarius = Apothecarius.brew();
             var entity1 = apothecarius.createEntity({});
             var entity2 = apothecarius.createEntity({});
             var entity3 = apothecarius.createEntity({});
@@ -314,7 +314,7 @@ describe('alchemy.ecs.Apothecarius', function () {
     describe('dispose', function () {
         it('clears all stored entities when being disposed', function () {
             // prepare
-            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            var apothecarius = Apothecarius.brew();
             spyOn(apothecarius, 'removeAllEntities').andCallThrough();
 
             // execute
