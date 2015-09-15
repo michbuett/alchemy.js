@@ -31,6 +31,8 @@
     "test": "grunt test && grunt coveralls"
   },
   "dependencies": {
-    "immutabilis": "^2.0.1"
+    "coquo-venenum": "^1.1.1",
+    "immutabilis": "^2.0.1",
+    "pro-singulis": "^1.2.0"
   }
 }

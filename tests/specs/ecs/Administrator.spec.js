@@ -1,13 +1,15 @@
 describe('alchemy.ecs.Administrator', function () {
     'use strict';
 
+    var each = require('pro-singulis');
     var immutable = require('immutabilis');
     var alchemy = require('./../../../lib/core/Alchemy.js');
+    var EntityAdmin = require('./../../../lib/ecs/Administrator');
 
     it('updates all registered systems', function () {
         // prepare
         var state = immutable.fromJS({foo: 'bar'});
-        var testSubject = alchemy('alchemy.ecs.Administrator').brew();
+        var testSubject = EntityAdmin.brew();
         var testSystem = {
             update: jasmine.createSpy()
         };
@@ -22,7 +24,7 @@ describe('alchemy.ecs.Administrator', function () {
 
     it('disposes all component systems when disposing app', function () {
         // prepare
-        var testSubject = alchemy('alchemy.ecs.Administrator').brew();
+        var testSubject = EntityAdmin.brew();
         var testSystem = {
             dispose: jasmine.createSpy()
         };
@@ -38,7 +40,7 @@ describe('alchemy.ecs.Administrator', function () {
     it('allows to define an initial set of entities which have children', function () {
         // prepare
         var repo = alchemy('alchemy.ecs.Apothecarius').brew(repo);
-        var testSubject = alchemy('alchemy.ecs.Administrator').brew({ repo: repo, });
+        var testSubject = EntityAdmin.brew({ repo: repo, });
 
         // execute
         testSubject.initEntities([{
@@ -64,7 +66,7 @@ describe('alchemy.ecs.Administrator', function () {
     it('allows to define an initial set of entities', function () {
         // prepare
         var repo = alchemy('alchemy.ecs.Apothecarius').brew(repo);
-        var testSubject = alchemy('alchemy.ecs.Administrator').brew({ repo: repo, });
+        var testSubject = EntityAdmin.brew({ repo: repo, });
 
         // execute
         testSubject.initEntities([{
@@ -84,12 +86,12 @@ describe('alchemy.ecs.Administrator', function () {
     it('allows to define state dependent entities', function () {
         // prepare
         var repo = alchemy('alchemy.ecs.Apothecarius').brew(repo);
-        var testSubject = alchemy('alchemy.ecs.Administrator').brew({ repo: repo, });
+        var testSubject = EntityAdmin.brew({ repo: repo, });
         var state = immutable.fromJS(['foo', 'bar']);
 
         // execute #1 'init'
         testSubject.initEntities([function (state) {
-            return alchemy.each(state.val(), function (item) {
+            return each(state.val(), function (item) {
                 return {
                     id: item
                 };
@@ -121,7 +123,7 @@ describe('alchemy.ecs.Administrator', function () {
     it('allows to define default components for an entity type', function () {
         // prepare
         var repo = alchemy('alchemy.ecs.Apothecarius').brew(repo);
-        var testSubject = alchemy('alchemy.ecs.Administrator').brew({ repo: repo, });
+        var testSubject = EntityAdmin.brew({ repo: repo, });
 
         testSubject.setEntityDefaults('foobar', {
             foo: {
@@ -156,7 +158,7 @@ describe('alchemy.ecs.Administrator', function () {
     it('allows to override component defaults', function () {
         // prepare
         var repo = alchemy('alchemy.ecs.Apothecarius').brew(repo);
-        var testSubject = alchemy('alchemy.ecs.Administrator').brew({ repo: repo, });
+        var testSubject = EntityAdmin.brew({ repo: repo, });
 
         testSubject.setEntityDefaults('foobar', {
             foo: {
