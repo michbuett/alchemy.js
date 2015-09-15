@@ -131,7 +131,7 @@ module.exports = function (grunt) {
             },
 
             js: {
-                files: ['Gruntfile.js', 'src/**/*js', 'tests/**/*js'],
+                files: ['Gruntfile.js', 'lib/**/*js', 'tests/**/*js'],
                 tasks: ['jshint', 'jasmine_node', 'jasmine:all'],
             },
         },
