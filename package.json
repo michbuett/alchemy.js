@@ -25,7 +25,7 @@
     "grunt-jasmine-node-new": "~0.3.2",
     "grunt-jsonlint": "~1.0.0",
     "grunt-template-jasmine-istanbul": "^0.3.0",
-    "grunt-template-jasmine-nml": "^1.1.0"
+    "grunt-template-jasmine-nml": "^1.2.0"
   },
   "scripts": {
     "test": "grunt test && grunt coveralls"
@@ -33,6 +33,7 @@
   "dependencies": {
     "coquo-venenum": "^1.1.1",
     "immutabilis": "^2.0.1",
-    "pro-singulis": "^1.2.0"
+    "pro-singulis": "^1.2.0",
+    "virtual-dom": "^2.0.1"
   }
 }

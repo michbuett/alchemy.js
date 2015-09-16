@@ -2,9 +2,10 @@
 describe('alchemy.ecs.VDomRenderSystem', function () {
     'use strict';
 
-    var Apothecarius = require('./../../../lib/ecs/Apothecarius');
     var Delegatus = require('./../../../lib/web/Delegatus');
-    var alchemy = require('./../../../lib/core/Alchemy.js');
+    var Apothecarius = require('./../../../lib/ecs/Apothecarius');
+    var VDomRenderSystem = require('./../../../lib/ecs/VDomRenderSystem');
+    var utils = require('./../../../lib/core/Alchemy.js');
 
     beforeEach(function () {
         setFixtures(sandbox());
@@ -17,7 +18,7 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
 
     it('renders the entities to the DOM', function () {
         // prepare
-        var renderer = alchemy('alchemy.ecs.VDomRenderSystem').brew({
+        var renderer = VDomRenderSystem.brew({
             entities: this.apothecarius
         });
 
@@ -34,7 +35,7 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
 
     it('renders the update when changing the state', function () {
         // prepare
-        var renderer = alchemy('alchemy.ecs.VDomRenderSystem').brew({
+        var renderer = VDomRenderSystem.brew({
             entities: this.apothecarius
         });
 
@@ -58,7 +59,7 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
         var testHandler = jasmine.createSpy();
         var delegator = Delegatus.brew();
         var delegateKey = delegator.delegateHandler('click', testHandler);
-        var renderer = alchemy('alchemy.ecs.VDomRenderSystem').brew({
+        var renderer = VDomRenderSystem.brew({
             delegator: delegator,
             entities: this.apothecarius
         });
@@ -83,7 +84,7 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
         var testHandler = jasmine.createSpy();
         var delegator = Delegatus.brew();
         var delegateKey = delegator.delegateHandler('click', testHandler);
-        var renderer = alchemy('alchemy.ecs.VDomRenderSystem').brew({
+        var renderer = VDomRenderSystem.brew({
             delegator: delegator,
             entities: this.apothecarius
         });
@@ -104,7 +105,7 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
 
     it('throws an exception if renderer cannot be determined', function () {
         // prepare
-        var renderer = alchemy('alchemy.ecs.VDomRenderSystem').brew({
+        var renderer = VDomRenderSystem.brew({
             entities: this.apothecarius
         });
 
@@ -123,7 +124,7 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
 
     it('skips entities which have no parent dom element', function () {
         // prepare
-        var renderer = alchemy('alchemy.ecs.VDomRenderSystem').brew({
+        var renderer = VDomRenderSystem.brew({
             entities: this.apothecarius
         });
 
@@ -144,7 +145,7 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
 
     it('removes references when being disposed', function () {
         // prepare
-        var testSubject = alchemy('alchemy.ecs.VDomRenderSystem').brew({
+        var testSubject = VDomRenderSystem.brew({
             delegator: Delegatus.brew(),
             entities: this.apothecarius
         });
@@ -158,7 +159,7 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
     });
 
     function initRenderer() {
-        alchemy.brew({
+        utils.brew({
             name: 'FooRenderer',
             overrides: {
                 render: jasmine.createSpy().andCallFake(function (context) {
@@ -172,7 +173,7 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
             }
         });
 
-        alchemy.brew({
+        utils.brew({
             name: 'BarRenderer',
             overrides: {
                 render: jasmine.createSpy().andCallFake(function (context) {
@@ -184,7 +185,7 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
             }
         });
 
-        alchemy.brew({
+        utils.brew({
             name: 'BazRenderer',
             overrides: {
                 render: jasmine.createSpy().andCallFake(function (context) {
