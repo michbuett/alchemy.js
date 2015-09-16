@@ -2,12 +2,14 @@
 describe('alchemy.ecs.VDomRenderSystem', function () {
     'use strict';
 
+    var Apothecarius = require('./../../../lib/ecs/Apothecarius');
+    var Delegatus = require('./../../../lib/web/Delegatus');
     var alchemy = require('./../../../lib/core/Alchemy.js');
 
     beforeEach(function () {
         setFixtures(sandbox());
 
-        this.apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+        this.apothecarius = Apothecarius.brew();
 
         initRenderer();
         initEntities(this.apothecarius);
@@ -54,7 +56,7 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
     it('binds delegated events handler with selector', function () {
         // prepare
         var testHandler = jasmine.createSpy();
-        var delegator = alchemy('alchemy.web.Delegatus').brew();
+        var delegator = Delegatus.brew();
         var delegateKey = delegator.delegateHandler('click', testHandler);
         var renderer = alchemy('alchemy.ecs.VDomRenderSystem').brew({
             delegator: delegator,
@@ -79,7 +81,7 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
     it('binds delegated events handler without selector', function () {
         // prepare
         var testHandler = jasmine.createSpy();
-        var delegator = alchemy('alchemy.web.Delegatus').brew();
+        var delegator = Delegatus.brew();
         var delegateKey = delegator.delegateHandler('click', testHandler);
         var renderer = alchemy('alchemy.ecs.VDomRenderSystem').brew({
             delegator: delegator,
@@ -143,7 +145,7 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
     it('removes references when being disposed', function () {
         // prepare
         var testSubject = alchemy('alchemy.ecs.VDomRenderSystem').brew({
-            delegator: alchemy('alchemy.web.Delegatus').brew(),
+            delegator: Delegatus.brew(),
             entities: this.apothecarius
         });
 

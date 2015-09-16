@@ -2,7 +2,7 @@
 describe('alchemy.web.Stylus', function () {
     'use strict';
 
-    var alchemy = require('./../../../lib/core/Alchemy.js');
+    var Stylus = require('./../../../lib/web/Stylus');
 
     beforeEach(function () {
         setFixtures([
@@ -13,7 +13,7 @@ describe('alchemy.web.Stylus', function () {
             '</div>',
         ].join());
 
-        this.testSubject = alchemy('alchemy.web.Stylus').brew();
+        this.testSubject = Stylus.brew();
     });
 
     afterEach(function () {
@@ -29,8 +29,8 @@ describe('alchemy.web.Stylus', function () {
             this.testSubject.dispose();
 
             // verify
-            expect(this.testSubject.sheet).toBe(null);
-            expect(this.testSubject.rules).toBe(null);
+            expect(this.testSubject.sheet).toBeFalsy();
+            expect(this.testSubject.rules).toBeFalsy();
         });
 
         it('removes css rules when beeing disposed', function () {

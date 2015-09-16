@@ -2,10 +2,12 @@
 describe('alchemy.ecs.CssRenderSystem', function () {
     'use strict';
 
-    var alchemy = require('./../../../lib/core/Alchemy.js');
+    var Apothecarius = require('./../../../lib/ecs/Apothecarius');
+    var Stylus = require('./../../../lib/web/Stylus');
+    var CssRenderSystem = require('./../../../lib/ecs/CssRenderSystem');
 
     beforeEach(function () {
-        this.stylus = alchemy('alchemy.web.Stylus').brew();
+        this.stylus = Stylus.brew();
 
         setFixtures([
             '<div id="foo">FOO',
@@ -24,7 +26,7 @@ describe('alchemy.ecs.CssRenderSystem', function () {
     describe('update', function () {
         it('allows to render entity specific css', function () {
             // prepare
-            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            var apothecarius = Apothecarius.brew();
             apothecarius.createEntity({
                 id: 'foo',
 
@@ -43,7 +45,7 @@ describe('alchemy.ecs.CssRenderSystem', function () {
                 }
             });
 
-            var testSubject = alchemy('alchemy.ecs.CssRenderSystem').brew({
+            var testSubject = CssRenderSystem.brew({
                 stylus: this.stylus,
                 entities: apothecarius
             });
@@ -61,7 +63,7 @@ describe('alchemy.ecs.CssRenderSystem', function () {
         it('ignores entities where state was unchanged', function () {
             // prepare
             var renderSpy = jasmine.createSpy().andReturn({padding: 0});
-            var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+            var apothecarius = Apothecarius.brew();
             apothecarius.createEntity({
                 id: 'foo',
 
@@ -74,7 +76,7 @@ describe('alchemy.ecs.CssRenderSystem', function () {
                 }
             });
 
-            var testSubject = alchemy('alchemy.ecs.CssRenderSystem').brew({
+            var testSubject = CssRenderSystem.brew({
                 stylus: this.stylus,
                 entities: apothecarius
             });
@@ -92,7 +94,7 @@ describe('alchemy.ecs.CssRenderSystem', function () {
         it('allows to render static (state-independent) css', function () {
             // prepare
             var apothecarius = initEntities();
-            var testSubject = alchemy('alchemy.ecs.CssRenderSystem').brew({
+            var testSubject = CssRenderSystem.brew({
                 stylus: this.stylus,
                 entities: apothecarius,
             });
@@ -117,7 +119,7 @@ describe('alchemy.ecs.CssRenderSystem', function () {
         it('allows to render static (state-independent) entity css', function () {
             // prepare
             var apothecarius = initEntities();
-            var testSubject = alchemy('alchemy.ecs.CssRenderSystem').brew({
+            var testSubject = CssRenderSystem.brew({
                 stylus: this.stylus,
                 entities: apothecarius,
             });
@@ -140,7 +142,7 @@ describe('alchemy.ecs.CssRenderSystem', function () {
     describe('dispose', function () {
         it('removes the reference to the apothecarius', function () {
             // prepare
-            var testSubject = alchemy('alchemy.ecs.CssRenderSystem').brew({
+            var testSubject = CssRenderSystem.brew({
                 stylus: this.stylus,
                 entities: initEntities()
             });
@@ -154,7 +156,7 @@ describe('alchemy.ecs.CssRenderSystem', function () {
     });
 
     function initEntities() {
-        var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+        var apothecarius = Apothecarius.brew();
 
         apothecarius.createEntity({
             id: 'foo',

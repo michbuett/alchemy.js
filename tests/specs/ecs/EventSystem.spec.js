@@ -2,6 +2,9 @@
 describe('alchemy.ecs.EventSystem', function () {
     'use strict';
 
+    var Delegatus = require('./../../../lib/web/Delegatus');
+    var Apothecarius = require('./../../../lib/ecs/Apothecarius');
+    var EventSystem = require('./../../../lib/ecs/EventSystem');
     var alchemy = require('./../../../lib/core/Alchemy.js');
 
     beforeEach(function () {
@@ -10,9 +13,9 @@ describe('alchemy.ecs.EventSystem', function () {
 
     it('allows to delegate DOM events to application messages', function () {
         // prepare
-        var delegatus = alchemy('alchemy.web.Delegatus').brew();
+        var delegatus = Delegatus.brew();
         var apothecarius = initEntities();
-        var testSubject = alchemy('alchemy.ecs.EventSystem').brew({
+        var testSubject = EventSystem.brew({
             delegator: delegatus,
             entities: apothecarius,
         });
@@ -32,9 +35,9 @@ describe('alchemy.ecs.EventSystem', function () {
 
     it('supports backbone-style even definition', function () {
         // prepare
-        var testSubject = alchemy('alchemy.ecs.EventSystem').brew({
-            delegator: alchemy('alchemy.web.Delegatus').brew(),
-            entities: alchemy('alchemy.ecs.Apothecarius').brew(),
+        var testSubject = EventSystem.brew({
+            delegator: Delegatus.brew(),
+            entities: Apothecarius.brew(),
         });
 
         var entityId = testSubject.entities.createEntity({
@@ -62,9 +65,9 @@ describe('alchemy.ecs.EventSystem', function () {
     it('can delegate browser events to handler methods', function () {
         // prepare
         var testHandler = jasmine.createSpy();
-        var delegator = alchemy('alchemy.web.Delegatus').brew();
+        var delegator = Delegatus.brew();
         var entities = initEntities();
-        var testSubject = alchemy('alchemy.ecs.EventSystem').brew({
+        var testSubject = EventSystem.brew({
             entities: entities,
             delegator: delegator,
         });
@@ -87,10 +90,10 @@ describe('alchemy.ecs.EventSystem', function () {
         var testHandler = jasmine.createSpy().andCallFake(function (data) {
             eventData = data;
         });
-        var delegator = alchemy('alchemy.web.Delegatus').brew();
+        var delegator = Delegatus.brew();
         var messages = alchemy('alchemy.core.Observari').brew();
         var entities = initEntities();
-        var testSubject = alchemy('alchemy.ecs.EventSystem').brew({
+        var testSubject = EventSystem.brew({
             entities: entities,
             delegator: delegator,
             messages: messages,
@@ -111,9 +114,9 @@ describe('alchemy.ecs.EventSystem', function () {
 
     it('allows an event handler to update the entities state', function () {
         // prepare
-        var delegator = alchemy('alchemy.web.Delegatus').brew();
+        var delegator = Delegatus.brew();
         var entities = initEntities();
-        var testSubject = alchemy('alchemy.ecs.EventSystem').brew({
+        var testSubject = EventSystem.brew({
             entities: entities,
             delegator: delegator,
         });
@@ -145,9 +148,9 @@ describe('alchemy.ecs.EventSystem', function () {
 
     it('removes references when being disposed', function () {
         // prepare
-        var testSubject = alchemy('alchemy.ecs.EventSystem').brew({
+        var testSubject = EventSystem.brew({
             entities: initEntities(),
-            delegator: alchemy('alchemy.web.Delegatus').brew(),
+            delegator: Delegatus.brew(),
             messages: alchemy('alchemy.core.Observari').brew(),
         });
 
@@ -161,7 +164,7 @@ describe('alchemy.ecs.EventSystem', function () {
     });
 
     function initEntities() {
-        var apothecarius = alchemy('alchemy.ecs.Apothecarius').brew();
+        var apothecarius = Apothecarius.brew();
         apothecarius.createEntity({
             id: 'foo',
 

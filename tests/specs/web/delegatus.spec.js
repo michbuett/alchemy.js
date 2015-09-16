@@ -2,7 +2,7 @@
 describe('alchemy.web.Delegatus', function () {
     'use strict';
 
-    var alchemy = require('./../../../lib/core/Alchemy.js');
+    var Delegatus = require('./../../../lib/web/Delegatus');
 
     beforeEach(function () {
         setFixtures([
@@ -20,7 +20,7 @@ describe('alchemy.web.Delegatus', function () {
         it('allows to delegate dom events', function () {
             // prepare
             var el = document.getElementById('foo');
-            var delegatus = alchemy('alchemy.web.Delegatus').brew({
+            var delegatus = Delegatus.brew({
                 root: document.body,
             });
             var handler = jasmine.createSpy();
@@ -36,7 +36,7 @@ describe('alchemy.web.Delegatus', function () {
         it('ignores invalid input', function () {
             // prepare
             var el = document.getElementById('foo');
-            var delegatus = alchemy('alchemy.web.Delegatus').brew({
+            var delegatus = Delegatus.brew({
                 root: document.body,
             });
 
@@ -56,7 +56,7 @@ describe('alchemy.web.Delegatus', function () {
         it('ignores events which occure not on a target element', function () {
             var root = document.getElementById('sandbox');
             var el = document.getElementById('foo');
-            var delegatus = alchemy('alchemy.web.Delegatus').brew({
+            var delegatus = Delegatus.brew({
                 root: root
             });
             var handler = jasmine.createSpy();
@@ -72,7 +72,7 @@ describe('alchemy.web.Delegatus', function () {
 
         it('reuses event handlers', function () {
             var el = document.getElementById('foo');
-            var delegatus = alchemy('alchemy.web.Delegatus').brew({
+            var delegatus = Delegatus.brew({
                 root: document.getElementById('sandbox')
             });
             var handler = function () {};
@@ -91,7 +91,7 @@ describe('alchemy.web.Delegatus', function () {
     describe('dispose', function () {
         it('clears references to dom node and event emitter', function () {
             // prepare
-            var delegatus = alchemy('alchemy.web.Delegatus').brew({
+            var delegatus = Delegatus.brew({
                 root: document.body,
             });
             // execute
@@ -102,7 +102,7 @@ describe('alchemy.web.Delegatus', function () {
 
         it('stops delegating when disposed', function () {
             // prepare
-            var delegatus = alchemy('alchemy.web.Delegatus').brew({
+            var delegatus = Delegatus.brew({
                 root: document.body,
             });
             var elFoo = document.getElementById('foo');
