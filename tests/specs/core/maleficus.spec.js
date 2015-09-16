@@ -1,16 +1,11 @@
 describe('Maleficus', function () {
     'use strict';
 
-    var alchemy = require('./../../../lib/core/Alchemy.js');
-    var subject;
-
-    beforeEach(function () {
-        subject = alchemy('alchemy.core.Maleficus').brew();
-    });
+    var render = require('./../../../lib/core/Maleficus');
 
     describe('render', function () {
         it('can replace data attributes', function () {
-            expect(subject.render('<div id="<$=data.id$>" class="<$=data.cls$>"><$=data.text$></div>', {
+            expect(render('<div id="<$=data.id$>" class="<$=data.cls$>"><$=data.text$></div>', {
                 id: 'test_id',
                 cls: 'test_class',
                 text: 'test_text'
@@ -19,7 +14,7 @@ describe('Maleficus', function () {
 
         it('can evaluate loops', function () {
             /*jshint white: false*/
-            expect(subject.render([
+            expect(render([
                 '<$ for (var i = 0; i < data.list.length; i++) { $>',
                 '<li><$=data.list[i]$></li>',
                 '<$ } $>'
@@ -40,11 +35,11 @@ describe('Maleficus', function () {
             ].join('');
             /*jshint white: true*/
 
-            expect(subject.render(tpl, {
+            expect(render(tpl, {
                 condition: true,
                 trueVal: 'YEEEHAA!'
             })).toBe('<div>YEEEHAA!</div>');
-            expect(subject.render(tpl, {
+            expect(render(tpl, {
                 condition: false,
                 falseVal: 'OH NO!'
             })).toBe('<div>OH NO!</div>');
@@ -62,7 +57,7 @@ describe('Maleficus', function () {
             ].join('\n');
             /*jshint white: true*/
 
-            expect(subject.render(tpl).replace(/\s/g, '')).toBe('<div>YEEEHAA!</div>');
+            expect(render(tpl).replace(/\s/g, '')).toBe('<div>YEEEHAA!</div>');
         });
 
         it('removes line comments', function () {
@@ -75,15 +70,15 @@ describe('Maleficus', function () {
             ].join('\n');
             /*jshint white: true*/
 
-            expect(subject.render(tpl).replace(/\s/g, '')).toBe('<div>YEEEHAA!</div>');
+            expect(render(tpl).replace(/\s/g, '')).toBe('<div>YEEEHAA!</div>');
         });
 
         it('has no access to the main closure scope', function () {
-            expect(subject.render('<$=(typeof potions)$>')).toBe('undefined');
+            expect(render('<$=(typeof potions)$>')).toBe('undefined');
         });
 
         it('has access to the explicitly given closure scope', function () {
-            expect(subject.render('<$=(typeof alchemy)$>')).toBe('function');
+            expect(render('<$=(typeof alchemy)$>')).toBe('function');
         });
     });
 });
