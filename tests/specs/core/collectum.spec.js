@@ -109,6 +109,20 @@ describe('alchemy.core.Collectum', function () {
                 baz: 'baz'
             }]);
         });
+
+        it('calls "toData" of items (if available)', function () {
+            // prepare
+            var toData = jasmine.createSpy('toData');
+            this.collectum.add({
+                toData: toData,
+            });
+
+            // execute
+            this.collectum.toData();
+
+            // verify
+            expect(toData).toHaveBeenCalled();
+        });
     });
 
     describe('indexOf', function () {

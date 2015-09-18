@@ -2,6 +2,7 @@ describe('alchemy.web.Applicatus', function () {
     'use strict';
 
     var alchemy = require('./../../../lib/core/Alchemy.js');
+    var Applicatus = require('./../../../lib/web/Applicatus.js');
 
     function createApp(pcfg) {
         var cfg = {
@@ -13,7 +14,7 @@ describe('alchemy.web.Applicatus', function () {
             cfg = alchemy.mix(cfg, pcfg);
         }
 
-        return alchemy('alchemy.web.Applicatus').brew(cfg);
+        return Applicatus.brew(cfg);
     }
 
     function createLaunchedApp(cfg) {
@@ -128,15 +129,20 @@ describe('alchemy.web.Applicatus', function () {
     describe('finish', function () {
         it('stops the animation loop if it has been started', function () {
             // prepare
+            var cancelAnimationFrame1 = jasmine.createSpy();
             var app1 = createLaunchedApp({
                 requestAnimationFrame: function () {
                     return 42;
-                }
+                },
+                cancelAnimationFrame: cancelAnimationFrame1,
             });
+
+            var cancelAnimationFrame2 = jasmine.createSpy();
             var app2 = createLaunchedApp({
                 requestAnimationFrame: function () {
                     return false;
-                }
+                },
+                cancelAnimationFrame: cancelAnimationFrame2,
             });
 
             // execute
@@ -144,8 +150,8 @@ describe('alchemy.web.Applicatus', function () {
             app2.dispose();
 
             // verify
-            expect(app1.cancelAnimationFrame).toHaveBeenCalled();
-            expect(app2.cancelAnimationFrame).not.toHaveBeenCalled();
+            expect(cancelAnimationFrame1).toHaveBeenCalled();
+            expect(cancelAnimationFrame2).not.toHaveBeenCalled();
         });
 
         it('clears the message bus', function () {

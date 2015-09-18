@@ -54,5 +54,18 @@ describe('Oculus', function () {
             // verify
             expect(spy).not.toHaveBeenCalled();
         });
+
+        it('ignores non-observable objects', function () {
+            // prepare
+            var obj = {
+                on: jasmine.createSpy('on'),
+            };
+
+            // execute
+            this.oculus.observe(obj, 'foo', function () {});
+
+            // verify
+            expect(obj.on).not.toHaveBeenCalled();
+        });
     });
 });

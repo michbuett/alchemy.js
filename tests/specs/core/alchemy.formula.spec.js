@@ -80,6 +80,8 @@ describe('alchemy.formula', function () {
 
     it('supports api v2', function () {
         // prepare
+        var Oculus = require('../../../lib/core/Oculus');
+        var Observari = require('../../../lib/core/Observari');
         var source = {
             foo: 'foo',
             bar: 'bar',
@@ -97,6 +99,6 @@ describe('alchemy.formula', function () {
         var potion = alchemy('formula-v2');
         expect(potion.foo).toBe('foo');
         expect(potion.bar).toBe('bar');
-        expect(spy).toHaveBeenCalledWith(alchemy('Oculus'), alchemy('Observari'));
+        expect(spy).toHaveBeenCalledWith(Oculus, Observari);
     });
 });

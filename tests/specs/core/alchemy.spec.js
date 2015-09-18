@@ -1079,6 +1079,8 @@ describe('alchemy', function () {
 
         it('allows the overrides to be a function wich is called with the super type', function () {
             // prepare
+            var Oculus = require('../../../lib/core/Oculus');
+            var Observari = require('../../../lib/core/Observari');
             var p1 = alchemy.brew({
                 overrides: {
                     foo: function () {
@@ -1105,7 +1107,7 @@ describe('alchemy', function () {
             });
 
             // verify
-            expect(overrides).toHaveBeenCalledWith(p1, alchemy('Oculus'), alchemy('Observari'));
+            expect(overrides).toHaveBeenCalledWith(p1, Oculus, Observari);
             expect(p2.foo()).toBe('foo - bar');
         });
 

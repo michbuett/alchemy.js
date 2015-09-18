@@ -5,7 +5,7 @@ describe('alchemy.ecs.EventSystem', function () {
     var Delegatus = require('./../../../lib/web/Delegatus');
     var Apothecarius = require('./../../../lib/ecs/Apothecarius');
     var EventSystem = require('./../../../lib/ecs/EventSystem');
-    var alchemy = require('./../../../lib/core/Alchemy.js');
+    var Observari = require('../../../lib/core/Observari');
 
     beforeEach(function () {
         setFixtures('<div id="foo"></div>');
@@ -91,7 +91,7 @@ describe('alchemy.ecs.EventSystem', function () {
             eventData = data;
         });
         var delegator = Delegatus.brew();
-        var messages = alchemy('alchemy.core.Observari').brew();
+        var messages = Observari.brew();
         var entities = initEntities();
         var testSubject = EventSystem.brew({
             entities: entities,
@@ -151,7 +151,7 @@ describe('alchemy.ecs.EventSystem', function () {
         var testSubject = EventSystem.brew({
             entities: initEntities(),
             delegator: Delegatus.brew(),
-            messages: alchemy('alchemy.core.Observari').brew(),
+            messages: Observari.brew(),
         });
 
         // execute
