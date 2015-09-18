@@ -88,6 +88,22 @@ describe('alchemy.web.Delegatus', function () {
         });
     });
 
+    describe('delegateHandler', function () {
+        it('can create a delegation key', function () {
+            var delegatus = Delegatus.brew({
+                root: document.getElementById('sandbox')
+            });
+
+            var handler = function () {};
+
+            var key1 = delegatus.delegateHandler('click', handler);
+            var key2 = delegatus.delegateHandler('click', handler);
+
+            expect(key1).toBe(0);
+            expect(key2).toBe(0);
+        });
+    });
+
     describe('dispose', function () {
         it('clears references to dom node and event emitter', function () {
             // prepare

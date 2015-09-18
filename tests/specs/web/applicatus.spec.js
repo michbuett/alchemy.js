@@ -218,4 +218,28 @@ describe('alchemy.web.Applicatus', function () {
             expect(controller.onBaz).not.toHaveBeenCalled();
         });
     });
+
+    describe('update', function () {
+        it('allows to update the application state', function () {
+            // prepare
+            var tick;
+            var newState = {};
+            var app = createLaunchedApp({
+                requestAnimationFrame: function (loopfn) {
+                    tick = loopfn;
+                },
+
+                update: function () {
+                    return newState;
+                }
+            });
+
+
+            // execute
+            tick();
+
+            // verify
+            expect(app.state).toBe(newState);
+        });
+    });
 });

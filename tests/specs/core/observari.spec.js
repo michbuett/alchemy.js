@@ -166,6 +166,16 @@ describe('Observari', function () {
             expect(listeners[3].fn).not.toHaveBeenCalled();
             expect(this.observari.events).toEqual({});
         });
+
+        it('does not throw an error when removing an listener which never existed', function () {
+            var observari = this.observari;
+            var handler = function () {};
+            var scope = {};
+
+            expect(function () {
+                observari.off('foo', handler, scope);
+            }).not.toThrow();
+        });
     });
 
     /** @name TEST_once */
@@ -212,6 +222,14 @@ describe('Observari', function () {
             expect(onetimeListener.callCount).toBe(1);
             expect(otherListener1.callCount).toBe(2);
             expect(otherListener2.callCount).toBe(2);
+        });
+    });
+
+    describe('dispose', function () {
+        it('does not throw an error when being disposed without any listener', function () {
+            expect(function () {
+                Observari.brew().dispose();
+            }).not.toThrow();
         });
     });
 });
