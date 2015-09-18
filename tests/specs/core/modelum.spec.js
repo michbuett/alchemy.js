@@ -1,10 +1,10 @@
 describe('alchemy.core.Modelum', function () {
     'use strict';
 
-    var alchemy = require('./../../../lib/core/Alchemy.js');
+    var Modelum = require('./../../../lib/core/Modelum');
 
     beforeEach(function () {
-        this.model = alchemy('alchemy.core.Modelum').brew({
+        this.model = Modelum.brew({
             data: {
                 foo: 'bar',
                 ping: 'pong'
@@ -36,7 +36,7 @@ describe('alchemy.core.Modelum', function () {
         });
 
         it('always returns an object', function () {
-            expect(alchemy.isObject(alchemy('Modelum').brew().toData())).toBeTruthy();
+            expect(Modelum.brew().toData()).toEqual({});
         });
     });
     describe('set', function () {

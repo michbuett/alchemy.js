@@ -1,10 +1,10 @@
 describe('Observari', function () {
     'use strict';
 
-    var alchemy = require('./../../../lib/core/Alchemy.js');
+    var Observari = require('./../../../lib/core/Observari');
 
     beforeEach(function () {
-        this.observari = alchemy('alchemy.core.Observari').brew();
+        this.observari = Observari.brew();
     });
 
     afterEach(function () {
@@ -212,36 +212,6 @@ describe('Observari', function () {
             expect(onetimeListener.callCount).toBe(1);
             expect(otherListener1.callCount).toBe(2);
             expect(otherListener2.callCount).toBe(2);
-        });
-    });
-
-    /** @name TEST_mixin */
-    describe('observable aspect', function () {
-        it('allows to make any potion observable', function () {
-            // prepare
-            var anyObj = alchemy('MateriaPrima').brew();
-            // execute
-            anyObj.addIngredient('observari', this.observari);
-            // verify
-            expect(typeof anyObj.on).toBe('function');
-            expect(typeof anyObj.off).toBe('function');
-            expect(typeof anyObj.once).toBe('function');
-            expect(typeof anyObj.trigger).toBe('function');
-        });
-
-        it('allows to make new potions observable', function () {
-            // prepare
-            // execute
-            var anyPotion = alchemy.brew({
-                ingredients: {
-                    observable: 'Observari'
-                }
-            });
-            // verify
-            expect(typeof anyPotion.on).toBe('function');
-            expect(typeof anyPotion.off).toBe('function');
-            expect(typeof anyPotion.once).toBe('function');
-            expect(typeof anyPotion.trigger).toBe('function');
         });
     });
 });

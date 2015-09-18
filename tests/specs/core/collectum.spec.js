@@ -1,7 +1,8 @@
 describe('alchemy.core.Collectum', function () {
     'use strict';
 
-    var alchemy = require('./../../../lib/core/Alchemy.js');
+    // var Modelum = require('./../../../lib/core/Modelum');
+    var Collectum = require('./../../../lib/core/Collectum');
     var data1 = {
         id: 'id-1',
         foo: 'foo'
@@ -16,9 +17,9 @@ describe('alchemy.core.Collectum', function () {
     };
 
     beforeEach(function () {
-        this.collectum = alchemy('alchemy.core.Collectum').brew({
+        this.collectum = Collectum.brew(null, [{
             items: [data1, data2, data3]
-        });
+        }]);
     });
 
     afterEach(function () {
@@ -30,12 +31,12 @@ describe('alchemy.core.Collectum', function () {
 
     describe('constructor', function () {
         it('allows to add items using the constructor', function () {
-            this.collectum = alchemy('Collectum').brew();
+            this.collectum = Collectum.brew();
             expect(this.collectum.length).toBe(0);
 
-            this.collectum = alchemy('Collectum').brew({
+            this.collectum = Collectum.brew(null, [{
                 items: [data1, data2, data3]
-            });
+            }]);
             expect(this.collectum.length).toBe(3);
         });
 
@@ -48,10 +49,10 @@ describe('alchemy.core.Collectum', function () {
             };
 
             // execute
-            this.collectum = alchemy('Collectum').brew({
+            this.collectum = Collectum.brew(null, [{
                 idProp: 'myId',
                 items: [data]
-            });
+            }]);
 
             // verify
             expect(this.collectum.get(id)).toBe(data);
@@ -543,57 +544,6 @@ describe('alchemy.core.Collectum', function () {
             expect(this.collectum.length).toEqual(0);
             expect(onRemove).not.toHaveBeenCalled();
             expect(onChange).not.toHaveBeenCalled();
-        });
-    });
-
-    describe('event proxy', function () {
-        it('triggers the changes of a model', function () {
-            // prepare
-            var model = alchemy('alchemy.core.Modelum').brew({
-                foo: 'bar'
-            });
-            var onChange = jasmine.createSpy('onChange');
-            this.collectum.add(model);
-            this.collectum.on('change', onChange);
-            // execute
-            model.set('foo', 'baz');
-            // verify
-            expect(onChange).toHaveBeenCalled();
-            expect(onChange.mostRecentCall.args[0].source).toBe(model);
-        });
-
-        it('acts as a proxy for all events of a stored item', function () {
-            // prepare
-            var item = alchemy('alchemy.core.Observari').brew();
-            var handler1 = jasmine.createSpy('foo');
-            var handler2 = jasmine.createSpy('bar');
-            this.collectum.add(item);
-            this.collectum.on('foo', handler1);
-            this.collectum.on('bar', handler2);
-            // execute
-            item.trigger('foo', {
-                foo: 'foo'
-            });
-            // verify
-            expect(handler1).toHaveBeenCalled();
-            expect(handler1.mostRecentCall.args[0].source).toBe(item);
-            expect(handler1.mostRecentCall.args[0].foo).toBe('foo');
-            expect(handler1.mostRecentCall.args[1].name).toBe('foo');
-            expect(handler2).not.toHaveBeenCalled();
-        });
-
-        it('can proxy events without event data', function () {
-            // prepare
-            var item = alchemy('alchemy.core.Observari').brew();
-            var handler1 = jasmine.createSpy('foo');
-            this.collectum.add(item);
-            this.collectum.on('foo', handler1);
-            // execute
-            item.trigger('foo');
-            // verify
-            expect(handler1).toHaveBeenCalled();
-            expect(handler1.mostRecentCall.args[0].source).toBe(item);
-            expect(handler1.mostRecentCall.args[1].name).toBe('foo');
         });
     });
 

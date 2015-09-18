@@ -1,11 +1,12 @@
 describe('Oculus', function () {
     'use strict';
 
-    var alchemy = require('./../../../lib/core/Alchemy.js');
+    var Oculus = require('./../../../lib/core/Oculus');
+    var Observari = require('./../../../lib/core/Observari');
 
     beforeEach(function () {
-        this.oculus = alchemy('alchemy.core.Oculus').brew();
-        this.observable = alchemy('alchemy.core.Observari').brew();
+        this.oculus = Oculus.brew();
+        this.observable = Observari.brew();
     });
 
     afterEach(function () {
@@ -54,31 +55,4 @@ describe('Oculus', function () {
             expect(spy).not.toHaveBeenCalled();
         });
     });
-
-    /** @name TEST_mixin */
-    describe('observable aspect', function () {
-        it('give any existing potion to observe other objects', function () {
-            // prepare
-            var anyObj = alchemy('MateriaPrima').brew();
-            // execute
-            anyObj.addIngredient('observer', this.oculus);
-            // verify
-            expect(typeof anyObj.observe).toBe('function');
-            expect(typeof anyObj.isObservable).toBe('function');
-        });
-
-        it('give new potion to observe other object', function () {
-            // prepare
-            // execute
-            var anyPotion = alchemy.brew({
-                ingredients: {
-                    observer: 'Oculus'
-                }
-            });
-            // verify
-            expect(typeof anyPotion.observe).toBe('function');
-            expect(typeof anyPotion.isObservable).toBe('function');
-        });
-    });
-
 });
