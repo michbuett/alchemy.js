@@ -78,7 +78,7 @@ describe('Maleficus', function () {
         });
 
         it('has access to the explicitly given closure scope', function () {
-            expect(render('<$=(typeof alchemy)$>')).toBe('function');
+            expect(render('<$=(typeof alchemy)$>')).toBe('object');
         });
     });
 });

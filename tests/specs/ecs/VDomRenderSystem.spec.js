@@ -5,14 +5,12 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
     var Delegatus = require('./../../../lib/web/Delegatus');
     var Apothecarius = require('./../../../lib/ecs/Apothecarius');
     var VDomRenderSystem = require('./../../../lib/ecs/VDomRenderSystem');
-    var utils = require('./../../../lib/core/Alchemy.js');
 
     beforeEach(function () {
         setFixtures(sandbox());
 
         this.apothecarius = Apothecarius.brew();
 
-        initRenderer();
         initEntities(this.apothecarius);
     });
 
@@ -158,11 +156,12 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
         expect(testSubject.delegator).toBeFalsy();
     });
 
-    function initRenderer() {
-        utils.brew({
-            name: 'FooRenderer',
-            overrides: {
-                render: jasmine.createSpy().andCallFake(function (context) {
+    function initEntities(apothecarius) {
+        apothecarius.createEntity({
+            id: 'foo',
+            vdom: {
+                root: document.getElementById('sandbox'),
+                renderer: jasmine.createSpy().andCallFake(function (context) {
                     return context.h('div#' + context.entityId, null, [
                         context.renderChild('bar'),
                         context.h('div.spacer'),
@@ -170,40 +169,6 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
                         context.renderChild('unknown-entity'),
                     ]);
                 })
-            }
-        });
-
-        utils.brew({
-            name: 'BarRenderer',
-            overrides: {
-                render: jasmine.createSpy().andCallFake(function (context) {
-                    return context.h('div', {
-                        id: context.entityId,
-                        className: context.state.val('bla'),
-                    }, context.renderAllChildren());
-                })
-            }
-        });
-
-        utils.brew({
-            name: 'BazRenderer',
-            overrides: {
-                render: jasmine.createSpy().andCallFake(function (context) {
-                    return context.h('div', {
-                        id: context.entityId,
-                        className: 'baz-class'
-                    }, context.renderAllChildren());
-                })
-            }
-        });
-    }
-
-    function initEntities(apothecarius) {
-        apothecarius.createEntity({
-            id: 'foo',
-            vdom: {
-                root: document.getElementById('sandbox'),
-                renderer: 'FooRenderer'
             },
             children: {
                 bar: 'bar',
@@ -214,7 +179,12 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
         apothecarius.createEntity({
             id: 'bar',
             vdom: {
-                renderer: 'BarRenderer'
+                renderer: function (context) {
+                    return context.h('div', {
+                        id: context.entityId,
+                        className: context.state.val('bla'),
+                    }, context.renderAllChildren());
+                }
             },
             children: {
                 ping: 'ping',
@@ -229,14 +199,24 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
         apothecarius.createEntity({
             id: 'baz',
             vdom: {
-                renderer: 'BazRenderer'
+                renderer: function (context) {
+                    return context.h('div', {
+                        id: context.entityId,
+                        className: 'baz-class'
+                    }, context.renderAllChildren());
+                }
             },
         });
 
         apothecarius.createEntity({
             id: 'ping',
             vdom: {
-                renderer: 'BazRenderer'
+                renderer: function (context) {
+                    return context.h('div', {
+                        id: context.entityId,
+                        className: 'baz-class'
+                    }, context.renderAllChildren());
+                }
             }
         });
 
