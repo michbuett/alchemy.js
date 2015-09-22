@@ -193,7 +193,7 @@ describe('alchemy.web.Applicatus', function () {
             }).toThrow('Invalid input: Message map missing');
         });
 
-        it('delegates messages to the controller', function () {
+        it('createDelegates messages to the controller', function () {
             // prepare
             var controller = {
                 messages: {

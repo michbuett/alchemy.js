@@ -25,12 +25,10 @@ describe('alchemy.ecs.EventSystem', function () {
         testSubject.update();
 
         // verify
+        var delegatedEvents = apothecarius.getComponentData('foo', 'delegatedEvents');
         expect(apothecarius.getComponentData('foo', 'events')).toBeFalsy();
-        expect(apothecarius.getComponentData('foo', 'delegatedEvents')).toEqual([{
-            selector: '#foo',
-            event: 'click',
-            delegate: 0,
-        }]);
+        expect(delegatedEvents[0].selector).toBe('#foo');
+        expectToBeDelegate(delegatedEvents[0].delegate);
     });
 
     it('supports backbone-style even definition', function () {
@@ -51,15 +49,11 @@ describe('alchemy.ecs.EventSystem', function () {
         testSubject.update();
 
         // verify
-        expect(testSubject.entities.getComponentData(entityId, 'delegatedEvents')).toEqual([{
-            selector: '.foo .bar',
-            event: 'click',
-            delegate: 0,
-        }, {
-            selector: '#baz',
-            event: 'click',
-            delegate: 1,
-        }]);
+        var delegatedEvents = testSubject.entities.getComponentData(entityId, 'delegatedEvents');
+        expect(delegatedEvents[0].selector).toBe('.foo .bar');
+        expectToBeDelegate(delegatedEvents[0].delegate);
+        expect(delegatedEvents[1].selector).toBe('#baz');
+        expectToBeDelegate(delegatedEvents[1].delegate);
     });
 
     it('can delegate browser events to handler methods', function () {
@@ -77,7 +71,7 @@ describe('alchemy.ecs.EventSystem', function () {
         testSubject.addHandler('fooClick', testHandler);
         testSubject.update();
         var del = entities.getComponentData('foo', 'delegatedEvents')[0];
-        delegator.delegateKey(del.event, del.delegate, testEl);
+        del.delegate.bind(testEl);
         $(testEl).click();
 
         // verify
@@ -104,7 +98,7 @@ describe('alchemy.ecs.EventSystem', function () {
         // execute
         testSubject.update();
         var del = entities.getComponentData('bar', 'delegatedEvents')[0];
-        delegator.delegateKey(del.event, del.delegate, testEl);
+        del.delegate.bind(testEl);
         $(testEl).click();
 
         // verify
@@ -136,7 +130,7 @@ describe('alchemy.ecs.EventSystem', function () {
         // execute
         testSubject.update();
         var del = entities.getComponentData('foo', 'delegatedEvents')[0];
-        delegator.delegateKey(del.event, del.delegate, testEl);
+        del.delegate.bind(testEl);
         $(testEl).click();
 
         // verify
@@ -197,5 +191,10 @@ describe('alchemy.ecs.EventSystem', function () {
             delegatedEvents: []
         });
         return apothecarius;
+    }
+
+    function expectToBeDelegate(subj) {
+        expect(typeof subj).toBe('object');
+        expect(typeof subj.bind).toBe('function');
     }
 });

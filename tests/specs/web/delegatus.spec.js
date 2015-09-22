@@ -16,7 +16,22 @@ describe('alchemy.web.Delegatus', function () {
         ].join(''));
     });
 
-    describe('delegate', function () {
+    describe('createDelegate', function () {
+        it('can create a delegation key', function () {
+            var delegatus = Delegatus.brew({
+                root: document.getElementById('sandbox')
+            });
+
+            var handler = function () {};
+
+            var delegate1 = delegatus.createDelegate('click', handler);
+            var delegate2 = delegatus.createDelegate('click', handler);
+
+            expect(typeof delegate1).toBe('object');
+            expect(typeof delegate1.bind).toBe('function');
+            expect(delegate2).toBe(delegate1);
+        });
+
         it('allows to delegate dom events', function () {
             // prepare
             var el = document.getElementById('foo');
@@ -26,41 +41,21 @@ describe('alchemy.web.Delegatus', function () {
             var handler = jasmine.createSpy();
 
             // execute
-            delegatus.delegate(el, 'click', handler);
+            delegatus.createDelegate('click', handler).bind(el);
             $(el).click();
 
             // verify
             expect(handler).toHaveBeenCalled();
         });
 
-        it('ignores invalid input', function () {
-            // prepare
-            var el = document.getElementById('foo');
-            var delegatus = Delegatus.brew({
-                root: document.body,
-            });
-
-            expect(function () {
-                delegatus.delegate();
-            }).not.toThrow();
-
-            expect(function () {
-                delegatus.delegate(el);
-            }).not.toThrow();
-
-            expect(function () {
-                delegatus.delegate(el, 'click');
-            }).not.toThrow();
-        });
-
-        it('ignores events which occure not on a target element', function () {
+        it('ignores events which occur not on a target element', function () {
             var root = document.getElementById('sandbox');
             var el = document.getElementById('foo');
             var delegatus = Delegatus.brew({
                 root: root
             });
             var handler = jasmine.createSpy();
-            delegatus.delegate(el, 'click', handler);
+            delegatus.createDelegate('click', handler).bind(el);
 
             // execute
             $('#bar').click();
@@ -70,7 +65,7 @@ describe('alchemy.web.Delegatus', function () {
             expect(handler).not.toHaveBeenCalled();
         });
 
-        it('reuses event handlers', function () {
+        it('re-uses event handlers', function () {
             var el = document.getElementById('foo');
             var delegatus = Delegatus.brew({
                 root: document.getElementById('sandbox')
@@ -79,28 +74,12 @@ describe('alchemy.web.Delegatus', function () {
             var scope = {};
 
             // execute
-            delegatus.delegate(el, 'click', handler, scope);
-            delegatus.delegate(el, 'click', handler, scope);
-            delegatus.delegate(el, 'click', handler, scope);
+            delegatus.createDelegate('click', handler, scope).bind(el);
+            delegatus.createDelegate('click', handler, scope).bind(el);
+            delegatus.createDelegate('click', handler, scope).bind(el);
 
             // verify
             expect(delegatus.events.click.length).toBe(1);
-        });
-    });
-
-    describe('delegateHandler', function () {
-        it('can create a delegation key', function () {
-            var delegatus = Delegatus.brew({
-                root: document.getElementById('sandbox')
-            });
-
-            var handler = function () {};
-
-            var key1 = delegatus.delegateHandler('click', handler);
-            var key2 = delegatus.delegateHandler('click', handler);
-
-            expect(key1).toBe(0);
-            expect(key2).toBe(0);
         });
     });
 
@@ -127,8 +106,8 @@ describe('alchemy.web.Delegatus', function () {
             var handler2 = jasmine.createSpy();
 
             // execute
-            delegatus.delegate(elFoo, 'click', handler1);
-            delegatus.delegate(elBar, 'click', handler2);
+            delegatus.createDelegate('click', handler1).bind(elFoo);
+            delegatus.createDelegate('click', handler2).bind(elBar);
             $(elFoo).click();
             delegatus.dispose();
             $(elBar).click();

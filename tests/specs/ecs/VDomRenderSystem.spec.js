@@ -52,21 +52,19 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
         expect($('div#foo div#bar.blub div#pong')).toExist();
     });
 
-    it('binds delegated events handler with selector', function () {
+    it('binds createDelegated events handler with selector', function () {
         // prepare
         var testHandler = jasmine.createSpy();
         var delegator = Delegatus.brew();
-        var delegateKey = delegator.delegateHandler('click', testHandler);
+        var delegate = delegator.createDelegate('click', testHandler);
         var renderer = VDomRenderSystem.brew({
-            delegator: delegator,
             entities: this.apothecarius
         });
 
         renderer.update();
         this.apothecarius.setComponent('foo', 'delegatedEvents', [{
-            event: 'click',
             selector: '#baz',
-            delegate: delegateKey,
+            delegate: delegate,
         }]);
 
         // execute
@@ -77,20 +75,19 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
         expect(testHandler).toHaveBeenCalled();
     });
 
-    it('binds delegated events handler without selector', function () {
+    it('binds createDelegated events handler without selector', function () {
         // prepare
         var testHandler = jasmine.createSpy();
         var delegator = Delegatus.brew();
-        var delegateKey = delegator.delegateHandler('click', testHandler);
+        var delegate = delegator.createDelegate('click', testHandler);
         var renderer = VDomRenderSystem.brew({
-            delegator: delegator,
             entities: this.apothecarius
         });
 
         renderer.update();
         this.apothecarius.setComponent('foo', 'delegatedEvents', [{
             event: 'click',
-            delegate: delegateKey,
+            delegate: delegate,
         }]);
 
         // execute
@@ -144,7 +141,6 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
     it('removes references when being disposed', function () {
         // prepare
         var testSubject = VDomRenderSystem.brew({
-            delegator: Delegatus.brew(),
             entities: this.apothecarius
         });
 
@@ -153,7 +149,6 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
 
         // verify
         expect(testSubject.entities).toBeFalsy();
-        expect(testSubject.delegator).toBeFalsy();
     });
 
     function initEntities(apothecarius) {
