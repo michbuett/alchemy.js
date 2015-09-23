@@ -2,10 +2,10 @@
 describe('alchemy.ecs.EventSystem', function () {
     'use strict';
 
-    var Delegatus = require('./../../../lib/web/Delegatus');
-    var Apothecarius = require('./../../../lib/ecs/Apothecarius');
-    var EventSystem = require('./../../../lib/ecs/EventSystem');
-    var Observari = require('../../../lib/core/Observari');
+    var Delegatus = require('./../../../lib/Delegatus');
+    var Apothecarius = require('./../../../lib/Apothecarius');
+    var EventSystem = require('./../../../lib/EventSystem');
+    var Observari = require('../../../lib/Observari');
 
     beforeEach(function () {
         setFixtures('<div id="foo"></div>');

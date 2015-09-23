@@ -25,7 +25,6 @@ module.exports = function (grunt) {
                 'lib/**/*.js',
                 'tests/**/*.js',
                 // no check for 3rd party libs
-                '!lib/vendor/**/*.js',
                 '!tests/vendor/**/*.js',
             ],
             options: {
@@ -56,10 +55,7 @@ module.exports = function (grunt) {
 
             all: {
                 src: [
-                    'lib/core/Alchemy.js',
-                    'lib/core/*.js',
-                    'lib/web/*.js',
-                    'lib/ecs/*.js',
+                    'lib/**/*.js',
                 ],
 
                 options: {
@@ -69,10 +65,7 @@ module.exports = function (grunt) {
 
             coverage: {
                 src: [
-                    'lib/core/Alchemy.js',
-                    'lib/core/*.js',
-                    'lib/web/*.js',
-                    'lib/ecs/*.js',
+                    'lib/**/*.js',
                 ],
 
                 options: {

@@ -1,7 +1,7 @@
 describe('alchemy.ecs.Apothecarius', function () {
     'use strict';
 
-    var Apothecarius = require('./../../../lib/ecs/Apothecarius');
+    var Apothecarius = require('./../../../lib/Apothecarius');
 
     /** @name TEST_createEntity */
     describe('createEntity', function () {

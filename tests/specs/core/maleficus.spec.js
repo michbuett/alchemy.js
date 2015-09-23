@@ -1,7 +1,7 @@
 describe('Maleficus', function () {
     'use strict';
 
-    var render = require('./../../../lib/core/Maleficus');
+    var render = require('./../../../lib/Maleficus');
 
     describe('render', function () {
         it('can replace data attributes', function () {

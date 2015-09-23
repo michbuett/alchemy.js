@@ -1,8 +1,8 @@
 describe('Oculus', function () {
     'use strict';
 
-    var Oculus = require('./../../../lib/core/Oculus');
-    var Observari = require('./../../../lib/core/Observari');
+    var Oculus = require('./../../../lib/Oculus');
+    var Observari = require('./../../../lib/Observari');
 
     beforeEach(function () {
         this.oculus = Oculus.brew();

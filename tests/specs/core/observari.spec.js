@@ -1,7 +1,7 @@
 describe('Observari', function () {
     'use strict';
 
-    var Observari = require('./../../../lib/core/Observari');
+    var Observari = require('./../../../lib/Observari');
 
     beforeEach(function () {
         this.observari = Observari.brew();

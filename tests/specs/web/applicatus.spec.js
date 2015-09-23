@@ -1,8 +1,8 @@
 describe('alchemy.web.Applicatus', function () {
     'use strict';
 
-    var alchemy = require('./../../../lib/core/Alchemy.js');
-    var Applicatus = require('./../../../lib/web/Applicatus.js');
+    var alchemy = require('./../../../lib/Alchemy.js');
+    var Applicatus = require('./../../../lib/Applicatus.js');
 
     function createApp(pcfg) {
         var cfg = {

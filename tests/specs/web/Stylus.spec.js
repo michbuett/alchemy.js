@@ -2,7 +2,7 @@
 describe('alchemy.web.Stylus', function () {
     'use strict';
 
-    var Stylus = require('./../../../lib/web/Stylus');
+    var Stylus = require('./../../../lib/Stylus');
 
     beforeEach(function () {
         setFixtures([

@@ -2,9 +2,9 @@
 describe('alchemy.ecs.VDomRenderSystem', function () {
     'use strict';
 
-    var Delegatus = require('./../../../lib/web/Delegatus');
-    var Apothecarius = require('./../../../lib/ecs/Apothecarius');
-    var VDomRenderSystem = require('./../../../lib/ecs/VDomRenderSystem');
+    var Delegatus = require('./../../../lib/Delegatus');
+    var Apothecarius = require('./../../../lib/Apothecarius');
+    var VDomRenderSystem = require('./../../../lib/VDomRenderSystem');
 
     beforeEach(function () {
         setFixtures(sandbox());

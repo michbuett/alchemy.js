@@ -1,7 +1,7 @@
 describe('alchemy.core.Modelum', function () {
     'use strict';
 
-    var Modelum = require('./../../../lib/core/Modelum');
+    var Modelum = require('./../../../lib/Modelum');
 
     beforeEach(function () {
         this.model = Modelum.brew({

@@ -2,7 +2,7 @@
 describe('alchemy.web.Delegatus', function () {
     'use strict';
 
-    var Delegatus = require('./../../../lib/web/Delegatus');
+    var Delegatus = require('./../../../lib/Delegatus');
 
     beforeEach(function () {
         setFixtures([

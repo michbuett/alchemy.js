@@ -3,8 +3,8 @@ describe('alchemy.ecs.Administrator', function () {
 
     var each = require('pro-singulis');
     var immutable = require('immutabilis');
-    var Apothecarius = require('./../../../lib/ecs/Apothecarius');
-    var Administrator = require('./../../../lib/ecs/Administrator');
+    var Apothecarius = require('./../../../lib/Apothecarius');
+    var Administrator = require('./../../../lib/Administrator');
 
     it('updates all registered systems', function () {
         // prepare

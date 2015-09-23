@@ -2,9 +2,9 @@
 describe('alchemy.ecs.CssRenderSystem', function () {
     'use strict';
 
-    var Apothecarius = require('./../../../lib/ecs/Apothecarius');
-    var Stylus = require('./../../../lib/web/Stylus');
-    var CssRenderSystem = require('./../../../lib/ecs/CssRenderSystem');
+    var Apothecarius = require('./../../../lib/Apothecarius');
+    var Stylus = require('./../../../lib/Stylus');
+    var CssRenderSystem = require('./../../../lib/CssRenderSystem');
 
     beforeEach(function () {
         this.stylus = Stylus.brew();
