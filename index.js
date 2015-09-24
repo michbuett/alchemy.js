@@ -13,6 +13,6 @@ module.exports = {
     Oculus: require('./lib/Oculus'),
     StateSystem: require('./lib/StateSystem'),
     Stylus: require('./lib/Stylus'),
-    Utils: require('./lib/Alchemy'),
+    Utils: require('./lib/Utils'),
     VDomRenderSystem: require('./lib/VDomRenderSystem'),
 };

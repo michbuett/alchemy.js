@@ -5,7 +5,7 @@
     "Michael Buettner <michael.buettner@gmx.net>"
   ],
   "description": "A framework for functional and data-driven app development",
-  "main": "lib/core/Alchemy.js",
+  "main": "index.js",
   "moduleType": ["global", "node"],
   "license": "LICENSE",
   "ignore": [

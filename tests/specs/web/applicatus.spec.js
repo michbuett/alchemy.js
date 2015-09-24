@@ -1,8 +1,8 @@
 describe('alchemy.web.Applicatus', function () {
     'use strict';
 
-    var alchemy = require('./../../../lib/Alchemy.js');
-    var Applicatus = require('./../../../lib/Applicatus.js');
+    var utils = require('./../../../lib/Utils');
+    var Applicatus = require('./../../../lib/Applicatus');
 
     function createApp(pcfg) {
         var cfg = {
@@ -11,7 +11,7 @@ describe('alchemy.web.Applicatus', function () {
         };
 
         if (pcfg) {
-            cfg = alchemy.mix(cfg, pcfg);
+            cfg = utils.mix(cfg, pcfg);
         }
 
         return Applicatus.brew(cfg);
