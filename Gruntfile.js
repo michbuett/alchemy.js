@@ -53,7 +53,7 @@ module.exports = function (grunt) {
                 ],
             },
 
-            all: {
+            debug: { // for debugging tests
                 src: [
                     'lib/**/*.js',
                 ],
@@ -90,10 +90,10 @@ module.exports = function (grunt) {
                             }
                         }],
                         thresholds: {
-                            lines: 85,
-                            statements: 85,
-                            branches: 80,
-                            functions: 90
+                            lines: 95,
+                            statements: 95,
+                            branches: 95,
+                            functions: 95
                         },
                     }
                 },
@@ -125,7 +125,7 @@ module.exports = function (grunt) {
 
             js: {
                 files: ['Gruntfile.js', 'lib/**/*js', 'tests/**/*js'],
-                tasks: ['jshint', 'jasmine_node', 'jasmine:all'],
+                tasks: ['test'],
             },
         },
 
@@ -152,7 +152,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-coveralls');
 
     // define aliases
+    grunt.registerTask('default', ['availabletasks']);
     grunt.registerTask('lint', ['jsonlint', 'jshint']);
     grunt.registerTask('test', ['lint', 'jasmine_node', 'jasmine:coverage']);
-    grunt.registerTask('default', ['availabletasks']);
 };

@@ -13,7 +13,7 @@
     "web",
     "frontend"
   ],
-  "license": "LICENSE",
+  "license": "JSON",
   "devDependencies": {
     "grunt": "~0.4.5",
     "grunt-available-tasks": "~0.5.0",
@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "coquo-venenum": "^1.1.1",
-    "immutabilis": "^2.0.1",
+    "immutabilis": "^2.0.3",
     "pro-singulis": "^1.2.0",
     "virtual-dom": "^2.0.1"
   }
