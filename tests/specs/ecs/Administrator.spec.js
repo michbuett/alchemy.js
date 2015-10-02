@@ -3,6 +3,7 @@ describe('alchemy.ecs.Administrator', function () {
 
     var each = require('pro-singulis');
     var immutable = require('immutabilis');
+    var coquoVenenum = require('coquo-venenum');
     var Apothecarius = require('./../../../lib/Apothecarius');
     var Administrator = require('./../../../lib/Administrator');
 
@@ -20,21 +21,6 @@ describe('alchemy.ecs.Administrator', function () {
 
         // verify
         expect(testSystem.update).toHaveBeenCalledWith(state);
-    });
-
-    it('disposes all component systems when disposing app', function () {
-        // prepare
-        var testSubject = Administrator.brew();
-        var testSystem = {
-            dispose: jasmine.createSpy()
-        };
-        testSubject.addSystem(testSystem);
-
-        // execute
-        testSubject.dispose();
-
-        // verify
-        expect(testSystem.dispose).toHaveBeenCalled();
     });
 
     it('allows to define an initial set of entities which have children', function () {
@@ -190,6 +176,47 @@ describe('alchemy.ecs.Administrator', function () {
                 key: 'key-bar',
                 value: 'value-bar',
             },
+        });
+    });
+
+    describe('dispose', function () {
+        it('disposes all component systems when disposing app', function () {
+            // prepare
+            var testSubject = Administrator.brew();
+            var testSystem = {
+                dispose: jasmine.createSpy()
+            };
+            testSubject.addSystem(testSystem);
+
+            // execute
+            testSubject.dispose();
+
+            // verify
+            expect(testSystem.dispose).toHaveBeenCalled();
+        });
+
+        it('clears the injected entity repo', function () {
+            // prepare
+            var System = coquoVenenum({});
+            var repo = Apothecarius.brew(repo);
+            var testSubject = Administrator.brew({ repo: repo, });
+            var system1 = System.brew();
+            var system2 = System.brew();
+
+            testSubject.addSystem(system1);
+            testSubject.addSystem(system2);
+
+            var repoBefore1 = system1.entities;
+            var repoBefore2 = system2.entities;
+
+            // execute
+            testSubject.dispose();
+
+            // verify
+            expect(repoBefore1).toBe(repo);
+            expect(repoBefore2).toBe(repo);
+            expect(system1.entities).toBe(null);
+            expect(system2.entities).toBe(null);
         });
     });
 });
