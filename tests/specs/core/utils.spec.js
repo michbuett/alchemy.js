@@ -290,6 +290,74 @@ describe('alchemy', function () {
         });
     });
 
+    /** @name TEST_melt */
+    describe('melt', function () {
+        it('allows to melt two objects together', function () {
+            expect(alchemy.melt({
+                foo: 1,
+                bar: 2,
+                baz: 3
+            }, {
+                foo: 10,
+                bar: 20
+            })).toEqual({
+                foo: 10,
+                bar: 20,
+                baz: 3,
+            });
+        });
+
+
+        it('allows deep object merges', function () {
+            // prepare
+            var sourceOb1 = {
+                foo: 1,
+                bar: {
+                    ping: 'pong',
+                    baz: {
+                        bli: 'bla',
+                    }
+                },
+            };
+            var sourceOb2 = {
+                bar: {
+                    ping: 'pung',
+                    baz: {
+                        bli: 'blub',
+                    }
+                },
+                baz: 30,
+            };
+
+            // execute
+            var result = alchemy.melt(sourceOb1, sourceOb2);
+
+            // verfiy
+            expect(result).toEqual({
+                foo: 1,
+                bar: {
+                    ping: 'pung',
+                    baz: {
+                        bli: 'blub',
+                    }
+                },
+                baz: 30,
+            });
+        });
+
+        it('does not modify the source objects', function () {
+            // prepare
+            var sourceOb1 = { foo: 1, bar: { baz: 2}, };
+            var sourceOb2 = { bar: { baz: 30}, };
+
+            // execute
+            alchemy.melt(sourceOb1, sourceOb2);
+
+            // verfiy
+            expect(sourceOb1).toEqual({ foo: 1, bar: { baz: 2}, });
+            expect(sourceOb2).toEqual({ bar: { baz: 30}, });
+        });
+    });
 
     /** @name TEST_extract */
     describe('extract', function () {
