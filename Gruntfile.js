@@ -45,7 +45,6 @@ module.exports = function (grunt) {
                     'tests/helper/compatibility.helper.js',
                     'tests/vendor/jquery-2.0.3.js',
                     'tests/vendor/*.js',
-                    'lib/vendor/*.js'
                 ],
 
                 specs: [
