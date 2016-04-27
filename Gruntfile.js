@@ -152,6 +152,7 @@ module.exports = function (grunt) {
 
     // define aliases
     grunt.registerTask('default', ['availabletasks']);
+    grunt.registerTask('dev', ['watch']);
     grunt.registerTask('lint', ['jsonlint', 'jshint']);
     grunt.registerTask('test', ['lint', 'jasmine_node', 'jasmine:coverage']);
 };

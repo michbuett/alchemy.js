@@ -5,6 +5,7 @@ describe('alchemy.ecs.CssRenderSystem', function () {
     var Apothecarius = require('./../../../lib/Apothecarius');
     var Stylus = require('./../../../lib/Stylus');
     var CssRenderSystem = require('./../../../lib/CssRenderSystem');
+    var immutable = require('immutabilis');
 
     beforeEach(function () {
         this.stylus = Stylus.brew();
@@ -26,14 +27,10 @@ describe('alchemy.ecs.CssRenderSystem', function () {
     describe('update', function () {
         it('allows to render entity specific css', function () {
             // prepare
+            var state = immutable.fromJS({ fg: '#00FF00', bg: '#FF00FF', });
             var apothecarius = Apothecarius.brew();
             apothecarius.createEntity({
                 id: 'foo',
-
-                state: {
-                    fg: '#00FF00',
-                    bg: '#FF00FF',
-                },
 
                 css: {
                     entityRules: function (state) {
@@ -51,7 +48,7 @@ describe('alchemy.ecs.CssRenderSystem', function () {
             });
 
             // execute
-            testSubject.update();
+            testSubject.update(state);
 
             // verify
             expect($('div#foo')).toHaveCss({
@@ -62,14 +59,11 @@ describe('alchemy.ecs.CssRenderSystem', function () {
 
         it('ignores entities where state was unchanged', function () {
             // prepare
+            var state = immutable.fromJS({ foo: 'bar' });
             var renderSpy = jasmine.createSpy().andReturn({padding: 0});
             var apothecarius = Apothecarius.brew();
             apothecarius.createEntity({
                 id: 'foo',
-
-                state: {
-                    foo: 'bar',
-                },
 
                 css: {
                     entityRules: renderSpy
@@ -81,14 +75,49 @@ describe('alchemy.ecs.CssRenderSystem', function () {
                 entities: apothecarius
             });
 
-            testSubject.update();
+            testSubject.update(state);
+            expect(renderSpy).toHaveBeenCalled();
             renderSpy.reset();
 
             // execute
-            testSubject.update();
+            testSubject.update(state);
 
             // verify
             expect(renderSpy).not.toHaveBeenCalled();
+        });
+
+        it('allows tp transform the application state to an entity specific (sub) state', function () {
+            // prepare
+            var state = immutable.fromJS({
+                foo: {
+                    bar: 'baz',
+                },
+            });
+
+            var renderSpy = jasmine.createSpy().andReturn({padding: 0});
+
+            var apothecarius = Apothecarius.brew();
+            apothecarius.createEntity({
+                id: 'foo',
+
+                css: {
+                    entityRules: renderSpy,
+                    stateMap: function (appState) {
+                        return appState.sub('foo').sub('bar');
+                    }
+                }
+            });
+
+            var testSubject = CssRenderSystem.brew({
+                stylus: this.stylus,
+                entities: apothecarius
+            });
+
+            // execute
+            testSubject.update(state);
+
+            // verify
+            expect(renderSpy).toHaveBeenCalledWith(immutable.fromJS('baz'));
         });
 
         it('allows to render static (state-independent) css', function () {
