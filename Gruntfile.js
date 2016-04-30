@@ -124,8 +124,16 @@ module.exports = function (grunt) {
 
             js: {
                 files: ['Gruntfile.js', 'lib/**/*js', 'tests/**/*js'],
-                tasks: ['test'],
+                tasks: ['lint', 'jasmine_node', 'jasmine:debug'],
             },
+        },
+
+        connect: {
+            dev: {
+                options: {
+                    livereload: true,
+                },
+            }
         },
 
         // ////////////////////////////////////////////////////////////////////
@@ -143,16 +151,17 @@ module.exports = function (grunt) {
 
     // load grunt plugins
     grunt.loadNpmTasks('grunt-available-tasks');
+    grunt.loadNpmTasks('grunt-contrib-connect');
+    grunt.loadNpmTasks('grunt-contrib-jasmine');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.loadNpmTasks('grunt-contrib-jasmine');
+    grunt.loadNpmTasks('grunt-coveralls');
     grunt.loadNpmTasks('grunt-jasmine-node-new');
     grunt.loadNpmTasks('grunt-jsonlint');
-    grunt.loadNpmTasks('grunt-coveralls');
 
     // define aliases
     grunt.registerTask('default', ['availabletasks']);
-    grunt.registerTask('dev', ['watch']);
+    grunt.registerTask('dev', ['connect', 'watch']);
     grunt.registerTask('lint', ['jsonlint', 'jshint']);
     grunt.registerTask('test', ['lint', 'jasmine_node', 'jasmine:coverage']);
 };
