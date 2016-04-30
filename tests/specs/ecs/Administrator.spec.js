@@ -76,12 +76,14 @@ describe('alchemy.ecs.Administrator', function () {
         var state = immutable.fromJS(['foo', 'bar']);
 
         // execute #1 'init'
-        testSubject.initEntities([function (state) {
-            return each(state.val(), function (item) {
-                return {
-                    id: item
-                };
-            });
+        testSubject.initEntities([{
+            children: function (state) {
+                return each(state.val(), function (item) {
+                    return {
+                        id: item
+                    };
+                });
+            }
         }], state);
 
         // verify #1
