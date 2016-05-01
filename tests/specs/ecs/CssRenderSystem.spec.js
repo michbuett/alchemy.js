@@ -115,9 +115,11 @@ describe('alchemy.ecs.CssRenderSystem', function () {
 
             // execute
             testSubject.update(state);
+            testSubject.update(state.set('foo', { baz: 'baz'}));
 
             // verify
             expect(renderSpy).toHaveBeenCalledWith(immutable.fromJS('baz'));
+            expect(renderSpy.calls.count()).toBe(1);
         });
 
         it('allows to render static (state-independent) css', function () {
@@ -137,7 +139,7 @@ describe('alchemy.ecs.CssRenderSystem', function () {
             });
 
             // execute
-            testSubject.update();
+            testSubject.update({});
 
             // verify
             expect($('div#foo')).toHaveCss({color: 'rgb(255, 0, 0)'});
@@ -160,7 +162,7 @@ describe('alchemy.ecs.CssRenderSystem', function () {
             });
 
             // execute
-            testSubject.update();
+            testSubject.update({});
 
             // verify
             expect($('div#foo')).toHaveCss({color: 'rgb(1, 2, 3)'});
