@@ -8,54 +8,59 @@ describe('alchemy.web.Delegatus', function () {
         setFixtures([
             '<div id="sandbox">',
               '<ul>',
-                '<li id="foo">Foo</li>',
-                '<li id="bar">Bar</li>',
-                '<li id="baz">Baz</li>',
+                '<li id="foo" class="ping">Foo</li>',
+                '<li id="bar" class="ping">Bar</li>',
+                '<li id="baz" class="pong">Baz</li>',
               '</ul>',
             '</div>',
         ].join(''));
     });
 
-    describe('createDelegate', function () {
-        it('can create a delegation key', function () {
-            var delegatus = Delegatus.brew({
-                root: document.getElementById('sandbox')
-            });
-
-            var handler = function () {};
-
-            var delegate1 = delegatus.createDelegate('click', handler);
-            var delegate2 = delegatus.createDelegate('click', handler);
-
-            expect(typeof delegate1).toBe('object');
-            expect(typeof delegate1.bind).toBe('function');
-            expect(delegate2).toBe(delegate1);
-        });
-
+    describe('addEventListener', function () {
         it('allows to delegate dom events', function () {
             // prepare
-            var el = document.getElementById('foo');
+            var handler = jasmine.createSpy();
             var delegatus = Delegatus.brew({
                 root: document.body,
             });
-            var handler = jasmine.createSpy();
 
             // execute
-            delegatus.createDelegate('click', handler).bind(el);
-            $(el).click();
+            delegatus.addEventListener('click #foo', handler);
+            $('#foo').click();
 
             // verify
             expect(handler).toHaveBeenCalled();
         });
 
+        it('allows to filter using css selectors', function () {
+            // prepare
+            var handler = jasmine.createSpy();
+            var delegatus = Delegatus.brew({
+                root: document.body,
+            });
+
+            // execute #1
+            delegatus.addEventListener('click #sandbox .ping', handler);
+            $('.pong').click();
+
+            // verify #1
+            expect(handler).not.toHaveBeenCalled();
+
+            // execute #2
+            $('.ping').click();
+
+            // verify #2
+            expect(handler).toHaveBeenCalled();
+        });
+
         it('ignores events which occur not on a target element', function () {
             var root = document.getElementById('sandbox');
-            var el = document.getElementById('foo');
+            var handler = jasmine.createSpy();
             var delegatus = Delegatus.brew({
                 root: root
             });
-            var handler = jasmine.createSpy();
-            delegatus.createDelegate('click', handler).bind(el);
+
+            delegatus.addEventListener('click #foo', handler);
 
             // execute
             $('#bar').click();
@@ -65,22 +70,6 @@ describe('alchemy.web.Delegatus', function () {
             expect(handler).not.toHaveBeenCalled();
         });
 
-        it('re-uses event handlers', function () {
-            var el = document.getElementById('foo');
-            var delegatus = Delegatus.brew({
-                root: document.getElementById('sandbox')
-            });
-            var handler = function () {};
-            var scope = {};
-
-            // execute
-            delegatus.createDelegate('click', handler, scope).bind(el);
-            delegatus.createDelegate('click', handler, scope).bind(el);
-            delegatus.createDelegate('click', handler, scope).bind(el);
-
-            // verify
-            expect(delegatus.events.click.length).toBe(1);
-        });
     });
 
     describe('dispose', function () {
@@ -97,20 +86,19 @@ describe('alchemy.web.Delegatus', function () {
 
         it('stops delegating when disposed', function () {
             // prepare
+            var handler1 = jasmine.createSpy();
+            var handler2 = jasmine.createSpy();
             var delegatus = Delegatus.brew({
                 root: document.body,
             });
-            var elFoo = document.getElementById('foo');
-            var elBar = document.getElementById('bar');
-            var handler1 = jasmine.createSpy();
-            var handler2 = jasmine.createSpy();
+
+            delegatus.addEventListener('click #foo', handler1);
+            delegatus.addEventListener('click #bar', handler2);
 
             // execute
-            delegatus.createDelegate('click', handler1).bind(elFoo);
-            delegatus.createDelegate('click', handler2).bind(elBar);
-            $(elFoo).click();
+            $('#foo').click();
             delegatus.dispose();
-            $(elBar).click();
+            $('#bar').click();
 
             // verify
             expect(handler1).toHaveBeenCalled();

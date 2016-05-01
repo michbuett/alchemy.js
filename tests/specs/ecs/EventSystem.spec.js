@@ -8,193 +8,116 @@ describe('alchemy.ecs.EventSystem', function () {
     var Observari = require('../../../lib/Observari');
 
     beforeEach(function () {
-        setFixtures('<div id="foo"></div>');
+        setFixtures('<div id="foo"><div class="bar"></div><div class="baz"></div></div>');
+
+        this.delegatus = Delegatus.brew();
+
+        this.apothecarius = Apothecarius.brew();
+
+        this.messages = Observari.brew();
+
+        this.testSubject = EventSystem.brew({
+            delegator: this.delegatus,
+            entities: this.apothecarius,
+            messages: this.messages,
+        });
     });
 
-    it('allows to delegate DOM events to application messages', function () {
+    it('allows to register event listeners', function () {
         // prepare
-        var delegatus = Delegatus.brew();
-        var apothecarius = initEntities();
-        var testSubject = EventSystem.brew({
-            delegator: delegatus,
-            entities: apothecarius,
-        });
-        testSubject.addHandler('fooClick', function () {});
+        var fooHandler = jasmine.createSpy();
 
-        // execute
-        testSubject.update();
+        this.apothecarius.createEntity({
+            id: 'foo',
 
-        // verify
-        var delegatedEvents = apothecarius.getComponentData('foo', 'delegatedEvents');
-        expect(apothecarius.getComponentData('foo', 'events')).toBeFalsy();
-        expect(delegatedEvents[0].selector).toBe('#foo');
-        expectToBeDelegate(delegatedEvents[0].delegate);
-    });
-
-    it('supports backbone-style even definition', function () {
-        // prepare
-        var testSubject = EventSystem.brew({
-            delegator: Delegatus.brew(),
-            entities: Apothecarius.brew(),
-        });
-
-        var entityId = testSubject.entities.createEntity({
             events: {
-                'click .foo .bar': function () {},
-                'click #baz': function () {},
+                'click': fooHandler,
             }
         });
 
         // execute
-        testSubject.update();
+        this.testSubject.update();
+        $('#foo').click();
 
-        // verify
-        var delegatedEvents = testSubject.entities.getComponentData(entityId, 'delegatedEvents');
-        expect(delegatedEvents[0].selector).toBe('.foo .bar');
-        expectToBeDelegate(delegatedEvents[0].delegate);
-        expect(delegatedEvents[1].selector).toBe('#baz');
-        expectToBeDelegate(delegatedEvents[1].delegate);
+        // verfiy
+        expect(fooHandler).toHaveBeenCalled();
     });
 
-    it('can delegate browser events to handler methods', function () {
+    it('supports backbone-style even definition', function () {
         // prepare
-        var testHandler = jasmine.createSpy();
-        var delegator = Delegatus.brew();
-        var entities = initEntities();
-        var testSubject = EventSystem.brew({
-            entities: entities,
-            delegator: delegator,
+        var barHandler = jasmine.createSpy('click handler for "bar"');
+        var bazHandler = jasmine.createSpy('click handler for "baz"');
+
+        this.apothecarius.createEntity({
+            id: 'foo',
+
+            events: {
+                'click .bar': barHandler,
+                'click .baz': bazHandler,
+            }
         });
-        var testEl = document.getElementById('foo');
 
-        // execute
-        testSubject.addHandler('fooClick', testHandler);
-        testSubject.update();
-        var del = entities.getComponentData('foo', 'delegatedEvents')[0];
-        del.delegate.bind(testEl);
-        $(testEl).click();
+        this.testSubject.update();
 
-        // verify
-        expect(testHandler).toHaveBeenCalled();
+        // execute #1
+        $('.bar').click();
+
+        // verfiy #1
+        expect(barHandler).toHaveBeenCalled();
+        expect(bazHandler).not.toHaveBeenCalled();
+
+        // execute #2
+        barHandler.reset();
+        $('.baz').click();
+
+        // verfiy #2
+        expect(barHandler).not.toHaveBeenCalled();
+        expect(bazHandler).toHaveBeenCalled();
     });
 
     it('can delegate browser events to messages', function () {
         // prepare
-        var eventData;
-        var testHandler = jasmine.createSpy().andCallFake(function (data) {
-            eventData = data;
+        var fooHandler = jasmine.createSpy();
+        var barHandler = jasmine.createSpy();
+        var bazHandler = jasmine.createSpy();
+
+        this.apothecarius.createEntity({
+            id: 'foo',
+
+            events: {
+                'click': function (ev, state, sendMessage) {
+                    sendMessage('fooMessage');
+                },
+                'click .bar': { message: 'barMessage', },
+                'click .baz': 'bazMessage',
+            }
         });
-        var delegator = Delegatus.brew();
-        var messages = Observari.brew();
-        var entities = initEntities();
-        var testSubject = EventSystem.brew({
-            entities: entities,
-            delegator: delegator,
-            messages: messages,
-        });
-        var testEl = document.getElementById('foo');
-        messages.on('fooMessage', testHandler);
+
+        this.messages.on('fooMessage', fooHandler);
+        this.messages.on('barMessage', barHandler);
+        this.messages.on('bazMessage', bazHandler);
+
+        this.testSubject.update();
 
         // execute
-        testSubject.update();
-        var del = entities.getComponentData('bar', 'delegatedEvents')[0];
-        del.delegate.bind(testEl);
-        $(testEl).click();
+        $('#foo').click();
+        $('.bar').click();
+        $('.baz').click();
 
         // verify
-        expect(testHandler).toHaveBeenCalled();
-        expect(eventData).toEqual({foo: 'bar'});
-    });
-
-    it('allows an event handler to update the entities state', function () {
-        // prepare
-        var delegator = Delegatus.brew();
-        var entities = initEntities();
-        var testSubject = EventSystem.brew({
-            entities: entities,
-            delegator: delegator,
-        });
-        var testEl = document.getElementById('foo');
-
-        testSubject.addHandler('fooClick', function (event, state) {
-            return {
-                foo: 'foo-2',
-                bar: 'bar-2',
-            };
-        });
-        entities.setComponent('foo', 'state', {
-            foo: 'foo-1',
-            bar: 'bar-1',
-        });
-
-        // execute
-        testSubject.update();
-        var del = entities.getComponentData('foo', 'delegatedEvents')[0];
-        del.delegate.bind(testEl);
-        $(testEl).click();
-
-        // verify
-        expect(entities.getComponentData('foo', 'state')).toEqual({
-            foo: 'foo-2',
-            bar: 'bar-2',
-        });
+        expect(fooHandler).toHaveBeenCalled();
+        expect(barHandler).toHaveBeenCalled();
+        expect(bazHandler).toHaveBeenCalled();
     });
 
     it('removes references when being disposed', function () {
         // prepare
-        var testSubject = EventSystem.brew({
-            entities: initEntities(),
-            delegator: Delegatus.brew(),
-            messages: Observari.brew(),
-        });
-
         // execute
-        testSubject.dispose();
+        this.testSubject.dispose();
 
         // verify
-        expect(testSubject.entities).toBeFalsy();
-        expect(testSubject.delegator).toBeFalsy();
-        expect(testSubject.messages).toBeFalsy();
+        expect(this.testSubject.entities).toBeFalsy();
+        expect(this.testSubject.delegator).toBeFalsy();
+        expect(this.testSubject.messages).toBeFalsy();
     });
-
-    function initEntities() {
-        var apothecarius = Apothecarius.brew();
-        apothecarius.createEntity({
-            id: 'foo',
-
-            events: {
-                click: {
-                    selector: '#foo',
-                    handler: 'fooClick',
-                }
-            },
-        });
-
-        apothecarius.createEntity({
-            id: 'bar',
-            state: {
-                foo: 'bar',
-            },
-
-            events: {
-                click: {
-                    message: 'fooMessage',
-                }
-            },
-
-            delegatedEvents: []
-        });
-
-        apothecarius.createEntity({
-            id: 'baz',
-
-            delegatedEvents: []
-        });
-        return apothecarius;
-    }
-
-    function expectToBeDelegate(subj) {
-        expect(typeof subj).toBe('object');
-        expect(typeof subj.bind).toBe('function');
-    }
 });
