@@ -2,7 +2,6 @@
 describe('alchemy.ecs.VDomRenderSystem', function () {
     'use strict';
 
-    // var Delegatus = require('./../../../lib/Delegatus');
     var Apothecarius = require('./../../../lib/Apothecarius');
     var VDomRenderSystem = require('./../../../lib/VDomRenderSystem');
     var immutable = require('immutabilis');
@@ -12,11 +11,8 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
 
         this.apothecarius = Apothecarius.brew();
 
-        // this.delegator = Delegatus.brew();
-
         this.testSubject = VDomRenderSystem.brew({
             entities: this.apothecarius,
-            // delegator: this.delegator,
         });
     });
 
@@ -29,10 +25,7 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
             vdom: {
                 root: document.getElementById('sandbox'),
                 renderer: function (ctxt) {
-                    return ctxt.h('div', {
-                        id: ctxt.entityId,
-                        className: ctxt.state.val(),
-                    });
+                    return ctxt.h('div.' + ctxt.state.val());
                 },
             }
         });
@@ -65,7 +58,7 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
     it('allows to render all known child-entities', function () {
         // prepare
         var renderer = function (ctxt) {
-            return ctxt.h('div#' + ctxt.entityId, null, ctxt.renderAllChildren());
+            return ctxt.h('div', null, ctxt.renderAllChildren());
         };
 
         this.apothecarius.createEntity({
@@ -119,7 +112,6 @@ describe('alchemy.ecs.VDomRenderSystem', function () {
                 root: document.getElementById('sandbox'),
                 renderer: function (ctxt) {
                     return ctxt.h('div', {
-                        id: ctxt.entityId,
                         className: ctxt.state.val(),
                     });
                 },
