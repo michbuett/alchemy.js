@@ -2,226 +2,183 @@
 describe('alchemy.ecs.VDomRenderSystem', function () {
     'use strict';
 
-    var Delegatus = require('./../../../lib/Delegatus');
+    // var Delegatus = require('./../../../lib/Delegatus');
     var Apothecarius = require('./../../../lib/Apothecarius');
     var VDomRenderSystem = require('./../../../lib/VDomRenderSystem');
+    var immutable = require('immutabilis');
 
     beforeEach(function () {
         setFixtures(sandbox());
 
         this.apothecarius = Apothecarius.brew();
 
-        initEntities(this.apothecarius);
+        // this.delegator = Delegatus.brew();
+
+        this.testSubject = VDomRenderSystem.brew({
+            entities: this.apothecarius,
+            // delegator: this.delegator,
+        });
     });
 
     it('renders the entities to the DOM', function () {
         // prepare
-        var renderer = VDomRenderSystem.brew({
-            entities: this.apothecarius
+        var state = immutable.fromJS('bar');
+
+        this.apothecarius.createEntity({
+            id: 'foo',
+            vdom: {
+                root: document.getElementById('sandbox'),
+                renderer: function (ctxt) {
+                    return ctxt.h('div', {
+                        id: ctxt.entityId,
+                        className: ctxt.state.val(),
+                    });
+                },
+            }
         });
 
-        // execute
-        renderer.update();
+        // execute #1
+        this.testSubject.update(state);
 
-        // verify
-        expect($('div#foo')).toExist();
-        expect($('div#foo div#bar.bla')).toExist();
-        expect($('div#foo div#baz.baz-class')).toExist();
-        expect($('div#foo div#bar.bla div#ping')).toExist();
-        expect($('div#foo div#bar.bla div#pong')).toExist();
+        // verify #1
+        expect($('div#foo.bar')).toExist();
+        expect($('div#foo.baz')).not.toExist();
+
+        // second update (no state change)
+        // execute #2
+        this.testSubject.update(state);
+
+        // verify #2
+        expect($('div#foo.bar')).toExist();
+        expect($('div#foo.baz')).not.toExist();
+
+        // third update (state change)
+        // execute #3
+        this.testSubject.update(immutable.fromJS('baz'));
+
+        // verify #3
+        expect($('div#foo.bar')).not.toExist();
+        expect($('div#foo.baz')).toExist();
+
     });
 
-    it('renders the update when changing the state', function () {
+    it('allows to render all known child-entities', function () {
         // prepare
-        var renderer = VDomRenderSystem.brew({
-            entities: this.apothecarius
-        });
+        var renderer = function (ctxt) {
+            return ctxt.h('div#' + ctxt.entityId, null, ctxt.renderAllChildren());
+        };
 
-        renderer.update();
-
-        this.apothecarius.setComponent('bar', 'state', {
-            bla: 'blub'
-        });
-
-        // execute
-        renderer.update();
-
-        // verify
-        expect($('div#foo div#bar.blub')).toExist();
-        expect($('div#foo div#bar.blub div#ping')).toExist();
-        expect($('div#foo div#bar.blub div#pong')).toExist();
-    });
-
-    it('binds createDelegated events handler with selector', function () {
-        // prepare
-        var testHandler = jasmine.createSpy();
-        var delegator = Delegatus.brew();
-        var delegate = delegator.createDelegate('click', testHandler);
-        var renderer = VDomRenderSystem.brew({
-            entities: this.apothecarius
-        });
-
-        renderer.update();
-        this.apothecarius.setComponent('foo', 'delegatedEvents', [{
-            selector: '#baz',
-            delegate: delegate,
-        }]);
-
-        // execute
-        renderer.update();
-        $('#baz').click();
-
-        // verify
-        expect(testHandler).toHaveBeenCalled();
-    });
-
-    it('binds createDelegated events handler without selector', function () {
-        // prepare
-        var testHandler = jasmine.createSpy();
-        var delegator = Delegatus.brew();
-        var delegate = delegator.createDelegate('click', testHandler);
-        var renderer = VDomRenderSystem.brew({
-            entities: this.apothecarius
-        });
-
-        renderer.update();
-        this.apothecarius.setComponent('foo', 'delegatedEvents', [{
-            event: 'click',
-            delegate: delegate,
-        }]);
-
-        // execute
-        renderer.update();
-        $('#foo').click();
-
-        // verify
-        expect(testHandler).toHaveBeenCalled();
-    });
-
-    it('throws an exception if renderer cannot be determined', function () {
-        // prepare
-        var renderer = VDomRenderSystem.brew({
-            entities: this.apothecarius
+        this.apothecarius.createEntity({
+            id: 'foo',
+            vdom: {
+                root: document.getElementById('sandbox'),
+                renderer: renderer,
+            },
+            children: [ 'bar', 'baz'],
         });
 
         this.apothecarius.createEntity({
-            id: 'invalid-renderer-test',
-            vdom: {}
+            id: 'bar',
+            vdom: { renderer: renderer, },
+        });
+
+        this.apothecarius.createEntity({
+            id: 'baz',
+            vdom: { renderer: renderer, },
+            children: [ 'ping', 'pong'],
+        });
+
+        this.apothecarius.createEntity({
+            id: 'ping',
+            vdom: { renderer: renderer, },
+        });
+
+        this.apothecarius.createEntity({
+            id: 'pong',
+            vdom: { renderer: renderer, },
         });
 
         // execute
-        expect(function () {
-            renderer.update();
+        this.testSubject.update(immutable.fromJS());
 
         // verify
-        }).toThrow('Cannot determine renderer for entity "invalid-renderer-test"!');
+        expect($('#foo #bar')).toExist();
+        expect($('#foo #baz #ping')).toExist();
+        expect($('#foo #baz #pong')).toExist();
+    });
+
+    it('allows to map the application state', function () {
+        // prepare
+        var state = immutable.fromJS({
+            foo: 'bar'
+        });
+
+        this.apothecarius.createEntity({
+            id: 'foo',
+            vdom: {
+                root: document.getElementById('sandbox'),
+                renderer: function (ctxt) {
+                    return ctxt.h('div', {
+                        id: ctxt.entityId,
+                        className: ctxt.state.val(),
+                    });
+                },
+                stateMap: function (appState) {
+                    return appState.sub('foo');
+                },
+            }
+        });
+
+        // execute #1
+        this.testSubject.update(state);
+
+        // verify #1
+        expect($('div#foo.bar')).toExist();
+        expect($('div#foo.baz')).not.toExist();
+
+        // second update (no state change)
+        // execute #2
+        this.testSubject.update(state);
+
+        // verify #2
+        expect($('div#foo.bar')).toExist();
+        expect($('div#foo.baz')).not.toExist();
+
+        // third update (state change)
+        // execute #3
+        this.testSubject.update(state.set('foo', 'baz'));
+
+        // verify #3
+        expect($('div#foo.bar')).not.toExist();
+        expect($('div#foo.baz')).toExist();
+
     });
 
     it('skips entities which have no parent dom element', function () {
         // prepare
-        var renderer = VDomRenderSystem.brew({
-            entities: this.apothecarius
-        });
+        var renderer = jasmine.createSpy('renderer');
 
         this.apothecarius.createEntity({
             id: 'no-parent-dom',
             vdom: {
-                renderer: function (c) { return c.h(); },
+                renderer: renderer,
             }
         });
 
         // execute
-        renderer.update();
+        this.testSubject.update(immutable.fromJS());
 
         // verify
-        var vdom = this.apothecarius.getComponentData('no-parent-dom', 'vdom');
-        expect(vdom.last).toBeFalsy();
+        expect(renderer).not.toHaveBeenCalled();
     });
 
     it('removes references when being disposed', function () {
         // prepare
-        var testSubject = VDomRenderSystem.brew({
-            entities: this.apothecarius
-        });
 
         // execute
-        testSubject.dispose();
+        this.testSubject.dispose();
 
         // verify
-        expect(testSubject.entities).toBeFalsy();
+        expect(this.testSubject.entities).toBeFalsy();
     });
-
-    function initEntities(apothecarius) {
-        apothecarius.createEntity({
-            id: 'foo',
-            vdom: {
-                root: document.getElementById('sandbox'),
-                renderer: jasmine.createSpy().andCallFake(function (context) {
-                    return context.h('div#' + context.entityId, null, [
-                        context.renderChild('bar'),
-                        context.h('div.spacer'),
-                        context.renderChild('baz'),
-                        context.renderChild('unknown-entity'),
-                    ]);
-                })
-            },
-            children: {
-                bar: 'bar',
-                baz: 'baz',
-            }
-        });
-
-        apothecarius.createEntity({
-            id: 'bar',
-            vdom: {
-                renderer: function (context) {
-                    return context.h('div', {
-                        id: context.entityId,
-                        className: context.state.val('bla'),
-                    }, context.renderAllChildren());
-                }
-            },
-            children: {
-                ping: 'ping',
-                pong: 'pong',
-                fail: 'unknown-entity',
-            },
-            state: {
-                bla: 'bla',
-            }
-        });
-
-        apothecarius.createEntity({
-            id: 'baz',
-            vdom: {
-                renderer: function (context) {
-                    return context.h('div', {
-                        id: context.entityId,
-                        className: 'baz-class'
-                    }, context.renderAllChildren());
-                }
-            },
-        });
-
-        apothecarius.createEntity({
-            id: 'ping',
-            vdom: {
-                renderer: function (context) {
-                    return context.h('div', {
-                        id: context.entityId,
-                        className: 'baz-class'
-                    }, context.renderAllChildren());
-                }
-            }
-        });
-
-        apothecarius.createEntity({
-            id: 'pong',
-            vdom: {
-                renderer: function (context) {
-                    return context.h('div#pong');
-                },
-            }
-        });
-    }
 });
