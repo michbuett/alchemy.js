@@ -30,23 +30,23 @@ describe('alchemy.ecs.Administrator', function () {
 
         // execute
         testSubject.initEntities([{
-            id: 'foo',
+            id: 'foo-entity-id',
             children: {
                 bar: {
-                    id: 'bar',
-                    children: {
-                        baz: {
-                            id: 'baz'
-                        }
-                    }
+                    id: 'bar-entity-id',
+                    children: [{
+                        id: 'baz-entity-id'
+                    }]
                 }
             }
         }]);
 
         // verify
-        expect(repo.contains('foo')).toBeTruthy();
-        expect(repo.contains('bar')).toBeTruthy();
-        expect(repo.contains('baz')).toBeTruthy();
+        expect(repo.contains('foo-entity-id')).toBeTruthy();
+        expect(repo.contains('bar-entity-id')).toBeTruthy();
+        expect(repo.contains('baz-entity-id')).toBeTruthy();
+        expectChildren('foo-entity-id', repo).toEqual({ bar: 'bar-entity-id' }); // defined as key-value-pair
+        expectChildren('bar-entity-id', repo).toEqual(['baz-entity-id']); // defined as array
     });
 
     it('allows to define an initial set of entities', function () {
@@ -77,6 +77,7 @@ describe('alchemy.ecs.Administrator', function () {
 
         // execute #1 'init'
         testSubject.initEntities([{
+            id: 'some-entity-id',
             children: function (state) {
                 return each(state.val(), function (item) {
                     return {
@@ -90,6 +91,7 @@ describe('alchemy.ecs.Administrator', function () {
         expect(repo.contains('foo')).toBeTruthy();
         expect(repo.contains('bar')).toBeTruthy();
         expect(repo.contains('baz')).toBeFalsy();
+        expectChildren('some-entity-id', repo).toEqual(['foo', 'bar']); // children fn returns an array
 
         // execute #2 'update (no changes)'
         testSubject.update(state);
@@ -98,6 +100,7 @@ describe('alchemy.ecs.Administrator', function () {
         expect(repo.contains('foo')).toBeTruthy();
         expect(repo.contains('bar')).toBeTruthy();
         expect(repo.contains('baz')).toBeFalsy();
+        expectChildren('some-entity-id', repo).toEqual(['foo', 'bar']);
 
         // execute #3 'update (for real)'
         testSubject.update(state.set(['bar', 'baz']));
@@ -106,6 +109,7 @@ describe('alchemy.ecs.Administrator', function () {
         expect(repo.contains('foo')).toBeFalsy();
         expect(repo.contains('bar')).toBeTruthy();
         expect(repo.contains('baz')).toBeTruthy();
+        expectChildren('some-entity-id', repo).toEqual(['bar', 'baz']);
     });
 
     it('allows to define default components for an entity type', function () {
@@ -221,4 +225,9 @@ describe('alchemy.ecs.Administrator', function () {
             expect(system2.entities).toBe(null);
         });
     });
+
+    /** @private */
+    function expectChildren(entityId, repo) {
+        return expect(repo.getComponentData(entityId, 'children'));
+    }
 });
