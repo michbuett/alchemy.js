@@ -1,29 +1,26 @@
 /* global $ */
-describe('alchemy.ecs.VDomRenderSystem (NG)', function () {
+describe('alchemy.ecs.vdom_ngRenderSystem (NG)', function () {
     'use strict';
 
-    // var Apothecarius = require('./../../../lib/Apothecarius');
     var VDomRenderSystem = require('./../../../lib/VDomRenderSystemNG');
     var immutable = require('immutabilis');
     var h = require('virtual-dom/h');
 
     beforeEach(function () {
-        setFixtures(sandbox());
+        setFixtures('<div id="foo"></div>');
 
         this.testSubject = VDomRenderSystem.brew();
     });
 
     it('renders the entities to the DOM', function () {
         var state = immutable.fromJS('bar');
-        var entities = [{
-            id: 'foo',
-            vdom: {
-                root: document.getElementById('sandbox'),
-                renderer: function (state) {
+        var entities = {
+            foo: {
+                vdom_ng: function (state) {
                     return h('div.' + state.val());
-                },
+                }
             }
-        }];
+        };
 
         this.testSubject.update(entities, state);
 
@@ -64,108 +61,96 @@ describe('alchemy.ecs.VDomRenderSystem (NG)', function () {
             return h('div', renderChildren(entity));
         };
 
-        var entities = [{
-            id: 'foo',
-            vdom: {
-                root: document.getElementById('sandbox'),
-                renderer: renderer,
+        var entities = {
+            'bang': {
+                vdom_ng: renderer,
+                children: [ 'boom', ],
+                parent: 'ping',
             },
-            children: [ 'bar', 'baz'],
-        }, {
-            id: 'bar',
-            vdom: { renderer: renderer, },
-        }, {
-            id: 'baz',
-            vdom: { renderer: renderer, },
-            children: [ 'ping', 'pong'],
-        }, {
-            id: 'ping',
-            vdom: { renderer: renderer, },
-        }, {
-            id: 'pong',
-            vdom: { renderer: renderer, },
-        }];
+            'foo': {
+                vdom_ng: renderer,
+                children: [ 'bar', 'baz'],
+            },
+            'bar': {
+                vdom_ng: renderer,
+                parent: 'foo',
+            },
+            'baz': {
+                vdom_ng: renderer,
+                children: [ 'ping', 'pong'],
+                parent: 'foo',
+            },
+            'ping': {
+                vdom_ng: renderer,
+                children: [ 'bang'],
+                parent: 'baz',
+            },
+            'pong': {
+                vdom_ng: renderer,
+                parent: 'baz',
+            }
+        };
 
         // execute
         this.testSubject.update(entities, immutable.fromJS());
 
         // verify
         expect($('#foo #bar')).toExist();
-    //     expect($('#foo #baz #ping')).toExist();
-    //     expect($('#foo #baz #pong')).toExist();
+        expect($('#foo #baz #ping')).toExist();
+        expect($('#foo #baz #pong')).toExist();
+        expect($('#foo #baz #ping #bang #boom')).toExist();
     });
 
-    // it('allows to map the application state', function () {
-    //     // prepare
-    //     var state = immutable.fromJS({
-    //         foo: 'bar'
-    //     });
+    it('skips entities which have no parent dom element', function () {
+        // prepare
+        var renderer = jasmine.createSpy('renderer');
+        var entities = {
+            'no-parent-dom': {
+                vdom_ng: renderer,
+            }
+        };
 
-    //     this.apothecarius.createEntity({
-    //         id: 'foo',
-    //         vdom: {
-    //             root: document.getElementById('sandbox'),
-    //             renderer: function (ctxt) {
-    //                 return ctxt.h('div', {
-    //                     className: ctxt.state.val(),
-    //                 });
-    //             },
-    //             stateMap: function (appState) {
-    //                 return appState.sub('foo');
-    //             },
-    //         }
-    //     });
+        // execute
+        this.testSubject.update(entities, immutable.fromJS());
 
-    //     // execute #1
-    //     this.testSubject.update(state);
+        // verify
+        expect(renderer).not.toHaveBeenCalled();
+    });
 
-    //     // verify #1
-    //     expect($('div#foo.bar')).toExist();
-    //     expect($('div#foo.baz')).not.toExist();
+    it('skips entities without vdom renderer', function () {
+        // prepare
+        var testSubject = this.testSubject;
+        var entities = {
+            'foo': {
+                vdom_ng: null,
+            }
+        };
 
-    //     // second update (no state change)
-    //     // execute #2
-    //     this.testSubject.update(state);
+        // execute
+        expect(function () {
+            testSubject.update(entities, immutable.fromJS());
 
-    //     // verify #2
-    //     expect($('div#foo.bar')).toExist();
-    //     expect($('div#foo.baz')).not.toExist();
+        // verify
+        }).not.toThrow();
+    });
 
-    //     // third update (state change)
-    //     // execute #3
-    //     this.testSubject.update(state.set('foo', 'baz'));
+    it('removes caches when being disposed', function () {
+        // prepare
+        var entities = {
+            'foo': {
+                vdom_ng: function () { return h('div#foo.bar'); },
+            }
+        };
 
-    //     // verify #3
-    //     expect($('div#foo.bar')).not.toExist();
-    //     expect($('div#foo.baz')).toExist();
+        this.testSubject.update(entities, immutable.fromJS());
+        expect(this.testSubject.lastTrees).toBeTruthy();
+        expect(this.testSubject.domNodes).toBeTruthy();
 
-    // });
+        // execute
+        this.testSubject.dispose();
 
-    // it('skips entities which have no parent dom element', function () {
-    //     // prepare
-    //     var renderer = jasmine.createSpy('renderer');
-
-    //     this.apothecarius.createEntity({
-    //         id: 'no-parent-dom',
-    //         vdom: {
-    //             renderer: renderer,
-    //         }
-    //     });
-
-    //     // execute
-    //     this.testSubject.update(immutable.fromJS());
-
-    //     // verify
-    //     expect(renderer).not.toHaveBeenCalled();
-    // });
-
-    // it('removes references when being disposed', function () {
-    //     // prepare
-
-    //     // execute
-    //     this.testSubject.dispose();
-
-    //     // verify
-    //     expect(this.testSubject.entities).toBeFalsy();
-    // });
+        // verify
+        expect(this.testSubject.lastTrees).toBeFalsy();
+        expect(this.testSubject.domNodes).toBeFalsy();
+    });
 });
