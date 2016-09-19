@@ -6,14 +6,27 @@
         return;
     }
 
-    global.Map = function () {
+    global.Map = function (data) {
         this.size = 0;
+
+        if (Array.isArray(data)) {
+            for (var i = 0, l = data.length; i < l; i++) {
+                this.set(data[i][0], data[i][1]);
+            }
+        }
     };
 
     global.Map.prototype.set = function (key, value) {
-        this[this.size] = key;
+        var isNew = typeof this['__' + key] === 'undefined';
+
+        if (isNew) {
+            this[this.size] = key;
+            this.size++;
+        }
+
         this['__' + key] = value;
-        this.size++;
+
+        return this;
     };
 
     global.Map.prototype.get = function (key) {
