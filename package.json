@@ -15,18 +15,18 @@
   ],
   "license": "JSON",
   "devDependencies": {
-    "grunt": "~0.4.5",
+    "grunt": "~1.0.1",
     "grunt-available-tasks": "~0.6.1",
-    "grunt-cli": "^0.1.13",
+    "grunt-cli": "^1.2.0",
     "grunt-contrib-connect": "^1.0.2",
-    "grunt-contrib-jasmine": "~0.9.2",
-    "grunt-contrib-jshint": "~0.11.3",
-    "grunt-contrib-watch": "~0.6.1",
+    "grunt-contrib-jasmine": "~1.0.3",
+    "grunt-contrib-jshint": "~1.0.0",
+    "grunt-contrib-watch": "~1.0.0",
     "grunt-coveralls": "^1.0.0",
     "grunt-jasmine-node-new": "~0.3.2",
-    "grunt-jsonlint": "~1.0.0",
-    "grunt-template-jasmine-istanbul": "^0.4.0",
-    "grunt-template-jasmine-nml": "^1.2.0"
+    "grunt-jsonlint": "~1.1.0",
+    "grunt-template-jasmine-istanbul": "^0.5.0",
+    "grunt-template-jasmine-nml": "^2.0.1"
   },
   "scripts": {
     "test": "grunt test && grunt coveralls"
