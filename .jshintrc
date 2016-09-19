@@ -16,7 +16,8 @@
         "runs": true,
         "expect": true,
         "sandbox": true,
-        "setFixtures": true
+        "setFixtures": true,
+        "Map": false
     },
 
     "strict"        : true,
