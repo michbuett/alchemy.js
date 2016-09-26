@@ -33,6 +33,10 @@
         return this['__' + key];
     };
 
+    global.Map.prototype.has = function (key) {
+        return Object.hasOwnProperty(this, '__' + key);
+    };
+
     global.Map.prototype.forEach = function (cb, ctx) {
         for (var i = 0; i < this.size; i++) {
             var key = this[i];
