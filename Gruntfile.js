@@ -37,7 +37,7 @@ module.exports = function (grunt) {
         // configure unit tests
         jasmine: {
             options: {
-                display: 'short',
+                // display: 'short',
                 keepRunner: true,
                 summary: true,
 
@@ -50,11 +50,13 @@ module.exports = function (grunt) {
 
                 specs: [
                     'tests/specs/**/*.spec.js',
+                    'tests/specs_old/**/*.spec.js',
                 ],
             },
 
             debug: { // for debugging tests
                 src: [
+                    'old/**/*.js',
                     'lib/**/*.js',
                 ],
 
@@ -65,6 +67,7 @@ module.exports = function (grunt) {
 
             coverage: {
                 src: [
+                    'old/**/*.js',
                     'lib/**/*.js',
                 ],
 
@@ -75,6 +78,7 @@ module.exports = function (grunt) {
                         templateOptions: {
                             pathmap: {
                                 'lib/': '.grunt/grunt-contrib-jasmine/lib/',
+                                'old/': '.grunt/grunt-contrib-jasmine/old/',
                             }
                         },
                         coverage: 'reports/coverage/coverage.json',
@@ -111,7 +115,8 @@ module.exports = function (grunt) {
             },
             core: [
                 'tests/helper/',
-                'tests/specs/core/'
+                'tests/specs/core/',
+                'tests/specs_old/core/'
             ]
         },
 
@@ -124,7 +129,7 @@ module.exports = function (grunt) {
             },
 
             js: {
-                files: ['Gruntfile.js', 'lib/**/*js', 'tests/**/*js'],
+                files: ['Gruntfile.js', 'lib/**/*js', 'old/**/*js', 'tests/**/*js'],
                 tasks: ['lint', 'jasmine_node', 'jasmine:debug'],
             },
         },

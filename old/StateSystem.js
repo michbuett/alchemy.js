@@ -4,7 +4,7 @@ module.exports = (function () {
     var immutable = require('immutabilis');
     var coquoVenenum = require('coquo-venenum');
     var each = require('pro-singulis');
-    var utils = require('./Utils');
+    var utils = require('../lib/Utils');
 
     /**
      * TODO: document me

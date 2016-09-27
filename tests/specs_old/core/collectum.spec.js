@@ -1,8 +1,7 @@
 describe('alchemy.core.Collectum', function () {
     'use strict';
 
-    // var Modelum = require('./../../../lib/Modelum');
-    var Collectum = require('./../../../lib/Collectum');
+    var Collectum = require('./../../../old/Collectum');
     var data1 = {
         id: 'id-1',
         foo: 'foo'

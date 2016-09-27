@@ -2,9 +2,9 @@
 describe('alchemy.ecs.CssRenderSystem', function () {
     'use strict';
 
-    var Apothecarius = require('./../../../lib/Apothecarius');
+    var Apothecarius = require('./../../../old/Apothecarius');
     var Stylus = require('./../../../lib/Stylus');
-    var CssRenderSystem = require('./../../../lib/CssRenderSystem');
+    var CssRenderSystem = require('./../../../old/CssRenderSystem');
     var immutable = require('immutabilis');
 
     beforeEach(function () {

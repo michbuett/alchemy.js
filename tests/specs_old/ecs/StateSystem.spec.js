@@ -2,8 +2,8 @@ describe('alchemy.ecs.StateSystem', function () {
     'use strict';
 
     var immutable = require('immutabilis');
-    var Apothecarius = require('./../../../lib/Apothecarius');
-    var StateSystem = require('./../../../lib/StateSystem');
+    var Apothecarius = require('./../../../old/Apothecarius');
+    var StateSystem = require('./../../../old/StateSystem');
 
     beforeEach(function () {
         this.state = initState();

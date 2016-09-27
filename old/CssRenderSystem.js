@@ -3,7 +3,7 @@ module.exports = (function () {
 
     var coquoVenenum = require('coquo-venenum');
     var each = require('pro-singulis');
-    var utils = require('./Utils');
+    var utils = require('../lib/Utils');
 
     /**
      * A component system to render static and dynamic CSS

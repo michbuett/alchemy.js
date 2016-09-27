@@ -2,8 +2,8 @@ module.exports = (function () {
     'use strict';
 
     var each = require('pro-singulis');
-    var Observari = require('./Observari');
-    var utils = require('./Utils');
+    var Observari = require('../lib/Observari');
+    var utils = require('../lib/Utils');
 
     /**
      * A potion to store and manage a set of data objects. The may be

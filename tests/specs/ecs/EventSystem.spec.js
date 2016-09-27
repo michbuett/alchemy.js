@@ -1,9 +1,8 @@
 /* global $ */
-describe('alchemy.ecs.EventSystem', function () {
+describe('alchemy.ecs.EventSystemNG', function () {
     'use strict';
 
     var Delegatus = require('./../../../lib/Delegatus');
-    var Apothecarius = require('./../../../lib/Apothecarius');
     var EventSystem = require('./../../../lib/EventSystem');
     var Observari = require('../../../lib/Observari');
 
@@ -12,13 +11,10 @@ describe('alchemy.ecs.EventSystem', function () {
 
         this.delegatus = Delegatus.brew();
 
-        this.apothecarius = Apothecarius.brew();
-
         this.messages = Observari.brew();
 
         this.testSubject = EventSystem.brew({
             delegator: this.delegatus,
-            entities: this.apothecarius,
             messages: this.messages,
         });
     });
@@ -27,16 +23,15 @@ describe('alchemy.ecs.EventSystem', function () {
         // prepare
         var fooHandler = jasmine.createSpy();
 
-        this.apothecarius.createEntity({
-            id: 'foo',
-
-            events: {
-                'click': fooHandler,
-            }
-        });
+        var entities = new Map([
+            ['foo', {
+                id: 'foo',
+                events: { 'click': fooHandler, }
+            }]
+        ]);
 
         // execute
-        this.testSubject.update();
+        this.testSubject.update(entities);
         $('#foo').click();
 
         // verfiy
@@ -48,16 +43,17 @@ describe('alchemy.ecs.EventSystem', function () {
         var barHandler = jasmine.createSpy('click handler for "bar"');
         var bazHandler = jasmine.createSpy('click handler for "baz"');
 
-        this.apothecarius.createEntity({
-            id: 'foo',
+        var entities = new Map([
+            ['foo', {
+                id: 'foo',
+                events: {
+                    'click .bar': barHandler,
+                    'click .baz': bazHandler,
+                }
+            }]
+        ]);
 
-            events: {
-                'click .bar': barHandler,
-                'click .baz': bazHandler,
-            }
-        });
-
-        this.testSubject.update();
+        this.testSubject.update(entities);
 
         // execute #1
         $('.bar').click();
@@ -75,49 +71,93 @@ describe('alchemy.ecs.EventSystem', function () {
         expect(bazHandler).toHaveBeenCalled();
     });
 
+    it('allows to change the delegated handler function', function () {
+        // prepare
+        var handler1 = jasmine.createSpy('first click handler for "bar"');
+        var handler2 = jasmine.createSpy('second click handler for "bar"');
+
+        var entities1 = new Map([
+            ['foo', { id: 'foo', events: { 'click': handler1, } }]
+        ]);
+        var entities2 = new Map([
+            ['foo', { id: 'foo', events: { 'click': handler2, } }]
+        ]);
+
+        // execute #1
+        this.testSubject.update(entities1);
+        $('#foo').click();
+
+        // verfiy #1
+        expect(handler1).toHaveBeenCalled();
+        expect(handler2).not.toHaveBeenCalled();
+
+        // execute #2
+        this.testSubject.update(entities2);
+        handler1.reset();
+        $('#foo').click();
+
+        // verfiy #2
+        expect(handler1).not.toHaveBeenCalled();
+        expect(handler2).toHaveBeenCalled();
+    });
+
     it('can delegate browser events to messages', function () {
         // prepare
         var fooHandler = jasmine.createSpy();
-        var barHandler = jasmine.createSpy();
-        var bazHandler = jasmine.createSpy();
 
-        this.apothecarius.createEntity({
-            id: 'foo',
-
-            events: {
-                'click': function (ev, state, sendMessage) {
-                    sendMessage('fooMessage');
-                },
-                'click .bar': { message: 'barMessage', },
-                'click .baz': 'bazMessage',
-            }
-        });
+        var entities = new Map([
+            ['foo', {
+                id: 'foo',
+                events: {
+                    'click': function (ev, sendMessage) {
+                        sendMessage('fooMessage');
+                    },
+                }
+            }]
+        ]);
 
         this.messages.on('fooMessage', fooHandler);
-        this.messages.on('barMessage', barHandler);
-        this.messages.on('bazMessage', bazHandler);
 
-        this.testSubject.update();
+        this.testSubject.update(entities);
 
         // execute
         $('#foo').click();
-        $('.bar').click();
-        $('.baz').click();
 
         // verify
         expect(fooHandler).toHaveBeenCalled();
-        expect(barHandler).toHaveBeenCalled();
-        expect(bazHandler).toHaveBeenCalled();
+    });
+
+    it('skips entites without a valid event compontent', function () {
+        // prepare
+        var testSubject = this.testSubject;
+        var entities = new Map([
+            ['foo', { id: 'foo', events: null, }],
+            ['bar', { id: 'bar', events: function () {}, }],
+            ['baz', { id: 'baz', events: { none: 'ok' }, }],
+        ]);
+
+        // execute
+        expect(function () {
+            testSubject.update(entities);
+
+        // verify
+        }).not.toThrow();
     });
 
     it('removes references when being disposed', function () {
         // prepare
+        var entities = new Map([
+            ['foo', { id: 'foo', events: { 'click': function () {}, } }]
+        ]);
+        this.testSubject.update(entities);
+
         // execute
         this.testSubject.dispose();
 
         // verify
-        expect(this.testSubject.entities).toBeFalsy();
         expect(this.testSubject.delegator).toBeFalsy();
         expect(this.testSubject.messages).toBeFalsy();
+        expect(this.testSubject.handlers).toBeFalsy();
+        expect(this.testSubject.sendMessage).toBeFalsy();
     });
 });

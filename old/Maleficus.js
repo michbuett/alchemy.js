@@ -23,7 +23,7 @@
 
     module.exports = (function () {
 
-        var alchemy = require('./Utils');
+        var alchemy = require('../lib/Utils');
         var cache = {};
 
         /**

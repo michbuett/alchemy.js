@@ -4,7 +4,7 @@ module.exports = (function () {
     var immutable = require('immutabilis');
     var coquoVenenum = require('coquo-venenum');
     var each = require('pro-singulis');
-    var utils = require('./Utils');
+    var utils = require('../lib/Utils');
 
     /**
      * The primary entity manager (an apothecarius is a storage manager)

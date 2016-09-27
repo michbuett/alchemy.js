@@ -1,160 +1,128 @@
-describe('alchemy.ecs.Administrator', function () {
+describe('alchemy.ecs.AdministratorNG', function () {
     'use strict';
 
-    var each = require('pro-singulis');
-    var immutable = require('immutabilis');
-    var coquoVenenum = require('coquo-venenum');
-    var Apothecarius = require('./../../../lib/Apothecarius');
     var Administrator = require('./../../../lib/Administrator');
 
-    it('updates all registered systems', function () {
+    it('allows to define entities depending on app state', function () {
         // prepare
-        var state = immutable.fromJS({foo: 'bar'});
-        var testSubject = Administrator.brew();
-        var testSystem = {
-            update: jasmine.createSpy()
-        };
-        testSubject.addSystem(testSystem);
+        var entityDef = jasmine.createSpy();
+        var state = {};
+        var testSubject = Administrator.brew({
+            entities: entityDef,
+            systems: [],
+        });
 
         // execute
         testSubject.update(state);
 
         // verify
-        expect(testSystem.update).toHaveBeenCalledWith(state);
+        expect(entityDef).toHaveBeenCalledWith(state);
     });
 
-    it('allows to define an initial set of entities which have children', function () {
+    it('allows to define entities depending on app state', function () {
         // prepare
-        var repo = Apothecarius.brew(repo);
-        var testSubject = Administrator.brew({ repo: repo, });
+        var entityDef = function () { return []; };
+        var system1 = { update: jasmine.createSpy() };
+        var system2 = { update: jasmine.createSpy() };
+        var state = {};
+        var testSubject = Administrator.brew({
+            entities: entityDef,
+            systems: [system1, system2],
+        });
 
         // execute
-        testSubject.initEntities([{
-            id: 'foo-entity-id',
-            children: {
-                bar: {
-                    id: 'bar-entity-id',
+        testSubject.update(state);
+
+        // verify
+        expect(system1.update).toHaveBeenCalled();
+        expect(system2.update).toHaveBeenCalled();
+    });
+
+    it('allows to travers the entities in depth-first order', function () {
+        // prepare
+        var entityDef = function () {
+            return [{
+                id: 'e0',
+                children: [{
+                    id: 'e00',
                     children: [{
-                        id: 'baz-entity-id'
+                        id: 'e000',
+                        children: [{
+                            id: 'e0000'
+                        }]
                     }]
+                }, {
+                    id: 'e01',
+                    children: [{
+                        id: 'e010'
+                    }, {
+                        id: 'e011',
+                        children: [{
+                            id: 'e0110'
+                        }, {
+                            id: 'e0111'
+                        }]
+                    }, {
+                        id: 'e012'
+                    }]
+                }]
+            }, {
+                id: 'e1',
+            }, {
+                id: 'e2',
+            }];
+        };
+        var expectedOrder = [
+            'e0', 'e00', 'e000', 'e0000', 'e01', 'e010',
+            'e011', 'e0110', 'e0111', 'e012', 'e1', 'e2'
+        ];
+
+        var actualEntities = null;
+        var forEachCb = jasmine.createSpy();
+        var forEachCtxt = {};
+        var testSubject = Administrator.brew({
+            entities: entityDef,
+            systems: [{
+                update: function (entities) {
+                    actualEntities = entities;
                 }
-            }
-        }]);
-
-        // verify
-        expect(repo.contains('foo-entity-id')).toBeTruthy();
-        expect(repo.contains('bar-entity-id')).toBeTruthy();
-        expect(repo.contains('baz-entity-id')).toBeTruthy();
-        expectChildren('foo-entity-id', repo).toEqual({ bar: 'bar-entity-id' }); // defined as key-value-pair
-        expectChildren('bar-entity-id', repo).toEqual(['baz-entity-id']); // defined as array
-    });
-
-    it('allows to define an initial set of entities', function () {
-        // prepare
-        var repo = Apothecarius.brew(repo);
-        var testSubject = Administrator.brew({ repo: repo, });
+            }],
+        });
 
         // execute
-        testSubject.initEntities([{
-            id: 'foo'
-        }, {
-            id: 'bar'
-        }, {
-            id: 'baz'
-        }]);
+        testSubject.update({});
 
         // verify
-        expect(repo.contains('foo')).toBeTruthy();
-        expect(repo.contains('bar')).toBeTruthy();
-        expect(repo.contains('baz')).toBeTruthy();
+        expect(actualEntities instanceof Map).toBeTruthy();
+        expect(actualEntities.size).toBe(expectedOrder.length);
+
+        actualEntities.forEach(forEachCb, forEachCtxt);
+        var allCalls = forEachCb.calls.all();
+        for (var i = 0; i < expectedOrder.length; i++) {
+            expect(allCalls[i].args[0].id).toBe(expectedOrder[i]);
+            expect(allCalls[i].args[1]).toBe(expectedOrder[i]);
+        }
     });
 
-    it('allows to define state dependent entities', function () {
+    it('skips all updates if state remains unchanged', function () {
         // prepare
-        var repo = Apothecarius.brew(repo);
-        var testSubject = Administrator.brew({ repo: repo, });
-        var state = immutable.fromJS(['foo', 'bar']);
+        var entityDef = jasmine.createSpy();
+        var system1 = { update: jasmine.createSpy() };
+        var system2 = { update: jasmine.createSpy() };
+        var state = {};
+        var testSubject = Administrator.brew({
+            entities: entityDef,
+            systems: [system1, system2],
+        });
 
-        // execute #1 'init'
-        testSubject.initEntities([{
-            id: 'some-entity-id',
-            children: function (state) {
-                return each(state.val(), function (item) {
-                    return {
-                        id: item
-                    };
-                });
-            }
-        }], state);
-
-        // verify #1
-        expect(repo.contains('foo')).toBeTruthy();
-        expect(repo.contains('bar')).toBeTruthy();
-        expect(repo.contains('baz')).toBeFalsy();
-        expectChildren('some-entity-id', repo).toEqual(['foo', 'bar']); // children fn returns an array
-
-        // execute #2 'update (no changes)'
+        // execute
+        testSubject.update(state);
+        testSubject.update(state);
         testSubject.update(state);
 
-        // verify #2
-        expect(repo.contains('foo')).toBeTruthy();
-        expect(repo.contains('bar')).toBeTruthy();
-        expect(repo.contains('baz')).toBeFalsy();
-        expectChildren('some-entity-id', repo).toEqual(['foo', 'bar']);
-
-        // execute #3 'update (for real)'
-        testSubject.update(state.set(['bar', 'baz']));
-
-        // verify #3
-        expect(repo.contains('foo')).toBeFalsy();
-        expect(repo.contains('bar')).toBeTruthy();
-        expect(repo.contains('baz')).toBeTruthy();
-        expectChildren('some-entity-id', repo).toEqual(['bar', 'baz']);
+        // verify
+        expect(entityDef.calls.count()).toBe(1);
+        expect(system1.update.calls.count()).toBe(1);
+        expect(system2.update.calls.count()).toBe(1);
     });
-
-    describe('dispose', function () {
-        it('disposes all component systems when disposing app', function () {
-            // prepare
-            var testSubject = Administrator.brew();
-            var testSystem = {
-                dispose: jasmine.createSpy()
-            };
-            testSubject.addSystem(testSystem);
-
-            // execute
-            testSubject.dispose();
-
-            // verify
-            expect(testSystem.dispose).toHaveBeenCalled();
-        });
-
-        it('clears the injected entity repo', function () {
-            // prepare
-            var System = coquoVenenum({});
-            var repo = Apothecarius.brew(repo);
-            var testSubject = Administrator.brew({ repo: repo, });
-            var system1 = System.brew();
-            var system2 = System.brew();
-
-            testSubject.addSystem(system1);
-            testSubject.addSystem(system2);
-
-            var repoBefore1 = system1.entities;
-            var repoBefore2 = system2.entities;
-
-            // execute
-            testSubject.dispose();
-
-            // verify
-            expect(repoBefore1).toBe(repo);
-            expect(repoBefore2).toBe(repo);
-            expect(system1.entities).toBe(null);
-            expect(system2.entities).toBe(null);
-        });
-    });
-
-    /** @private */
-    function expectChildren(entityId, repo) {
-        return expect(repo.getComponentData(entityId, 'children'));
-    }
 });
