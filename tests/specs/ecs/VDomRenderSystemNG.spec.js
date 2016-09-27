@@ -46,12 +46,12 @@ describe('alchemy.ecs.vdom_ngRenderSystem (NG)', function () {
                     h('.right')
                 ]),
 
-                children: [ 'bar' ],
+                children: [{ id: 'bar', }],
             }],
 
             ['bar', {
                 vdom_ng: h('#bar.boom', null, [h('#baz')]),
-                children: [ 'baz'],
+                children: [{ id: 'baz', }],
             }],
 
             ['baz', {
@@ -72,7 +72,7 @@ describe('alchemy.ecs.vdom_ngRenderSystem (NG)', function () {
                 h('.right', h('#bar'))
             ]),
 
-            children: [ 'bar' ],
+            children: [{ id: 'bar' }],
         }));
 
         // verify #2
