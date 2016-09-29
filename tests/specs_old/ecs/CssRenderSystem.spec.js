@@ -1,5 +1,5 @@
 /* global $ */
-describe('alchemy.ecs.CssRenderSystem', function () {
+describe('alchemy.old.CssRenderSystem', function () {
     'use strict';
 
     var Apothecarius = require('./../../../old/Apothecarius');

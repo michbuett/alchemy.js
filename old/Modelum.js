@@ -9,11 +9,11 @@ module.exports = (function () {
      * A potion to represent data (a model)
      *
      * @class
-     * @name alchemy.core.Modelum
-     * @extends alchemy.core.Oculus
+     * @name alchemy.old.Modelum
+     * @extends alchemy.old.Oculus
      */
     return Observari.extend({
-        /** @lends alchemy.core.Modelum */
+        /** @lends alchemy.old.Modelum */
 
         /**
          * The storage object for the data values.

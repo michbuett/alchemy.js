@@ -9,17 +9,17 @@ module.exports = (function () {
      * A component system to render static and dynamic CSS
      *
      * @class
-     * @name alchemy.ecs.CssRenderSystem
-     * @extends alchemy.core.MateriaPrima
+     * @name alchemy.old.CssRenderSystem
+     * @extends alchemy.old.MateriaPrima
      */
     return coquoVenenum({
-        /** @lends alchemy.ecs.CssRenderSystem.prototype */
+        /** @lends alchemy.old.CssRenderSystem.prototype */
 
         /**
          * The entity storage
          *
          * @property entities
-         * @type alchemy.ecs.Apothecarius
+         * @type alchemy.old.Apothecarius
          * @private
          */
         entities: undefined,
@@ -28,7 +28,7 @@ module.exports = (function () {
          * The css style helper which does the heavy lifting
          *
          * @property stylus
-         * @type alchemy.web.Stylus
+         * @type alchemy.old.Stylus
          * @private
          */
         stylus: undefined,

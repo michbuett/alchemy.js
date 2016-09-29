@@ -1,5 +1,5 @@
 /* global $ */
-describe('alchemy.web.Delegatus', function () {
+describe('alchemy.lib.Delegatus', function () {
     'use strict';
 
     var Delegatus = require('./../../../lib/Delegatus');

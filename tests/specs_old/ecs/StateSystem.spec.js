@@ -1,4 +1,4 @@
-describe('alchemy.ecs.StateSystem', function () {
+describe('alchemy.old.StateSystem', function () {
     'use strict';
 
     var immutable = require('immutabilis');

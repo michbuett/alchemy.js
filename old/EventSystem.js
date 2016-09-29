@@ -8,17 +8,17 @@ module.exports = (function () {
      * A component system to create delegated event handler for dom events
      *
      * @class
-     * @name alchemy.ecs.EventSystem
-     * @extends alchemy.core.MateriaPrima
+     * @name alchemy.old.EventSystem
+     * @extends alchemy.old.MateriaPrima
      */
     return coquoVenenum({
-        /** @lends alchemy.ecs.EventSystem.prototype */
+        /** @lends alchemy.old.EventSystem.prototype */
 
         /**
          * The message bus for the appication messages
          *
          * @property messages
-         * @type alchemy.core.Observari
+         * @type alchemy.old.Observari
          * @private
          */
         messages: undefined,
@@ -27,7 +27,7 @@ module.exports = (function () {
          * The browser event delegator
          *
          * @property delegator
-         * @type alchemy.web.Delegatus
+         * @type alchemy.old.Delegatus
          * @private
          */
         delegator: undefined,
@@ -36,7 +36,7 @@ module.exports = (function () {
          * The entity storage
          *
          * @property entities
-         * @type alchemy.ecs.Apothecarius
+         * @type alchemy.old.Apothecarius
          * @private
          */
         entities: undefined,

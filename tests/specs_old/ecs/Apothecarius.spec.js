@@ -1,4 +1,4 @@
-describe('alchemy.ecs.Apothecarius', function () {
+describe('alchemy.old.Apothecarius', function () {
     'use strict';
 
     var Apothecarius = require('./../../../old/Apothecarius');

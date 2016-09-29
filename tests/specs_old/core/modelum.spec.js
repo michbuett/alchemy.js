@@ -1,4 +1,4 @@
-describe('alchemy.core.Modelum', function () {
+describe('alchemy.old.Modelum', function () {
     'use strict';
 
     var Modelum = require('./../../../old/Modelum');

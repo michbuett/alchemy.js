@@ -1,5 +1,5 @@
 /* global $ */
-describe('alchemy.ecs.VDomRenderSystem', function () {
+describe('alchemy.old.VDomRenderSystem', function () {
     'use strict';
 
     var Apothecarius = require('./../../../old/Apothecarius');

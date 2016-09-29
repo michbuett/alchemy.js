@@ -1,5 +1,5 @@
 /* global $ */
-describe('alchemy.web.Stylus', function () {
+describe('alchemy.lib.Stylus', function () {
     'use strict';
 
     var Stylus = require('./../../../lib/Stylus');

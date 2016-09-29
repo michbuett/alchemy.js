@@ -7,22 +7,22 @@ module.exports = (function () {
 
     /**
      * A potion to store and manage a set of data objects. The may be
-     * instances of {@link alchemy.core.Modelum} but it's not neccessary.
+     * instances of {@link alchemy.old.Modelum} but it's not neccessary.
      * It is recommended, that the items to store provide a property which
-     * can act as a key (e.g. "id"; see {@link alchemy.core.Collectum.idProp})
+     * can act as a key (e.g. "id"; see {@link alchemy.old.Collectum.idProp})
      *
      * @class
-     * @name alchemy.core.Collectum
-     * @extends alchemy.core.MateriaPrima
+     * @name alchemy.old.Collectum
+     * @extends alchemy.old.MateriaPrima
      */
     return Observari.extend({
-       /** @lends alchemy.core.Collectum */
+       /** @lends alchemy.old.Collectum */
 
        /**
         * Fired after every change of the stored data
         *
         * @event
-        * @name alchemy.core.Collectum#change
+        * @name alchemy.old.Collectum#change
         * @param {Object} data The event data providing:
         *      - <code>insertIndex {Number}</code>: the index where the new items where inserted
         *      - <code>added {Array}</code>: the list of new items
@@ -33,7 +33,7 @@ module.exports = (function () {
         * Fired after adding an item
         *
         * @event
-        * @name alchemy.core.Collectum#add
+        * @name alchemy.old.Collectum#add
         * @param {Object} data The event data providing the property <code>added</code>
         *      which contains the added items
         */
@@ -42,7 +42,7 @@ module.exports = (function () {
         * Fired after removing an item
         *
         * @event
-        * @name alchemy.core.Collectum#remove
+        * @name alchemy.old.Collectum#remove
         * @param {Object} data The event data providing the property <code>removed</code>
         *      which contains the removed item
         */
@@ -250,7 +250,7 @@ module.exports = (function () {
         * Returns the data of all stored objects
         * If you have stored complex objects (with function, ...) it is recommended
         * that these objects provide a <code>toData</code> method the get the pure
-        * data (e.g. as {@link alchemy.core.Modelum}
+        * data (e.g. as {@link alchemy.old.Modelum}
         *
         * @return Array
         *      The set of data

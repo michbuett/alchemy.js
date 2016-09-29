@@ -1,4 +1,4 @@
-describe('alchemy.web.Applicatus', function () {
+describe('alchemy.lib.Applicatus', function () {
     'use strict';
 
     var utils = require('./../../../lib/Utils');

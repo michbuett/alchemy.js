@@ -1,4 +1,4 @@
-describe('alchemy.ecs.AdministratorNG', function () {
+describe('alchemy.lib.AdministratorNG', function () {
     'use strict';
 
     var Administrator = require('./../../../lib/Administrator');

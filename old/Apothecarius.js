@@ -12,11 +12,11 @@ module.exports = (function () {
      * one potion to bring them all and in the darkness bind them"
      *
      * @class
-     * @name alchemy.ecs.Apothecarius
-     * @extends alchemy.core.MateriaPrima
+     * @name alchemy.old.Apothecarius
+     * @extends alchemy.old.MateriaPrima
      */
     return coquoVenenum({
-        /** @lends alchemy.ecs.Apothecarius.prototype */
+        /** @lends alchemy.old.Apothecarius.prototype */
 
         /**
          * Creates a new entity (a set of components)

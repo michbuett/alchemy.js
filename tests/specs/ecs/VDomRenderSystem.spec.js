@@ -1,5 +1,5 @@
 /* global $ */
-describe('alchemy.ecs.vdom_ngRenderSystem (NG)', function () {
+describe('alchemy.lib.vdom_ngRenderSystem (NG)', function () {
     'use strict';
 
     var VDomRenderSystem = require('./../../../lib/VDomRenderSystem');

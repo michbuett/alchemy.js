@@ -1,4 +1,4 @@
-describe('alchemy.core.Collectum', function () {
+describe('alchemy.old.Collectum', function () {
     'use strict';
 
     var Collectum = require('./../../../old/Collectum');

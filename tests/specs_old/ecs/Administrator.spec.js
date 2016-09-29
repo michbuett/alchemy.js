@@ -1,4 +1,4 @@
-describe('alchemy.ecs.Administrator', function () {
+describe('alchemy.old.Administrator', function () {
     'use strict';
 
     var each = require('pro-singulis');

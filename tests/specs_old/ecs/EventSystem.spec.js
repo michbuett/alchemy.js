@@ -1,5 +1,5 @@
 /* global $ */
-describe('alchemy.ecs.EventSystem', function () {
+describe('alchemy.old.EventSystem', function () {
     'use strict';
 
     var Delegatus = require('./../../../lib/Delegatus');

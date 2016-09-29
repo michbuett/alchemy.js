@@ -10,17 +10,17 @@ module.exports = (function () {
      * TODO: document me
      *
      * @class
-     * @name alchemy.ecs.StateSystem
-     * @extends alchemy.core.MateriaPrima
+     * @name alchemy.old.StateSystem
+     * @extends alchemy.old.MateriaPrima
      */
     return coquoVenenum({
-        /** @lends alchemy.ecs.StateSystem.prototype */
+        /** @lends alchemy.old.StateSystem.prototype */
 
         /**
          * The entity storage
          *
          * @property entities
-         * @type alchemy.ecs.Apothecarius
+         * @type alchemy.old.Apothecarius
          * @private
          */
         entities: undefined,

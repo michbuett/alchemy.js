@@ -29,10 +29,10 @@ module.exports = (function () {
      * Description
      *
      * @class
-     * @name alchemy.ecs.Administrator
+     * @name alchemy.old.Administrator
      */
     return coquoVenenum({
-        /** @lends alchemy.ecs.Administrator.prototype */
+        /** @lends alchemy.old.Administrator.prototype */
 
         /**
          * Adds a new component system. Any component system should implement
@@ -182,7 +182,7 @@ module.exports = (function () {
          * The entity repository
          *
          * @property repo
-         * @type alchemy.ecs.Apothecarius
+         * @type alchemy.old.Apothecarius
          * @private
          */
         this.repo = null;

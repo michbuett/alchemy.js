@@ -80,16 +80,16 @@ module.exports = (function () {
      * to the screen
      *
      * @class
-     * @name alchemy.ecs.VDomRenderSystem
+     * @name alchemy.old.VDomRenderSystem
      */
     return coquoVenenum({
-        /** @lends alchemy.ecs.VDomRenderSystem.prototype */
+        /** @lends alchemy.old.VDomRenderSystem.prototype */
 
         /**
          * The entity storage
          *
          * @property entities
-         * @type alchemy.ecs.Apothecarius
+         * @type alchemy.old.Apothecarius
          * @private
          */
         entities: undefined,
