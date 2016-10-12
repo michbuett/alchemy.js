@@ -1,4 +1,3 @@
-/* global $ */
 describe('alchemy.lib.EventSystemNG', function () {
     'use strict';
 
@@ -19,23 +18,35 @@ describe('alchemy.lib.EventSystemNG', function () {
         });
     });
 
+    afterEach(function () {
+        this.messages.dispose();
+        this.message = null;
+
+        this.delegatus.dispose();
+        this.delegatus = null;
+
+        this.testSubject.dispose();
+        this.testSubject = null;
+    });
+
     it('allows to register event listeners', function () {
         // prepare
         var fooHandler = jasmine.createSpy();
 
-        var entities = new Map([
-            ['foo', {
-                id: 'foo',
-                events: { 'click': fooHandler, }
-            }]
-        ]);
+        var entities = [{
+            id: 'foo',
+            events: { 'click': fooHandler, }
+        }];
 
         // execute
         this.testSubject.update(entities);
-        $('#foo').click();
+        this.testSubject.update(entities);
+        this.testSubject.update(entities);
+        click('#foo');
 
         // verfiy
         expect(fooHandler).toHaveBeenCalled();
+        expect(fooHandler.calls.count()).toBe(1);
     });
 
     it('supports backbone-style even definition', function () {
@@ -43,20 +54,18 @@ describe('alchemy.lib.EventSystemNG', function () {
         var barHandler = jasmine.createSpy('click handler for "bar"');
         var bazHandler = jasmine.createSpy('click handler for "baz"');
 
-        var entities = new Map([
-            ['foo', {
-                id: 'foo',
-                events: {
-                    'click .bar': barHandler,
-                    'click .baz': bazHandler,
-                }
-            }]
-        ]);
+        var entities = [{
+            id: 'foo',
+            events: {
+                'click .bar': barHandler,
+                'click .baz': bazHandler,
+            }
+        }];
 
         this.testSubject.update(entities);
 
         // execute #1
-        $('.bar').click();
+        click('.bar');
 
         // verfiy #1
         expect(barHandler).toHaveBeenCalled();
@@ -64,7 +73,7 @@ describe('alchemy.lib.EventSystemNG', function () {
 
         // execute #2
         barHandler.reset();
-        $('.baz').click();
+        click('.baz');
 
         // verfiy #2
         expect(barHandler).not.toHaveBeenCalled();
@@ -76,16 +85,12 @@ describe('alchemy.lib.EventSystemNG', function () {
         var handler1 = jasmine.createSpy('first click handler for "bar"');
         var handler2 = jasmine.createSpy('second click handler for "bar"');
 
-        var entities1 = new Map([
-            ['foo', { id: 'foo', events: { 'click': handler1, } }]
-        ]);
-        var entities2 = new Map([
-            ['foo', { id: 'foo', events: { 'click': handler2, } }]
-        ]);
+        var entities1 = [{ id: 'foo', events: { 'click': handler1, } }];
+        var entities2 = [{ id: 'foo', events: { 'click': handler2, } }];
 
         // execute #1
         this.testSubject.update(entities1);
-        $('#foo').click();
+        click('#foo');
 
         // verfiy #1
         expect(handler1).toHaveBeenCalled();
@@ -94,7 +99,7 @@ describe('alchemy.lib.EventSystemNG', function () {
         // execute #2
         this.testSubject.update(entities2);
         handler1.reset();
-        $('#foo').click();
+        click('#foo');
 
         // verfiy #2
         expect(handler1).not.toHaveBeenCalled();
@@ -105,23 +110,21 @@ describe('alchemy.lib.EventSystemNG', function () {
         // prepare
         var fooHandler = jasmine.createSpy();
 
-        var entities = new Map([
-            ['foo', {
-                id: 'foo',
-                events: {
-                    'click': function (ev, sendMessage) {
-                        sendMessage('fooMessage');
-                    },
-                }
-            }]
-        ]);
+        var entities = [{
+            id: 'foo',
+            events: {
+                'click': function (ev, sendMessage) {
+                    sendMessage('fooMessage');
+                },
+            }
+        }];
 
         this.messages.on('fooMessage', fooHandler);
 
         this.testSubject.update(entities);
 
         // execute
-        $('#foo').click();
+        click('#foo');
 
         // verify
         expect(fooHandler).toHaveBeenCalled();
@@ -130,11 +133,11 @@ describe('alchemy.lib.EventSystemNG', function () {
     it('skips entites without a valid event compontent', function () {
         // prepare
         var testSubject = this.testSubject;
-        var entities = new Map([
-            ['foo', { id: 'foo', events: null, }],
-            ['bar', { id: 'bar', events: function () {}, }],
-            ['baz', { id: 'baz', events: { none: 'ok' }, }],
-        ]);
+        var entities = [
+             { id: 'foo', events: null, },
+             { id: 'bar', events: function () {}, },
+             { id: 'baz', events: { none: 'ok' }, },
+        ];
 
         // execute
         expect(function () {
@@ -146,9 +149,7 @@ describe('alchemy.lib.EventSystemNG', function () {
 
     it('removes references when being disposed', function () {
         // prepare
-        var entities = new Map([
-            ['foo', { id: 'foo', events: { 'click': function () {}, } }]
-        ]);
+        var entities = [{ id: 'foo', events: { 'click': function () {}, } }];
         this.testSubject.update(entities);
 
         // execute
@@ -160,4 +161,12 @@ describe('alchemy.lib.EventSystemNG', function () {
         expect(this.testSubject.handlers).toBeFalsy();
         expect(this.testSubject.sendMessage).toBeFalsy();
     });
+
+    function click(selector) {
+        var el = document.querySelector(selector);
+        var ev = document.createEvent('MouseEvent');
+
+        ev.initEvent('click', true, true);
+        el.dispatchEvent(ev);
+    }
 });

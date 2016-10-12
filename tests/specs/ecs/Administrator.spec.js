@@ -93,14 +93,13 @@ describe('alchemy.lib.AdministratorNG', function () {
         testSubject.update({});
 
         // verify
-        expect(actualEntities instanceof Map).toBeTruthy();
-        expect(actualEntities.size).toBe(expectedOrder.length);
+        expect(actualEntities).toBeTruthy();
+        expect(typeof actualEntities.forEach).toBe('function');
 
         actualEntities.forEach(forEachCb, forEachCtxt);
         var allCalls = forEachCb.calls.all();
         for (var i = 0; i < expectedOrder.length; i++) {
             expect(allCalls[i].args[0].id).toBe(expectedOrder[i]);
-            expect(allCalls[i].args[1]).toBe(expectedOrder[i]);
         }
     });
 

@@ -25,24 +25,23 @@ describe('alchemy.lib.CssRenderSystem', function () {
     describe('update', function () {
         it('allows to render entity specific css', function () {
             // prepare
-            var entities = new Map([
-                ['foo', {
-                    css: {
-                        '#foo': {
-                            'color': '#00FF00',
-                            'background-color': '#FF00FF',
-                        }
+            var entities = [{
+                id: 'foo',
+                css: {
+                    '#foo': {
+                        'color': '#00FF00',
+                        'background-color': '#FF00FF',
                     }
-                }],
-                ['bar', {
-                    css: {
-                        '#bar': {
-                            'color': '#00FFFF',
-                            'background-color': '#00FF00',
-                        },
-                    }
-                }]
-            ]);
+                }
+            }, {
+                id: 'bar',
+                css: {
+                    '#bar': {
+                        'color': '#00FFFF',
+                        'background-color': '#00FF00',
+                    },
+                }
+            }];
 
             var testSubject = CssRenderSystem.brew({
                 stylus: this.stylus,
@@ -64,10 +63,10 @@ describe('alchemy.lib.CssRenderSystem', function () {
 
         it('ignores entities without a valid css component', function () {
             // prepare
-            var entities = new Map([
-                ['foo', { id: 'foo', css: null, }],
-                ['bar', { id: 'bar', css: 'none', }]
-            ]);
+            var entities = [
+                { id: 'foo', css: null, },
+                { id: 'bar', css: 'none', }
+            ];
 
             var testSubject = CssRenderSystem.brew({
                 stylus: this.stylus,
