@@ -43,7 +43,6 @@ module.exports = function (grunt) {
 
                 helpers: [
                     'tests/helper/compatibility.helper.js',
-                    'tests/helper/map.helper.js',
                     'tests/vendor/jquery-2.0.3.js',
                     'tests/vendor/*.js',
                 ],
