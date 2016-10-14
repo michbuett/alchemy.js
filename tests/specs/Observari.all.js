@@ -1,7 +1,7 @@
-describe('Observari', function () {
+describe('alchemy.lib.Observari', function () {
     'use strict';
 
-    var Observari = require('./../../../lib/Observari');
+    var Observari = require('./../../lib/Observari');
 
     beforeEach(function () {
         this.observari = Observari.brew();

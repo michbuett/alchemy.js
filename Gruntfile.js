@@ -49,7 +49,8 @@ module.exports = function (grunt) {
                 ],
 
                 specs: [
-                    'tests/specs/**/*.spec.js',
+                    'tests/specs/**/*.all.js',
+                    'tests/specs/**/*.browser.js',
                     'tests/specs_old/**/*.spec.js',
                 ],
             },
@@ -104,20 +105,22 @@ module.exports = function (grunt) {
             },
         },
 
-        jasmine_node: {
+        jasmine_nodejs: {
             options: {
-                forceExit: true,
-                match: '.',
-                matchall: false,
-                extensions: 'js',
+                specNameSuffix: 'all.js',
+                helperNameSuffix: 'helper.js',
                 useHelpers: true,
-                specNameMatcher: 'spec',
+                reporters: {
+                    console: {
+                        colors: true,
+                        verbosity: 2,
+                    },
+                },
             },
-            core: [
-                'tests/helper/',
-                'tests/specs/core/',
-                'tests/specs_old/core/'
-            ]
+            all: {
+                helpers: [ 'tests/helper/compatibility.helper.js' ],
+                specs: [ 'tests/specs/**' ],
+            }
         },
 
         // ////////////////////////////////////////////////////////////////////
@@ -130,7 +133,7 @@ module.exports = function (grunt) {
 
             js: {
                 files: ['Gruntfile.js', 'lib/**/*js', 'old/**/*js', 'tests/**/*js'],
-                tasks: ['lint', 'jasmine_node', 'jasmine:debug'],
+                tasks: ['lint', 'jasmine_nodejs', 'jasmine:debug'],
             },
         },
 
@@ -162,12 +165,12 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-coveralls');
-    grunt.loadNpmTasks('grunt-jasmine-node-new');
+    grunt.loadNpmTasks('grunt-jasmine-nodejs');
     grunt.loadNpmTasks('grunt-jsonlint');
 
     // define aliases
     grunt.registerTask('default', ['availabletasks']);
     grunt.registerTask('dev', ['connect', 'watch']);
     grunt.registerTask('lint', ['jsonlint', 'jshint']);
-    grunt.registerTask('test', ['lint', 'jasmine_node', 'jasmine:coverage']);
+    grunt.registerTask('test', ['lint', 'jasmine_nodejs', 'jasmine:coverage']);
 };

@@ -1,9 +1,9 @@
 describe('alchemy.lib.EventSystemNG', function () {
     'use strict';
 
-    var Delegatus = require('./../../../lib/Delegatus');
-    var EventSystem = require('./../../../lib/EventSystem');
-    var Observari = require('../../../lib/Observari');
+    var Delegatus = require('./../../lib/Delegatus');
+    var EventSystem = require('./../../lib/EventSystem');
+    var Observari = require('../../lib/Observari');
 
     beforeEach(function () {
         setFixtures('<div id="foo"><div class="bar"></div><div class="baz"></div></div>');
@@ -35,7 +35,7 @@ describe('alchemy.lib.EventSystemNG', function () {
 
         var entities = [{
             id: 'foo',
-            events: { 'click': fooHandler, }
+            events: [['click', '', fooHandler]]
         }];
 
         // execute
@@ -56,10 +56,10 @@ describe('alchemy.lib.EventSystemNG', function () {
 
         var entities = [{
             id: 'foo',
-            events: {
-                'click .bar': barHandler,
-                'click .baz': bazHandler,
-            }
+            events: [
+                ['click', '.bar', barHandler],
+                ['click', '.baz', bazHandler],
+            ]
         }];
 
         this.testSubject.update(entities);
@@ -85,8 +85,8 @@ describe('alchemy.lib.EventSystemNG', function () {
         var handler1 = jasmine.createSpy('first click handler for "bar"');
         var handler2 = jasmine.createSpy('second click handler for "bar"');
 
-        var entities1 = [{ id: 'foo', events: { 'click': handler1, } }];
-        var entities2 = [{ id: 'foo', events: { 'click': handler2, } }];
+        var entities1 = [{ id: 'foo', events: [['click', '', handler1]]}];
+        var entities2 = [{ id: 'foo', events: [['click', '', handler2]]}];
 
         // execute #1
         this.testSubject.update(entities1);
@@ -112,11 +112,9 @@ describe('alchemy.lib.EventSystemNG', function () {
 
         var entities = [{
             id: 'foo',
-            events: {
-                'click': function (ev, sendMessage) {
-                    sendMessage('fooMessage');
-                },
-            }
+            events: [['click', '', function (ev, sendMessage) {
+                sendMessage('fooMessage');
+            }]]
         }];
 
         this.messages.on('fooMessage', fooHandler);
@@ -137,6 +135,8 @@ describe('alchemy.lib.EventSystemNG', function () {
              { id: 'foo', events: null, },
              { id: 'bar', events: function () {}, },
              { id: 'baz', events: { none: 'ok' }, },
+             { id: 'baz', events: [], },
+             { id: 'baz', events: [['click', null, 'none']], },
         ];
 
         // execute
@@ -149,7 +149,7 @@ describe('alchemy.lib.EventSystemNG', function () {
 
     it('removes references when being disposed', function () {
         // prepare
-        var entities = [{ id: 'foo', events: { 'click': function () {}, } }];
+        var entities = [{ id: 'foo', events: [['click', '',  function () {}]]}];
         this.testSubject.update(entities);
 
         // execute

@@ -1,8 +1,8 @@
-describe('Oculus', function () {
+describe('alchemy.lib.Oculus', function () {
     'use strict';
 
-    var Oculus = require('./../../../lib/Oculus');
-    var Observari = require('./../../../lib/Observari');
+    var Oculus = require('./../../lib/Oculus');
+    var Observari = require('./../../lib/Observari');
 
     beforeEach(function () {
         this.oculus = Oculus.brew();

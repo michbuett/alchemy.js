@@ -1,7 +1,7 @@
 describe('alchemy.lib.AdministratorNG', function () {
     'use strict';
 
-    var Administrator = require('./../../../lib/Administrator');
+    var Administrator = require('./../../lib/Administrator');
 
     it('allows to define entities depending on app state', function () {
         // prepare

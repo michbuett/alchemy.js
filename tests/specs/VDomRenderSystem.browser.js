@@ -1,8 +1,8 @@
 /* global $ */
-describe('alchemy.lib.vdom_ngRenderSystem (NG)', function () {
+describe('alchemy.lib.VDomRenderSystem', function () {
     'use strict';
 
-    var VDomRenderSystem = require('./../../../lib/VDomRenderSystem');
+    var VDomRenderSystem = require('./../../lib/VDomRenderSystem');
     var h = require('virtual-dom/h');
 
     beforeEach(function () {

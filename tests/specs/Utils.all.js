@@ -1,8 +1,8 @@
 /*global require*/
-describe('alchemy', function () {
+describe('alchemy.lib.Utils', function () {
     'use strict';
 
-    var alchemy = require('./../../../lib/Utils');
+    var alchemy = require('./../../lib/Utils');
 
     describe('general utility methods', function () {
         it('can detect numbers', function () {

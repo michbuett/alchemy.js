@@ -2,8 +2,8 @@
 describe('alchemy.lib.CssRenderSystem', function () {
     'use strict';
 
-    var Stylus = require('./../../../lib/Stylus');
-    var CssRenderSystem = require('./../../../lib/CssRenderSystem');
+    var Stylus = require('./../../lib/Stylus');
+    var CssRenderSystem = require('./../../lib/CssRenderSystem');
 
     beforeEach(function () {
         this.stylus = Stylus.brew();
