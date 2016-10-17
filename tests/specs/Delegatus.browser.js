@@ -17,7 +17,7 @@ describe('alchemy.lib.Delegatus', function () {
     });
 
     describe('addEventListener', function () {
-        it('allows to delegate dom events', function () {
+        it('allows to delegate mouse events', function () {
             // prepare
             var handler = jasmine.createSpy();
             var delegatus = Delegatus.brew({
@@ -30,6 +30,29 @@ describe('alchemy.lib.Delegatus', function () {
 
             // verify
             expect(handler).toHaveBeenCalled();
+        });
+
+        it('allows to delegate keyboard events', function () {
+            // prepare
+            var keyupHandler = jasmine.createSpy();
+            var keydownHandler = jasmine.createSpy();
+            var keypressHandler = jasmine.createSpy();
+            var delegatus = Delegatus.brew({
+                root: document.body,
+            });
+
+            // execute
+            delegatus.addEventListener('keydown #foo', keydownHandler);
+            delegatus.addEventListener('keyup #foo', keyupHandler);
+            delegatus.addEventListener('keypress #foo', keypressHandler);
+            triggerKeyboardEvent('keydown', '#foo');
+            triggerKeyboardEvent('keyup', '#foo');
+            triggerKeyboardEvent('keypress', '#foo');
+
+            // verify
+            expect(keydownHandler).toHaveBeenCalled();
+            expect(keyupHandler).toHaveBeenCalled();
+            expect(keypressHandler).toHaveBeenCalled();
         });
 
         it('allows to filter using css selectors', function () {
@@ -105,4 +128,12 @@ describe('alchemy.lib.Delegatus', function () {
             expect(handler2).not.toHaveBeenCalled();
         });
     });
+
+    function triggerKeyboardEvent(eventName, selector) {
+        var ev = document.createEvent('KeyboardEvent');
+        var el = document.querySelector(selector);
+
+        ev.initEvent(eventName, true, true);
+        el.dispatchEvent(ev);
+    }
 });
