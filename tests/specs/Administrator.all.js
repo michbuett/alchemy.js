@@ -1,4 +1,4 @@
-describe('alchemy.lib.AdministratorNG', function () {
+describe('alchemy.lib.Administrator', function () {
     'use strict';
 
     var Administrator = require('./../../lib/Administrator');
@@ -7,16 +7,17 @@ describe('alchemy.lib.AdministratorNG', function () {
         // prepare
         var entityDef = jasmine.createSpy();
         var state = {};
+        var deltas = [];
         var testSubject = Administrator.brew({
             entities: entityDef,
             systems: [],
         });
 
         // execute
-        testSubject.update(state);
+        testSubject.update(state, deltas);
 
         // verify
-        expect(entityDef).toHaveBeenCalledWith(state);
+        expect(entityDef).toHaveBeenCalledWith(state, deltas);
     });
 
     it('allows to define entities depending on app state', function () {
