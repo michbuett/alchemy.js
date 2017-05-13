@@ -9,32 +9,18 @@
   },
   "main": "index.js",
   "keywords": [
+    "FRP",
     "entity-system",
     "web",
     "frontend"
   ],
   "license": "JSON",
   "devDependencies": {
-    "grunt": "~1.0.1",
-    "grunt-available-tasks": "~0.6.1",
-    "grunt-cli": "^1.2.0",
-    "grunt-contrib-connect": "^1.0.2",
-    "grunt-contrib-jasmine": "~1.0.3",
-    "grunt-contrib-jshint": "~1.0.0",
-    "grunt-contrib-watch": "~1.0.0",
-    "grunt-coveralls": "^1.0.0",
-    "grunt-jasmine-nodejs": "^1.5.4",
-    "grunt-jsonlint": "~1.1.0",
-    "grunt-template-jasmine-istanbul": "^0.5.0",
-    "grunt-template-jasmine-nml": "^2.0.1"
   },
   "scripts": {
-    "test": "grunt test && grunt coveralls"
+    "test": "grunt test && grunt coveralls",
+    "build-examples": ""
   },
   "dependencies": {
-    "coquo-venenum": "^1.1.1",
-    "immutabilis": "^2.0.4",
-    "pro-singulis": "^1.2.0",
-    "virtual-dom": "^2.0.1"
   }
 }

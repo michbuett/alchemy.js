@@ -1,6 +1,7 @@
-docs
+**/.psa*
+**/.psc*
+**/.pulp-cache/
+**/bower_components/
+**/node_modules/
+**/output/
 tags
-node_modules/
-reports/
-.grunt/
-_SpecRunner.html
