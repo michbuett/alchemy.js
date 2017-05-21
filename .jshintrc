@@ -1,41 +1,4 @@
 {
-    "passfail"      : false,
-    "maxerr"        : 100,
-    "browser"       : true,
-    "node"          : true,
-
-    "globals": {
-        "jasmine": true,
-        "describe": true,
-        "it": true,
-        "beforeEach": true,
-        "afterEach": true,
-        "spyOn": true,
-        "waits": true,
-        "waitsFor": true,
-        "runs": true,
-        "expect": true,
-        "sandbox": true,
-        "setFixtures": true,
-        "Map": false
-    },
-
-    "strict"        : true,
-    "bitwise"       : true,
-    "curly"         : true,
-    "eqeqeq"        : true,
-    "noarg"         : true,
-    "regexp"        : false,
-    "undef"         : true,
-    "unused"        : "vars",
-    "newcap"        : true,
-    "noempty"       : true,
-    "nonew"         : true,
-    "nomen"         : false,
-    "onevar"        : false,
-    "plusplus"      : false,
-    "trailing"      : true,
-    "white"         : true,
-    "indent"        : 4
+  "esversion": 6
 }
 
