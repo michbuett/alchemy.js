@@ -17,7 +17,7 @@
   "license": "JSON",
   "devDependencies": {},
   "scripts": {
-    "test": "grunt test && grunt coveralls",
+    "test": "pulp browserify --to output/app.js",
     "build-examples": ""
   },
   "dependencies": {
