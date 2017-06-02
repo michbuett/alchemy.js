@@ -15,12 +15,12 @@
     "frontend"
   ],
   "license": "JSON",
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "scripts": {
     "test": "grunt test && grunt coveralls",
     "build-examples": ""
   },
   "dependencies": {
+    "inferno": "^3.3.1"
   }
 }

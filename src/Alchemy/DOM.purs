@@ -1,23 +1,35 @@
 module Alchemy.DOM
- ( loop
- , drainBuffer
+ ( KeyEvent
+ , keypressed
  ) where
 
-import Prelude (Unit)
 import Control.Monad.Eff (Eff)
 import DOM (DOM)
--- import Control.Monad.Eff.Console (CONSOLE)
-import Alchemy.Buffer (Buffer)
+import Signal (Signal, constant)
+import DOM.Event.Types (EventType)
+import DOM.Node.ParentNode (QuerySelector(..))
 
-foreign import loop ::
-  forall e. Eff (e) Unit -> Eff (dom :: DOM | e) Unit
--- foreign import loop ::
---   forall e.
---   (forall eff. Eff ( console ∷ CONSOLE | eff ) Unit)
---   -> Eff (dom :: DOM | e) Unit
+type KeyEvent =
+  { pressedCodes :: Array String
+  , ctrlKey :: Boolean
+  , shiftKey :: Boolean
+  , altKey :: Boolean
+  , metaKey :: Boolean
+  }
 
-foreign import drainBuffer ::
-  forall a e
-   . (a -> Eff (e) Unit)
-  -> Buffer a
-  -> Eff (e) Unit
+newtype Foo = Foo String
+
+
+body :: QuerySelector
+body = QuerySelector "body"
+
+foreign import keyPressedP ::
+  forall e c. (c -> Signal c) -> Eff (dom :: DOM | e) (Signal KeyEvent)
+
+-- |Creates a signal which will be `true` when the key matching the given key
+-- |code is pressed, and `false` when it's released.
+keypressed :: forall e. Eff (dom :: DOM | e) (Signal KeyEvent)
+keypressed = keyPressedP constant
+
+foreign import fromEventP ::
+  forall e c. (c -> Signal c) -> EventType -> String -> Eff (dom :: DOM | e) (Signal KeyEvent)
