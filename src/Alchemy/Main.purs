@@ -1,25 +1,25 @@
 module Main where
 
 import Prelude (Unit, bind, (<#>), (+), (-), (<>), show)
+import Data.Array (foldl, snoc)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
 import DOM (DOM)
+import DOM.Event.Types (KeyboardEvent)
+import DOM.Event.KeyboardEvent (code)
 import Signal (Signal, runSignal, sampleOn, map2, foldp)
 import Signal.Time (every)
--- import Data.Int (decimal, toStringAs)
--- import Data.String (joinWith)
 
-import Alchemy.DOM.KeyboardEvent (KeyboardEvent, key, onKeypressed, isPressed)
+import Alchemy.DOM.KeyboardEvent (keypressed)
 import Alchemy.DOM.Inferno (VNode, div, text, render)
 
 foreign import debugLog :: forall a e. a -> Eff (console :: CONSOLE | e) Unit
 
-data Control = Up | Down | NoOp
+data Action = P1Up | P1Down | P2Up | P2Down
 
 type Input =
   { time :: Number
-  , paddle1 :: Control
-  , paddle2 :: Control
+  , actions :: Array Action
   }
 
 type State =
@@ -27,27 +27,28 @@ type State =
   , val2 :: Int
   }
 
-input :: Number -> KeyboardEvent -> Input
-input t ev =
-  { time: t
-  , paddle1: op (key "KeyW") (key "KeyS") ev
-  , paddle2: op (key "ArrowUp") (key "ArrowDown") ev
-  }
-    where
-      op upKey downKey e =
-        if isPressed e upKey then Up
-        else if isPressed e downKey then Down
-        else NoOp
+keymap :: Array KeyboardEvent -> Array Action
+keymap pressedKeys = foldl keyToAction [] pressedKeys
+  where
+    keyToAction result ev =
+      case code ev of
+           "KeyW" -> snoc result P1Up
+           "KeyS" -> snoc result P1Down
+           "ArrowUp" -> snoc result P2Up
+           "ArrowDown" -> snoc result P2Down
+           _ -> result
+
+mergeInputs :: Number -> Array Action -> Input
+mergeInputs time actions = { time: time, actions: actions }
 
 update :: Input -> State -> State
-update i s =
-  { val1: step i.paddle1 s.val1
-  , val2: step i.paddle2 s.val2
-  }
-  where
-    step Up val = val + 1
-    step Down val = val - 1
-    step NoOp val = val
+update i s = foldl applyAction s i.actions
+
+applyAction :: State -> Action -> State
+applyAction s P1Up = s { val1 =  s.val1 + 1 }
+applyAction s P1Down = s { val1 = s.val1 - 1 }
+applyAction s P2Up = s { val2 = s.val2 + 1 }
+applyAction s P2Down = s { val2 = s.val2 - 1 }
 
 view :: State -> VNode
 view s = div []
@@ -55,16 +56,16 @@ view s = div []
   , div [] [ text ("Value #2 = " <>  show s.val2 ) ]
   ]
 
-
 tact :: Signal Number
 tact = every 33.3
 
 main :: forall e. Eff (dom :: DOM | e) Unit
 main = do
-  keys <- onKeypressed
+  actions <- keypressed keymap
+
   let
-    inSig = map2 input tact keys
+    inSig = sampleOn tact (map2 mergeInputs tact actions)
     stateSig = foldp update { val1: 0, val2: 0 } inSig
     outSig = stateSig <#> view
 
-  runSignal ((sampleOn tact outSig) <#> (render "#app"))
+  runSignal (outSig <#> (render "#app"))
