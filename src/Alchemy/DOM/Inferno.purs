@@ -14,8 +14,14 @@ data Attribute = Id
 
 foreign import data VNode :: Type
 
-foreign import div :: (Array Attribute) -> (Array VNode) -> VNode
+foreign import div :: (Array Attribute) → (Array VNode) → VNode
 
-foreign import text :: String -> VNode
+foreign import text :: String → VNode
 
-foreign import render :: forall e. String -> VNode -> Eff (dom :: DOM | e) Unit
+foreign import render :: ∀ e. String → VNode → Eff (dom :: DOM | e) Unit
+
+foreign import renderSystem ::
+  ∀ a b e
+  . (a → { | b } → VNode)
+  → { vdom :: a | b }
+  → Eff (dom :: DOM | e) Unit

@@ -1,71 +1,81 @@
 module Main where
 
-import Prelude (Unit, bind, (<#>), (+), (-), (<>), show)
-import Data.Array (foldl, snoc)
+import Alchemy.Components
+
+import Alchemy.Pixi (PIXI)
+import Alchemy.Pixi.Application as App
+import Alchemy.Pixi.Graphics (Color(..), Ref, assign, rect, updatePos)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Console (CONSOLE)
 import DOM (DOM)
-import DOM.Event.Types (KeyboardEvent)
-import DOM.Event.KeyboardEvent (code)
-import Signal (Signal, runSignal, sampleOn, map2, foldp)
-import Signal.Time (every)
+import Prelude (Unit, bind, (+), (*), (<), negate, (&&))
+import Signal (Signal, runSignal, foldp, (<~))
+import Type.Row (class RowLacks)
 
-import Alchemy.DOM.KeyboardEvent (keypressed)
-import Alchemy.DOM.Inferno (VNode, div, text, render)
+type R1 a = { x :: Int, y :: Int | a }
+type R2 a = { x :: Int, z :: Int | a }
 
-foreign import debugLog :: forall a e. a -> Eff (console :: CONSOLE | e) Unit
+type BallState =
+  { pixiRef :: Ref
+  , x :: Number
+  , y :: Number
+  , dx :: Number
+  , dy :: Number
+}
 
-data Action = P1Up | P1Down | P2Up | P2Down
+type Pos r = { posX :: Number, posY :: Number | r }
 
-type Input =
-  { time :: Number
-  , actions :: Array Action
-  }
+type Vel r = { dx :: Number, dy :: Number | r }
 
-type State =
-  { val1 :: Int
-  , val2 :: Int
-  }
+type PosAndVal r = Pos ( foo :: String | r )
 
-keymap :: Array KeyboardEvent -> Array Action
-keymap pressedKeys = foldl keyToAction [] pressedKeys
+pos :: ∀ r. RowLacks "posX" r ⇒ RowLacks "posY" r
+  ⇒ Number
+  → Number
+  → { | r }
+  → Pos r
+pos x y r = assign { posX: x, posY: y } r
+
+stepTime :: ∀ r
+  . Number
+  → { posX :: Number, posY :: Number, dx :: Number, dy :: Number | r }
+  → { posX :: Number, posY :: Number, dx :: Number, dy :: Number | r }
+stepTime delta r =
+  r { posX = r.posX + delta * r.dx
+    , posY = r.posY + delta * r.dy
+    }
+
+ballLogic :: BallState → Signal Number → Signal BallState
+ballLogic initial tact = foldp move initial tact
   where
-    keyToAction result ev =
-      case code ev of
-           "KeyW" -> snoc result P1Up
-           "KeyS" -> snoc result P1Down
-           "ArrowUp" -> snoc result P2Up
-           "ArrowDown" -> snoc result P2Down
-           _ -> result
+    move :: Number → BallState → BallState
+    move delta r =
+      let
+        stepX = r.x + (delta * r.dx)
+        newDx = if 0.0 < stepX && stepX + 20.0 < 800.0 then r.dx else -r.dx
+        stepY = r.y + (delta * r.dy)
+        newDy = if 0.0 < stepY && stepY + 20.0 < 600.0 then r.dy else -r.dy
+      in
+      r { x = r.x + newDx * delta
+        , y = r.y + newDy * delta
+        , dx = newDx
+        , dy = newDy
+        }
 
-mergeInputs :: Number -> Array Action -> Input
-mergeInputs time actions = { time: time, actions: actions }
+balls :: Signal Number → Ref → Components String (Signal BallState)
+balls tact ref = init "b1" { pixiRef: ref, x: 0.0, y: 0.0, dx: 3.0, dy: 3.5 }
 
-update :: Input -> State -> State
-update i s = foldl applyAction s i.actions
-
-applyAction :: State -> Action -> State
-applyAction s P1Up = s { val1 =  s.val1 + 1 }
-applyAction s P1Down = s { val1 = s.val1 - 1 }
-applyAction s P2Up = s { val2 = s.val2 + 1 }
-applyAction s P2Down = s { val2 = s.val2 - 1 }
-
-view :: State -> VNode
-view s = div []
-  [ div [] [ text ("Value #1 = " <>  show s.val1 ) ]
-  , div [] [ text ("Value #2 = " <>  show s.val2 ) ]
-  ]
-
-tact :: Signal Number
-tact = every 33.3
-
-main :: forall e. Eff (dom :: DOM | e) Unit
+main :: ∀ eff. Eff ( pixi :: PIXI, dom :: DOM | eff ) Unit
 main = do
-  actions <- keypressed keymap
+  node <- App.body
+  app <- App.init App.defaults node
+  tact <- App.tick app
+  ref <- rect (App.stage app) (Color 0xFFFFFF) 20 20
 
   let
-    inSig = sampleOn tact (map2 mergeInputs tact actions)
-    stateSig = foldp update { val1: 0, val2: 0 } inSig
-    outSig = stateSig <#> view
+    initialState :: BallState
+    initialState = { pixiRef: ref, x: 0.0, y: 0.0, dx: 3.0, dy: 5.0 }
 
-  runSignal (outSig <#> (render "#app"))
+    outSig :: ∀ e. Signal (Eff (pixi :: PIXI, dom :: DOM | e) Unit)
+    outSig = updatePos <~ ballLogic initialState tact
+
+  runSignal outSig

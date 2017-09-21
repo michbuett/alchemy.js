@@ -9,10 +9,10 @@ import Signal (Signal, constant)
 
 foreign import keypressedP :: forall a c e
    . (c -> Signal c)
-  -> (Array KeyboardEvent -> Array a)
-  -> Eff (dom :: DOM | e) (Signal (Array a))
+  -> (Array KeyboardEvent -> a)
+  -> Eff (dom :: DOM | e) (Signal a)
 
 keypressed :: forall a e
-   . (Array KeyboardEvent -> Array a)
-  -> Eff (dom :: DOM | e) (Signal (Array a))
+   . (Array KeyboardEvent -> a)
+  -> Eff (dom :: DOM | e) (Signal a)
 keypressed = keypressedP constant

@@ -35,3 +35,6 @@ exports.render = function (selector) {
         };
     };
 };
+
+exports.renderSystem = function (vdomRenderMap) {
+};
