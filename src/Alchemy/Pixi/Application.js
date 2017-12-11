@@ -3,10 +3,31 @@
 var pixi = require('pixi.js');
 
 exports.init = function (options) {
-    return function (node) {
+    return function (selector) {
+
+        function appendView(view) {
+            var node = document.querySelector(selector);
+
+            if (node) {
+                node.appendChild(view);
+            } else {
+                window.requestAnimationFrame(function () {
+                    appendView(view);
+                });
+            }
+        }
+
         return function () {
+            if (window.devicePixelRatio >= 0) {
+                options.resolution = window.devicePixelRatio;
+            }
+
             var app = new pixi.Application(options);
-            node.appendChild(app.view);
+            app.view.style.width = options.width + 'px';
+            app.view.style.height = options.height + 'px';
+
+            appendView(app.view);
+
             return app;
         };
     };
@@ -16,29 +37,14 @@ exports.stage = function (app) {
     return app.stage;
 };
 
-exports.body = function () {
-    return document.body;
-};
-
-exports.tickP = function (make) {
+exports.tickP = function (createChannel) {
     return function (app) {
         return function () {
-            var sig = make(1);
+            var channel = createChannel();
             app.ticker.add(function (delta) {
-                sig.set(delta);
+                channel.send(delta);
             });
-            return sig;
-        };
-    };
-};
-
-exports.loop = function (app) {
-    return function (sig) {
-        return function () {
-            app.ticker.add(function (delta) {
-                sig.set(delta);
-            });
-            return {};
+            return channel;
         };
     };
 };

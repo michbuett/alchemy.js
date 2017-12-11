@@ -1,16 +1,27 @@
 module Alchemy.DOM.Inferno
   ( Attribute
   , VNode
+  , VDom
+  , render
+  -- attributes
+  , id
+  , className
+  -- virtual dom nodes
   , div
   , text
-  , render
   ) where
 
 import Prelude (Unit)
 import Control.Monad.Eff (Eff)
 import DOM (DOM)
 
-data Attribute = Id
+newtype Attribute = Attribute (Array String)
+
+id :: String → Attribute
+id val = Attribute [ "id", val ]
+
+className :: String → Attribute
+className val = Attribute [ "className", val ]
 
 foreign import data VNode :: Type
 
@@ -18,10 +29,10 @@ foreign import div :: (Array Attribute) → (Array VNode) → VNode
 
 foreign import text :: String → VNode
 
-foreign import render :: ∀ e. String → VNode → Eff (dom :: DOM | e) Unit
+type VDom a =
+  { vnode :: VNode
+  , root :: String
+  | a }
 
-foreign import renderSystem ::
-  ∀ a b e
-  . (a → { | b } → VNode)
-  → { vdom :: a | b }
-  → Eff (dom :: DOM | e) Unit
+foreign import render ::
+  ∀ a eff. VDom a → Eff (dom :: DOM | eff) Unit

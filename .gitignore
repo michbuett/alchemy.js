@@ -1,7 +1,10 @@
 **/.psa*
 **/.psc*
 **/.pulp-cache/
-**/bower_components/
-**/node_modules/
-**/output/
+bower_components/*
+node_modules/*
+output/*
+examples/**/bower_components/*
+examples/**/node_modules/*
+examples/**/output/*
 tags

@@ -2,20 +2,16 @@ module Alchemy.Pixi.Application
   ( Application
   , Stage
   , Options
-  , body
   , defaults
   , init
   , stage
   , tick
-  , loop
   ) where
 
-import Prelude (Unit)
 import Control.Monad.Eff (Eff)
 import DOM (DOM)
-import DOM.Node.Types (Node)
 import Alchemy.Pixi (PIXI)
-import Signal (Signal, constant)
+import Alchemy.FRP.Channel (FRP, Channel, channel)
 
 foreign import data Application :: Type
 foreign import data Stage :: Type
@@ -36,20 +32,17 @@ defaults =
 foreign import init ::
   ∀ e
   . Options
-  → Node
-  → Eff ( pixi :: PIXI, dom :: DOM | e ) Application
-
-foreign import body :: ∀ e. Eff (dom :: DOM | e) Node
+  → String
+  → Eff (pixi :: PIXI, dom :: DOM | e) Application
 
 foreign import stage :: Application → Stage
 
-foreign import tickP ::
-  ∀ a e
-  . (a → Signal a)
+foreign import tickP :: ∀ a e
+  . Eff (frp :: FRP | e) (Channel a)
   → Application
-  → Eff ( pixi :: PIXI | e ) (Signal Number)
+  → Eff (pixi :: PIXI, frp :: FRP | e) (Channel Number)
 
-tick :: ∀ e . Application → Eff ( pixi :: PIXI | e ) (Signal Number)
-tick = tickP constant
-
-foreign import loop :: ∀ e. Application → Signal Number → Eff (pixi :: PIXI | e) Unit
+tick :: ∀ e
+  . Application
+  → Eff (pixi :: PIXI, frp :: FRP | e) (Channel Number)
+tick = tickP channel

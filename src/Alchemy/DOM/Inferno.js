@@ -8,9 +8,8 @@ exports.div = function (attributes) {
     var props = {};
 
     for (var i = 0, l = attributes.length; i < l; i++) {
-        var split = attributes[i].split('=');
-        var key = split[0].trim();
-        var val = split[1].trim();
+        var key = attributes[i][0];
+        var val = attributes[i][1];
 
         if (key === 'className') {
             className = val;
@@ -28,13 +27,13 @@ exports.text = function (text) {
     return Inferno.createVNode(VNodeFlags.Text, '', '', text);
 };
 
-exports.render = function (selector) {
-    return function (vNode) {
-        return function () {
-            Inferno.render(vNode, document.querySelector(selector));
-        };
-    };
-};
+exports.render = function (vdom) {
+    return function () {
+        var root = document.querySelector(vdom.root);
+        if (!root) {
+            return;
+        }
 
-exports.renderSystem = function (vdomRenderMap) {
+        Inferno.render(vdom.vnode, root);
+    };
 };

@@ -2,8 +2,8 @@ module Alchemy.Pixi.Graphics
   ( Color(..)
   , Ref
   , rect
-  , updatePos
-  , assign
+  , circle
+  , setPos
   ) where
 
 import Prelude
@@ -17,17 +17,22 @@ newtype Color = Color Int
 -- | Reference to a pixi graphic or sprite
 newtype Ref = Ref Int
 
+foreign import circle ::
+  ∀ e
+  . Stage
+  → Color
+  → Number
+  → Eff ( pixi :: PIXI | e ) Ref
+
 foreign import rect ::
   ∀ e
   . Stage
   → Color
-  → Int
-  → Int
+  → Number
+  → Number
   → Eff ( pixi :: PIXI | e ) Ref
 
-foreign import updatePos ::
+foreign import setPos ::
   ∀ r e
   . { pixiRef :: Ref, x :: Number, y :: Number | r }
   → Eff ( pixi :: PIXI | e) Unit
-
-foreign import assign :: ∀ r s t. Union r s t => Record r → Record s → Record t

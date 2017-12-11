@@ -1,18 +1,35 @@
 module Alchemy.DOM.KeyboardEvent
- ( keypressed
+ ( KeyEvent
+ , keydown
+ , keyup
  ) where
 
+import Prelude (bind)
 import Control.Monad.Eff (Eff)
 import DOM (DOM)
-import DOM.Event.Types (KeyboardEvent)
-import Signal (Signal, constant)
+import Alchemy.FRP.Channel (FRP, Channel, channel)
 
-foreign import keypressedP :: forall a c e
-   . (c -> Signal c)
-  -> (Array KeyboardEvent -> a)
-  -> Eff (dom :: DOM | e) (Signal a)
+type KeyEvent =
+  { code :: String
+  , ctrlKey :: Boolean
+  , shiftKey :: Boolean
+  , altKey :: Boolean
+  , metaKey :: Boolean
+  }
 
-keypressed :: forall a e
-   . (Array KeyboardEvent -> a)
-  -> Eff (dom :: DOM | e) (Signal a)
-keypressed = keypressedP constant
+foreign import keydownFn :: forall a e
+  . Channel a
+  → String
+  → Eff (dom :: DOM | e) (Channel KeyEvent)
+
+keyup :: forall e.
+  Eff (frp :: FRP, dom :: DOM | e) (Channel KeyEvent)
+keyup = do
+  c <- channel
+  keydownFn c "keyup"
+
+keydown :: forall e.
+  Eff (frp :: FRP, dom :: DOM | e) (Channel KeyEvent)
+keydown = do
+  c <- channel
+  keydownFn c "keydown"

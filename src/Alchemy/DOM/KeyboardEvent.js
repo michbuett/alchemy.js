@@ -1,32 +1,18 @@
 'use strict';
 
-exports.keypressedP = function (constant) {
-    var filterFn = function (key) {
-        return typeof key !== 'undefined';
-    };
-
-    return function (keymap) {
-        var out = constant([]);
-        var pressed = [];
-
+exports.keydownFn = function keyPressedP(channel) {
+    return function keyPressedP(event) {
         return function () {
-            window.addEventListener('keydown', function(e) {
-                if (pressed[e.keyCode]) {
-                    return;
-                }
-
-                pressed[e.keyCode] = e;
-                out.set(keymap(pressed.filter(filterFn)));
+            window.addEventListener(event, function(e) {
+                channel.send({
+                    code: e.code,
+                    ctrlKey: e.ctrlKey,
+                    shiftKey: e.shiftKey,
+                    altKey: e.altKey,
+                    metaKey: e.metaKey,
+                });
             });
-
-            window.addEventListener('keyup', function(e) {
-                if (pressed[e.keyCode]) {
-                    pressed[e.keyCode] = undefined;
-                    out.set(keymap(pressed.filter(filterFn)));
-                }
-            });
-
-            return out;
+            return channel;
         };
     };
 };
