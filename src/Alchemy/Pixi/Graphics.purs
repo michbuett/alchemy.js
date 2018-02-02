@@ -34,5 +34,5 @@ foreign import rect ::
 
 foreign import setPos ::
   ∀ r e
-  . { pixiRef :: Ref, x :: Number, y :: Number | r }
+  . Array { pixiRef :: Ref, x :: Number, y :: Number | r }
   → Eff ( pixi :: PIXI | e) Unit

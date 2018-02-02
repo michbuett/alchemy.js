@@ -1,25 +1,27 @@
 module Main where
 
-import Prelude
-import Control.Monad.Eff (Eff, kind Effect, foreachE)
-import Control.Monad.Eff.Console (CONSOLE, log)
-import Data.Symbol (SProxy(..))
-import DOM (DOM)
-import Control.Monad.ST (ST)
-import Type.Row (RProxy(..))
-import Data.Array (snoc)
-import Data.Tuple
--- import Math (min, max)
-
-import Alchemy.FRP.Stream
-import Alchemy.FRP.Channel
 import Alchemy.Entity.Storage
+import Alchemy.FRP.Channel
+import Alchemy.FRP.Stream
+import Data.Tuple
+import Prelude
+
+import Alchemy.DOM.Inferno as I
+import Alchemy.DOM.KeyboardEvent (KeyEvent, KeyboardST, keyboard, keydown, keyup, keyboard, pressed)
 import Alchemy.Pixi (PIXI)
 import Alchemy.Pixi.Application as App
 import Alchemy.Pixi.Graphics as G
-import Alchemy.DOM.Inferno as I
-import Alchemy.DOM.KeyboardEvent (KeyEvent, keyup, keydown)
-
+import Control.Monad.Eff (Eff, kind Effect, foreachE)
+import Control.Monad.Eff.Console (CONSOLE, log)
+import Control.Monad.ST (ST, STRef, newSTRef, readSTRef, writeSTRef)
+import DOM (DOM)
+import Data.Array (snoc)
+import Data.DateTime (time)
+import Data.Foreign.Keys (keys)
+import Data.Symbol (SProxy(..))
+import Math (sin, cos, min, max)
+import Signal.DOM (animationFrame)
+import Type.Row (RProxy(..))
 
 type V2 =
   { x :: Number, y :: Number }
@@ -27,348 +29,230 @@ type V2 =
 data GameMode =
   Init | Running | P1Win | P2Win
 
-type AppState =
+type GameObj =
+  { pixiRef :: G.Ref
+  , x :: Number
+  , y :: Number
+  , dx :: Number
+  , dy :: Number
+  , w :: Number
+  , h :: Number
+  }
+
+type GameState =
   { mode :: GameMode
   , scoreP1 :: Int
   , scoreP2 :: Int
   }
 
-type Components =
-  ( pos :: V2
-  , vel :: V2
-  , dim :: V2
-  , pixiRef :: G.Ref
-  , vdom :: I.VDom ()
-  , state :: AppState
-  , oType :: ObstacleType
-  )
-
-pos = SProxy :: SProxy "pos"
-vel = SProxy :: SProxy "vel"
-dim = SProxy :: SProxy "dim"
-pixiRef = SProxy :: SProxy "pixiRef"
-vdom = SProxy :: SProxy "vdom"
-state = SProxy :: SProxy "state"
-oType = SProxy :: SProxy "oType"
-
-type Collition =
-  { collider :: Entity ( pos :: V2
-                       , vel :: V2
-                       , dim :: V2
-                       , oType :: ObstacleType
-                       )
-  , collidee :: Entity ( pos :: V2
-                       , dim :: V2
-                       , oType :: ObstacleType
-                       )
+type Game =
+  { state :: GameState
+  , ball :: GameObj
+  , p1 :: GameObj
+  , p2 :: GameObj
+  , ui :: I.VDom ()
+  , time :: Number
   }
 
-data ObstacleType = Ball | Paddle | BankT | BankB | GoalL | GoalR
+type GameInput =
+  { p1 :: Number
+  , p2 :: Number
+  , deltaT :: Number
+  }
 
+data Player = P1 | P2
+
+data Direction = Up | Down
 
 data InputMsg =
-  StartNewGame
-  | MovePlayer Number String
+  HitBank
+  | HitPaddle
+  | Score Player
   | NoOp
 
 foreign import logAny ::
   ∀ a eff. a → Eff ( console :: CONSOLE | eff ) Unit
 
-p1 = EntityId "p1" :: EntityId
-p2 = EntityId "p2" :: EntityId
-
 fieldWidth = 600.0 :: Number
 fieldHeight = 400.0 :: Number
 paddleWidth = 20.0 :: Number
 paddleHeight = 50.0 :: Number
-borderSize = 5.0 :: Number
 ballSize = 5.0 :: Number
 
 -- ========================================
 -- INIT
 
-initialState :: AppState
-initialState =
+initGameState :: GameState
+initGameState =
   { mode: Init
   , scoreP1: 0
   , scoreP2: 0
   }
 
-initGameEntities :: ∀ eff h
+initBall :: Number → G.Ref → GameObj
+initBall a ref =
+  { pixiRef: ref
+  , x: (fieldWidth - ballSize) / 2.0
+  , y: (fieldHeight - ballSize) / 2.0
+  , dx: 5.0 * cos(a)
+  , dy: 5.0 * sin(a)
+  , w: ballSize
+  , h: ballSize
+  }
+
+initGame :: ∀ eff h
   . App.Stage
-  → Eff (pixi :: PIXI, st :: ST h | eff) (Storage Components)
-initGameEntities s = do
-  let white = G.Color 0xFFFFFF
+  → Eff (pixi :: PIXI, st :: ST h | eff) (STRef h Game)
+initGame s = do
+  gP1 <- G.rect s (G.Color 0xFFFFFF) paddleWidth paddleHeight
+  gP2 <- G.rect s (G.Color 0xFFFFFF) paddleWidth paddleHeight
+  gBall <- G.circle s (G.Color 0xFFFFFF) ballSize
 
-  gBall <- G.circle s white ballSize
-  gP1 <- G.rect s white paddleWidth paddleHeight
-  gP2 <- G.rect s white paddleWidth paddleHeight
-  gBorderTop <- G.rect s white fieldWidth borderSize
-  gBorderBottom <- G.rect s white fieldWidth borderSize
-  gBorderLeft <- G.rect s white borderSize (fieldHeight - 2.0 * borderSize)
-  gBorderRight <- G.rect s white borderSize (fieldHeight - 2.0 * borderSize)
-
-  empty (RProxy :: RProxy Components)
-    # set
-      { entityId: (EntityId "meta")
-      , state: initialState
-      , vdom: { vnode: renderVDom initialState , root: "#ui" }
-      }
-
-    >>= set
-      { entityId: (EntityId "ball")
-      , pixiRef: gBall
-      , pos:
-        { x: (fieldWidth - ballSize) / 2.0
-        , y: (fieldHeight - ballSize) / 2.0
-        }
-      , vel: { x: 2.0 , y: 2.0 }
-      , dim: { x: ballSize , y: ballSize }
-      , oType: Ball
-      }
-
-    >>= set
-      { entityId: p1
-      , pixiRef: gP1
-      , pos:
-        { x: borderSize + 1.0
-        , y: (fieldHeight - paddleHeight) / 2.0
-        }
-      , vel: { x: 0.0, y: 0.0 }
-      , dim: { x: paddleWidth , y: paddleHeight }
-      , oType: Paddle
-      }
-
-    >>= set
-      { entityId: p2
-      , pixiRef: gP2
-      , pos:
-        { x: fieldWidth - paddleWidth - borderSize - 1.0
-        , y: (fieldHeight - paddleHeight) / 2.0
-        }
-      , vel: { x: 0.0, y: 0.0 }
-      , dim: { x: paddleWidth , y: paddleHeight }
-      , oType: Paddle
-      }
-
-    >>= set
-      { entityId: EntityId "border-left"
-      , pixiRef: gBorderLeft
-      , pos: { x: 0.0 , y: borderSize }
-      , dim: { x: borderSize , y: fieldHeight - 2.0 * borderSize }
-      , oType: GoalL
-      }
-
-    >>= set
-      { entityId: EntityId "border-right"
-      , pixiRef: gBorderRight
-      , pos: { x: fieldWidth - borderSize, y: borderSize }
-      , dim: { x: borderSize , y: fieldHeight - 2.0 * borderSize }
-      , oType: GoalR
-      }
-
-    >>= set
-      { entityId: EntityId "border-top"
-      , pixiRef: gBorderTop
-      , pos: { x: 0.0, y: 0.0 }
-      , dim: { x: fieldWidth , y: borderSize }
-      , oType: BankT
-      }
-
-    >>= set
-      { entityId: EntityId "border-bottom"
-      , pixiRef: gBorderBottom
-      , pos: { x: 0.0, y: fieldHeight - borderSize }
-      , dim: { x: fieldWidth , y: borderSize }
-      , oType: BankB
-      }
+  newSTRef { state: initGameState
+           , ball: initBall 1.0 gBall
+           , p1:
+             { pixiRef: gP1
+             , x: 1.0
+             , y: (fieldHeight - paddleHeight) / 2.0
+             , dx: 0.0
+             , y: 0.0
+             , w: paddleWidth
+             , h: paddleHeight
+             }
+           , p2:
+             { pixiRef: gP2
+             , x: fieldWidth - paddleWidth - 1.0
+             , y: (fieldHeight - paddleHeight) / 2.0
+             , dx: 0.0
+             , dy: 0.0
+             , w: paddleWidth
+             , h: paddleHeight
+             }
+           , ui:
+             { vnode: renderVDom initGameState
+             , root: "#ui"
+             }
+           }
 
 
 -- ========================================
 -- UPDATE
 
-collitionDetection :: ∀ eff
-  . Stream (Entity (pos :: V2, dim :: V2, vel :: V2, oType :: ObstacleType))
-  → Stream (Entity (pos :: V2, dim :: V2, oType :: ObstacleType))
-  → Stream (Array Collition)
-collitionDetection moving obstacles =
-  (prod moving obstacles) # foldrS check []
-  where
-        check (Tuple m o) collitionsSoFar =
-          if intersect m o then
-            snoc collitionsSoFar { collider: m
-                                 , collidee: o
-                                 }
-          else
-            collitionsSoFar
-
-        intersect m o
-          | m.entityId == o.entityId = false
-          | m.pos.x + m.dim.x < o.pos.x = false
-          | m.pos.x > o.pos.x + o.dim.x = false
-          | m.pos.y + m.dim.y < o.pos.y = false
-          | m.pos.y > o.pos.y + o.dim.y = false
-          | otherwise = true
-
-
-collitionResolution :: ∀ eff h
-  . Channel InputMsg
-  → Storage Components
-  → Stream (Array Collition)
-  → Stream (Eff (console :: CONSOLE, st :: ST h | eff) Unit)
-collitionResolution inpChannel entities collitions =
-  collitions <#> (\cs -> foreachE cs resolve)
-  where bounceBall cr dx dy newX newY = void do
-          set { entityId: cr.entityId
-              , pos: { x: newX, y: newY }
-              , vel: { x: cr.vel.x * dx, y: cr.vel.y * dy }
-              } entities
-
-        bouncePaddle cr newY = void do
-          set { entityId: cr.entityId
-              , pos: { x: cr.pos.x, y: newY }
-              , vel: { x: 0.0, y: 0.0 }
-              } entities
-
-        logHit cr ce = do
-          log ((show cr.entityId) <> " hits " <> (show ce.entityId))
-
-        resolve c =
-          let minX = borderSize + paddleWidth + 1.0
-              maxX = fieldWidth - borderSize - paddleWidth - c.collider.dim.x - 1.0
-              x = max minX $ min c.collider.pos.x maxX
-              minY = borderSize
-              maxY = fieldHeight - borderSize - c.collider.dim.y
-              y = max minY $ min c.collider.pos.y maxY
-          in case c.collider.oType, c.collidee.oType of
-              Ball, Paddle ->
-                bounceBall c.collider (-1.0) 1.0 x y
-              Ball, BankT -> bounceBall c.collider 1.0 (-1.0) x y
-              Ball, BankB -> bounceBall c.collider 1.0 (-1.0) x y
-              Paddle, BankT -> bouncePaddle c.collider y
-              Paddle, BankB -> bouncePaddle c.collider y
-              _, _ -> logHit c.collider c.collidee
-
-
-stepPos :: ∀ eff h
-  . Storage Components
-  → Number
-  → Eff ( st :: ST h, console :: CONSOLE  | eff) Unit
-stepPos store delta =
-  access store # with pos # with vel # run (step delta)
-
-step :: ∀ r
-  . Number
-  → { pos :: V2, vel :: V2 | r }
-  → { pos :: V2, vel :: V2 | r }
-step delta r =
-  r { pos =
-      { x: r.pos.x + delta * r.vel.x
-      , y: r.pos.y + delta * r.vel.y
+startNewGame :: Game → Game
+startNewGame g =
+  let s = { mode: Running
+          , scoreP1: 0
+          , scoreP2: 0
+          }
+  in
+    g { state = s
+      , ball = initBall g.time g.ball.pixiRef
+      , ui { vnode = renderVDom s }
       }
-  }
 
-handleKeys :: ∀ eff
-  . Channel InputMsg
-  → KeyEvent
-  → Eff (frp :: FRP | eff) Unit
-handleKeys inp ev =
-  foreachE (messages ev.code) (send inp)
-    where messages code =
-            if code == "Space" then
-              [StartNewGame]
-            else if code == "KeyQ" then
-              [(MovePlayer (-1.0) "p1")]
-            else if code == "KeyA" then
-              [(MovePlayer 1.0 "p1")]
-            else if code == "ArrowUp" then
-              [(MovePlayer (-1.0) "p2")]
-            else if code == "ArrowDown" then
-              [(MovePlayer 1.0 "p2")]
-            else
-              []
+makeInp :: KeyboardST → Number → GameInput
+makeInp k dt =
+  let p1 = if pressed "KeyQ" k then 1.0
+           else if pressed "KeyA" k then -1.0
+           else 0.0
 
-handleKeyDown :: ∀ h e
-  . Storage Components
-  → Stream (KeyEvent → Eff (st :: ST h | e) Unit)
-handleKeyDown es =
-  access es # with state # read <#> handle
-  where moveUp p =
-          void $ set { entityId: p, vel: { x: 0.0, y: -8.0 } } es
+      p2 = if pressed "ArrowUp" k then 1.0
+           else if pressed "ArrowDown" k then -1.0
+           else 0.0
 
-        moveDown p =
-          void $ set { entityId: p, vel: { x: 0.0, y: 8.0 } } es
+   in { p1: p1
+      , p2: p2
+      , deltaT: dt
+      }
 
-        handle globalE ev =
-          case globalE.state.mode of
-               Running | ev.code == "KeyQ" -> moveUp p1
-                       | ev.code == "KeyA" -> moveDown p1
-                       | ev.code == "ArrowUp" -> moveUp p2
-                       | ev.code == "ArrowDown" -> moveDown p2
-                       | otherwise -> pure unit
+update :: GameInput → Game → Game
+update gIn g =
+  if g.state.mode == Running then
+    stepGame gIn g
+  else
+    if pressed "Space" gIn.keys then
+      startNewGame g
+    else
+      g
 
-               _ | ev.code == "Space" -> updateAppState es StartNewGame
-                 | otherwise -> pure unit
+stepGame :: GameInput → Game → Game
+stepGame i g =
+  let p1 = stepPlayer { dir: i.p1, dt: i.deltaT, p: g.p1 }
+      p2 = stepPlayer { dir: i.p2, dt: i.deltaT, p: g.p2 }
+      { ball, s1, s2 } =
+        stepBall { dt: i.deltaT
+                 , ball: g.ball
+                 , p1: p1
+                 , p2: p2
+                 }
+      state = stepMeta s1 s2 g.state
+      scored = state.scoreP1 /= g.state.scoreP1 || state.scoreP2 /= g.state.scoreP2
+   in { state: state
+      , ball: if scored
+                then initBall g.time g.ball.pixiRef
+                else ball
+      , p1: p1
+      , p2: p2
+      , ui: { vdom: if state /= g.state then renderVDom state else g.ui.vdom
+            , root: state.ui.root
+            }
+      }
 
-handleKeyUp :: ∀ h e
-  . Storage Components
-  → Stream (KeyEvent → Eff (st :: ST h | e) Unit)
-handleKeyUp es =
-  access es # with state # read <#> handle
-  where stopMoving p =
-          void $ set { entityId: p, vel: { x: 0.0, y: 0.0 } } es
-
-        handle globalE ev =
-          case globalE.state.mode of
-               Running | ev.code == "KeyQ" -> stopMoving p1
-                       | ev.code == "KeyA" -> stopMoving p1
-                       | ev.code == "ArrowUp" -> stopMoving p2
-                       | ev.code == "ArrowDown" -> stopMoving p2
-                       | otherwise -> pure unit
-
-               _ -> pure unit
-
-processInput :: ∀ h eff
-  . Storage Components
-  → InputMsg
-  → Eff ( st :: ST h, frp :: FRP, console :: CONSOLE | eff) Unit
-processInput s (MovePlayer v p) =
-  access s # with vel # whereId (EntityId p) # run setVelocity
-    where setVelocity e =
-            e { vel = { x: 0.0, y: v * 7.0 }}
-
-processInput s msg =
-  updateAppState s msg
+stepBall ::
+    { dt :: Number, ball :: GameObj, p1 :: GameObj, p2 :: GameObj }
+  → { ball :: GameObj, s1 :: Int, s2 :: Int }
+stepBall i =
+  stepPos i.dt i.ball # collitionHandling
+  where collitionHandling b
+          | intersect b i.p1 =
+            { ball: b { dx = -b.dx, dy = b.dy }
+            , s1: 0
+            , s2: 0
+            }
+          | intersect b i.p2 =
+            { ball: b { dx = -b.dx, dy = b.dy }
+            , s1: 0
+            , s2: 0
+            }
+          | otherwise =
+            { ball: b, s1: 0, s2: 0 }
 
 
-updateAppState :: ∀ h eff
-  . Storage Components
-  → InputMsg
-  → Eff ( st :: ST h | eff) Unit
-updateAppState store msg =
-  access store # with state # with vdom # run start
-    where start e =
-            e { state = s
-              , vdom { vnode = renderVDom s }
-              }
-              where s = update msg e.state
+stepPos :: Number → GameObj → GameObj
+stepPos dt o =
+  let x = o.x + dt * o.dx
+      y = o.y + dt * o.dy
+   in o { x = o.x + dt * o.dx
+        , y = max 0.0 (min (fieldHeight - o.h) y)
+        }
+
+intersect :: GameObj → GameObj → Boolean
+intersect m o
+  | m.x + m.w < o.x = false
+  | m.x > o.x + o.w = false
+  | m.y + m.h < o.y = false
+  | m.y > o.y + o.h = false
+  | otherwise = true
 
 
-update ::
-  InputMsg → AppState → AppState
-update StartNewGame _ =
-  { mode: Running
-  , scoreP1: 0
-  , scoreP2: 0
-  }
-update _ s = s
+stepPlayer :: { dir :: Number, dt :: Number, p :: GameObj } → GameObj
+stepPlayer i = i.p
 
+stepMeta :: Int → Int → GameState → GameState
+stepMeta s1 s2 s =
+  let s1' = s.scoreP1 + s1
+      s2' = s.scoreP2 + s2
+      m = if s1' == 10 then P1Win else if s2' == 10 then P2Win else s.mode
+   in { mode: m
+      , scoreP1: s1'
+      , scoreP2: s2'
+      }
 
 
 -- ========================================
 -- VIEW
 
-renderVDom :: AppState → I.VNode
+renderVDom :: GameState → I.VNode
 renderVDom st =
   I.div []
     [ I.div [ I.id "score" ]
@@ -392,31 +276,9 @@ renderVDom st =
               , I.div [ I.className "title" ] [ I.text subtitle]
               ]
 
-getVDomStream :: ∀ eff.
-  Storage Components -> Stream (Eff (dom :: DOM | eff) Unit)
-getVDomStream store =
-  access store # with vdom # read <#> renderDom
-
-renderDom :: ∀ a eff
-  . Entity (vdom :: I.VDom a)
-  → Eff (dom :: DOM | eff) Unit
-renderDom e =
-  I.render e.vdom
-
-getPixiPosStream :: ∀ eff.
-  Storage Components → Stream (Eff (pixi :: PIXI | eff) Unit)
-getPixiPosStream store =
-  access store # with pos # with pixiRef # read <#> updatePos
-
-updatePos :: ∀ eff
-  . Entity (pos :: V2, pixiRef :: G.Ref)
-  → Eff (pixi :: PIXI | eff) Unit
-updatePos entity = G.setPos p
-  where p = { pixiRef: entity.pixiRef
-            , x: entity.pos.x
-            , y: entity.pos.y
-            }
-
+updatePos :: ∀ eff. Game → Eff (pixi :: PIXI | eff) Unit
+updatePos g =
+  G.setPos $ [g.ball, g.p1, g.p2]
 
 -- ========================================
 -- MAIN
@@ -432,22 +294,29 @@ main :: ∀ eff h.
 main = do
   let options = App.defaults { width = 600, height = 400 }
 
-  inpChannel <- channel
-  keyd <- keydown
-  keyu <- keyup
   app <- App.init options "#field"
   animationFrame <- App.tick app
-  entities <- initGameEntities (App.stage app)
-  e <- get (RProxy :: RProxy ( state :: AppState )) entities
-  -- _ <- subscribe (handleKeys inpChannel) keyd
-  _ <- sampleBy (handleKeyDown entities) keyd
-  _ <- sampleBy (handleKeyUp entities) keyu
-  _ <- subscribe (processInput entities) inpChannel
-  _ <- subscribe (stepPos entities) animationFrame
-  _ <- sample (
-    (collitionDetection
-      (access entities # with pos # with vel # with dim # with oType # read)
-      (access entities # with pos # with dim # with oType # read))
-    # (collitionResolution inpChannel entities)) animationFrame
-  _ <- sample (getVDomStream entities) animationFrame
-  sample (getPixiPosStream entities) animationFrame
+  gameStateRef <- initGame (App.stage app)
+
+  runGame (makeInp <$> fromEff keyboard # sampleBy animationFrame) gameStateRef
+
+runGame :: ∀ eff h
+  . Channel GameInput
+  → Number
+  → STRef h Game
+  → Eff ( frp :: FRP
+        , frp :: FRP
+        , st :: ST h
+        , console :: CONSOLE
+        , pixi :: PIXI
+        , dom :: DOM
+        | eff ) Unit
+runGame gameIn tact gameStateRef = do
+  let gameS = fromEff $ readSTRef gameStateRef
+
+      write :: ∀ a e. (a → Game) → (a → Eff (st :: ST h | e) Game)
+      write fn = fn >>> writeSTRef gameStateRef
+
+  gameS <#> update <#> write # sampleBy gameIn
+  gameS <#> _.ui <#> I.render # sample tact
+  gameS <#> updatePos # sample tact

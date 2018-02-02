@@ -16,3 +16,33 @@ exports.keydownFn = function keyPressedP(channel) {
         };
     };
 };
+
+exports.pressed = function (code) {
+    return function (keys) {
+        return !!keys[code];
+    };
+};
+
+exports.keyboard = function () {
+    return pressedKeys;
+}
+
+var pressedKeys = {};
+
+function onKeyDown(e) {
+    pressedKeys[e.code] = true;
+};
+
+function onKeyUp(e) {
+    pressedKeys[e.code] = false;
+};
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.body.addEventListener('keydown', onKeyDown);
+    document.body.addEventListener('keyup', onKeyUp);
+});
+
+document.addEventListener('unload', function () {
+    document.body.removeEventListener('keydown', onKeyDown);
+    document.body.removeEventListener('keyup', onKeyUp);
+});

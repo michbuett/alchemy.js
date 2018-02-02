@@ -2,11 +2,11 @@ module Alchemy.Entity.Storage
   ( Storage
   , EntityId(..)
   , Entity
+  , EntityList
   , Accessor
   , class RowSubset
   , empty
   , init
-  , get
   , set
   , access
   , with
@@ -21,7 +21,6 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.ST (ST)
 import Data.Symbol (class IsSymbol, SProxy, reflectSymbol)
 import Type.Row (RProxy)
-import Alchemy.FRP.Stream (Stream, fromCallback)
 
 class RowSubset (r :: # Type) (s :: # Type)
 instance rowSubset :: Union r t s => RowSubset r s
@@ -41,6 +40,8 @@ instance eqEntityId :: Eq EntityId where
   eq (EntityId e1) (EntityId e2) = e1 == e2
 
 type Entity e = { entityId :: EntityId | e }
+
+type EntityList e = Array (Entity e)
 
 foreign import empty ::
   ∀ s. RProxy s → Storage s
@@ -90,18 +91,10 @@ foreign import whereId ::
   → Accessor w c
   → Accessor w c
 
-foreign import readFn ::
-  ∀ store entity a b c
-  . (((a → b) → c) → Stream a)
-  → Accessor store entity
-  → Stream { entityId :: EntityId | entity }
-
-read ::
-  ∀ store entity
+foreign import read ::
+  ∀ store entity eff h
   . Accessor store entity
-  → Stream { entityId :: EntityId | entity }
-read =
-  readFn fromCallback
+  → Eff (st :: ST h | eff) (EntityList entity)
 
 foreign import runFn ::
   ∀ store ei eo eff h
@@ -118,9 +111,3 @@ run ::
   → Eff (st :: ST h | eff) Unit
 run fn acc =
   runFn fn acc
-
-newtype EL e = EL (∀ eff h. Eff (st :: ST h | eff) (Entity e))
-
-foreign import get :: ∀ eff h e s.
-  RProxy e → Storage s → Eff (st :: ST h | eff) (Entity e)
-

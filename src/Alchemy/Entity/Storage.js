@@ -71,25 +71,15 @@ exports.setFn = function (r) {
     };
 };
 
-// exports.setManyFn = function (rs) {
-//     return function (s) {
-//         return function () {
-//             for (var i = 0, l = rs.length; i < l; i++) {
-//                 s.set(rs[i]);
-//             }
-//             return s;
-//         };
-//     };
-// };
-
 function Accessor(store, cmpFilter, entityIds) {
     this.store = store;
     this.cmpFilter = cmpFilter;
     this.entityIds = entityIds;
 }
 
-Accessor.prototype.forEach = function (callback, ctxt) {
+Accessor.prototype.read = function () {
     var entityIds = this.entityIds;
+    var result = [];
 
     if (!entityIds) {
         var base = this.store.getComponent(this.cmpFilter[0].name);
@@ -101,13 +91,15 @@ Accessor.prototype.forEach = function (callback, ctxt) {
         var entity = this.store.get(entityId, this.cmpFilter);
 
         if (entity) {
-            callback.call(ctxt, entity);
+            result.push(entity);
         }
     }
+
+    return result;
 };
 
 Accessor.prototype.run = function (fn) {
-    this.forEach(function (entity) {
+    this.read().forEach(function (entity) {
         this.store.set(fn(entity));
     }, this);
 };
@@ -139,38 +131,16 @@ exports.whereId = function (entityId) {
     };
 };
 
-exports.readFn = function (stream) {
-    return function (acc) {
-        return stream(function (cb) {
-            acc.forEach(cb);
-        });
-    };
+exports.read = function (acc) {
+    return stream(function (cb) {
+        acc.forEach(cb);
+    });
 };
 
 exports.runFn = function (fn) {
     return function (acc) {
         return function () {
             acc.run(fn);
-            return {};
-        };
-    };
-};
-
-// exports.write = function (stream) {
-//     return function (store) {
-//         return function () {
-//             stream.val(function (entity) {
-//                 store.set(entity);
-//             });
-//             return {};
-//         };
-//     };
-// };
-
-exports.get = function (rows) {
-    return function (store) {
-        return function () {
-            console.log('GET', rows)
             return {};
         };
     };

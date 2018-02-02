@@ -47,10 +47,13 @@ exports.circle = function (stage) {
     };
 };
 
-exports.setPos = function (o) {
+exports.setPos = function (ol) {
     return function () {
-        var g = graphics[o.pixiRef];
-        g.x = o.x;
-        g.y = o.y;
+        for (var i = 0, l = ol.length; i < l; i++) {
+            var o = ol[i];
+            var g = graphics[o.pixiRef];
+            g.x = o.x;
+            g.y = o.y;
+        }
     };
 };

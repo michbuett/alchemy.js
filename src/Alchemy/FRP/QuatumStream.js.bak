@@ -29,6 +29,10 @@ exports.fromChannel = function (channel) {
     };
 };
 
+exports.fromCallback = function (readValFn) {
+    return new Stream(readValFn);
+};
+
 exports.mapImpl = function (fn) {
     return function (s) {
         return new Stream(function (cb) {
@@ -51,8 +55,8 @@ exports.applyImpl = function (sf) {
     };
 };
 
-exports.sample = function (event) {
-    return function (stream) {
+exports.sample = function (stream) {
+    return function (event) {
         return function () {
             event.subscribe(function () {
                 stream.val(function (eff) {
@@ -63,8 +67,8 @@ exports.sample = function (event) {
     };
 };
 
-exports.sampleBy = function (event) {
-    return function (stream) {
+exports.sampleBy = function (stream) {
+    return function (event) {
         return function () {
             event.subscribe(function (a) {
                 stream.val(function (f) {
@@ -89,33 +93,43 @@ exports.combine = function (fn) {
     };
 };
 
-// exports.foldrS = function (fn) {
-//     return function (a) {
-//         return function (s) {
-//             return new Stream(function (cb) {
-//                 var result = a;
-//                 s.val(function (v) {
-//                     result = fn(v)(result);
-//                 });
-//
-//                 cb(result);
-//             });
-//         };
-//     };
-// };
-//
-// exports.foldlS = function (fn) {
-//     return function (a) {
-//         return function (s) {
-//             return new Stream(function (cb) {
-//                 var result = a;
-//                 s.val(function (v) {
-//                     result = fn(result)(v);
-//                 });
-//
-//                 cb(result);
-//             });
-//         };
-//     };
-// };
+exports.foldrS = function (fn) {
+    return function (a) {
+        return function (s) {
+            return new Stream(function (cb) {
+                var result = a;
+                s.val(function (v) {
+                    result = fn(v)(result);
+                });
+
+                cb(result);
+            });
+        };
+    };
+};
+
+exports.foldlS = function (fn) {
+    return function (a) {
+        return function (s) {
+            return new Stream(function (cb) {
+                var result = a;
+                s.val(function (v) {
+                    result = fn(result)(v);
+                });
+
+                cb(result);
+            });
+        };
+    };
+};
+
+exports.collapse = function (s) {
+    return new Stream(function (cb) {
+        var result = [];
+        s.val(function (v) {
+            result.push(v);
+        });
+        cb(result);
+    });
+};
 
