@@ -1,27 +1,20 @@
 module Main where
 
-import Alchemy.Entity.Storage
-import Alchemy.FRP.Channel
-import Alchemy.FRP.Stream
-import Data.Tuple
+
 import Prelude
 
 import Alchemy.DOM.Inferno as I
-import Alchemy.DOM.KeyboardEvent (KeyEvent, KeyboardST, keyboard, keydown, keyup, keyboard, pressed)
+import Alchemy.DOM.KeyboardEvent (KeyboardST, keyboard, pressed)
+import Alchemy.FRP.Channel (Channel, FRP)
+import Alchemy.FRP.Stream (Stream, fromEff, fromChannel, combine, sample)
 import Alchemy.Pixi (PIXI)
 import Alchemy.Pixi.Application as App
 import Alchemy.Pixi.Graphics as G
-import Control.Monad.Eff (Eff, kind Effect, foreachE)
-import Control.Monad.Eff.Console (CONSOLE, log)
+import Control.Monad.Eff (Eff, kind Effect)
+import Control.Monad.Eff.Console (CONSOLE)
 import Control.Monad.ST (ST, STRef, newSTRef, readSTRef, writeSTRef)
 import DOM (DOM)
-import Data.Array (snoc)
-import Data.DateTime (time)
-import Data.Foreign.Keys (keys)
-import Data.Symbol (SProxy(..))
-import Math (sin, cos, min, max)
-import Signal.DOM (animationFrame)
-import Type.Row (RProxy(..))
+import Math (sin, cos, min, max) as Math
 
 type V2 =
   { x :: Number, y :: Number }
@@ -58,25 +51,13 @@ type GameInput =
   { p1 :: Number
   , p2 :: Number
   , deltaT :: Number
+  , space :: Boolean
   }
-
-data Player = P1 | P2
-
-data Direction = Up | Down
-
-data InputMsg =
-  HitBank
-  | HitPaddle
-  | Score Player
-  | NoOp
-
-foreign import logAny ::
-  ∀ a eff. a → Eff ( console :: CONSOLE | eff ) Unit
 
 fieldWidth = 600.0 :: Number
 fieldHeight = 400.0 :: Number
 paddleWidth = 20.0 :: Number
-paddleHeight = 50.0 :: Number
+paddleHeight = 60.0 :: Number
 ballSize = 5.0 :: Number
 
 -- ========================================
@@ -94,8 +75,8 @@ initBall a ref =
   { pixiRef: ref
   , x: (fieldWidth - ballSize) / 2.0
   , y: (fieldHeight - ballSize) / 2.0
-  , dx: 5.0 * cos(a)
-  , dy: 5.0 * sin(a)
+  , dx: 5.0 * Math.cos(a)
+  , dy: 5.0 * Math.sin(a)
   , w: ballSize
   , h: ballSize
   }
@@ -109,13 +90,14 @@ initGame s = do
   gBall <- G.circle s (G.Color 0xFFFFFF) ballSize
 
   newSTRef { state: initGameState
+           , time: 0.0
            , ball: initBall 1.0 gBall
            , p1:
              { pixiRef: gP1
              , x: 1.0
              , y: (fieldHeight - paddleHeight) / 2.0
              , dx: 0.0
-             , y: 0.0
+             , dy: 0.0
              , w: paddleWidth
              , h: paddleHeight
              }
@@ -152,78 +134,79 @@ startNewGame g =
 
 makeInp :: KeyboardST → Number → GameInput
 makeInp k dt =
-  let p1 = if pressed "KeyQ" k then 1.0
-           else if pressed "KeyA" k then -1.0
+  let p1 = if pressed "KeyQ" k then -1.0
+           else if pressed "KeyA" k then 1.0
            else 0.0
 
-      p2 = if pressed "ArrowUp" k then 1.0
-           else if pressed "ArrowDown" k then -1.0
+      p2 = if pressed "ArrowUp" k then -1.0
+           else if pressed "ArrowDown" k then 1.0
            else 0.0
 
    in { p1: p1
       , p2: p2
       , deltaT: dt
+      , space: pressed "Space" k
       }
 
-update :: GameInput → Game → Game
-update gIn g =
-  if g.state.mode == Running then
-    stepGame gIn g
-  else
-    if pressed "Space" gIn.keys then
-      startNewGame g
-    else
-      g
+update :: Game → GameInput → Game
+update g gIn =
+  let g' = g { time = g.time + gIn.deltaT }
+   in
+  case g.state.mode of
+    Running -> stepGame gIn g'
+    otherwise -> if gIn.space then
+                   startNewGame g'
+                 else
+                   g'
 
 stepGame :: GameInput → Game → Game
 stepGame i g =
   let p1 = stepPlayer { dir: i.p1, dt: i.deltaT, p: g.p1 }
       p2 = stepPlayer { dir: i.p2, dt: i.deltaT, p: g.p2 }
-      { ball, s1, s2 } =
-        stepBall { dt: i.deltaT
-                 , ball: g.ball
-                 , p1: p1
-                 , p2: p2
-                 }
+      ball = stepBall { dt: i.deltaT, ball: g.ball, p1: p1, p2: p2 }
+      { s1, s2 } = score ball
       state = stepMeta s1 s2 g.state
-      scored = state.scoreP1 /= g.state.scoreP1 || state.scoreP2 /= g.state.scoreP2
+      scored = s1 || s2
    in { state: state
+      , time: g.time
       , ball: if scored
                 then initBall g.time g.ball.pixiRef
                 else ball
       , p1: p1
       , p2: p2
-      , ui: { vdom: if state /= g.state then renderVDom state else g.ui.vdom
-            , root: state.ui.root
+      , ui: { vnode: renderVDom state
+            , root: g.ui.root
             }
       }
 
 stepBall ::
     { dt :: Number, ball :: GameObj, p1 :: GameObj, p2 :: GameObj }
-  → { ball :: GameObj, s1 :: Int, s2 :: Int }
+  → GameObj
 stepBall i =
   stepPos i.dt i.ball # collitionHandling
   where collitionHandling b
           | intersect b i.p1 =
-            { ball: b { dx = -b.dx, dy = b.dy }
-            , s1: 0
-            , s2: 0
-            }
+              b { dx = -b.dx, dy = b.dy }
           | intersect b i.p2 =
-            { ball: b { dx = -b.dx, dy = b.dy }
-            , s1: 0
-            , s2: 0
-            }
-          | otherwise =
-            { ball: b, s1: 0, s2: 0 }
+              b { dx = -b.dx, dy = b.dy }
+          | b.y <= 0.0 =
+              b { dy = -b.dy, y = 0.0 }
+          | b.y + b.h >= fieldHeight =
+              b { dy = -b.dy, y = fieldHeight - b.h }
+          | otherwise = b
 
+score :: GameObj → { s1 :: Boolean, s2 :: Boolean }
+score ball
+  | ball.x <= 0.0 = { s1: true, s2: false }
+  | ball.x + ball.w >= fieldWidth = { s1: false, s2: true }
+  | otherwise = { s1: false, s2: false }
 
 stepPos :: Number → GameObj → GameObj
 stepPos dt o =
   let x = o.x + dt * o.dx
       y = o.y + dt * o.dy
    in o { x = o.x + dt * o.dx
-        , y = max 0.0 (min (fieldHeight - o.h) y)
+        , y = Math.max 0.0 (Math.min (fieldHeight - o.h) y)
         }
 
 intersect :: GameObj → GameObj → Boolean
@@ -234,14 +217,15 @@ intersect m o
   | m.y > o.y + o.h = false
   | otherwise = true
 
-
 stepPlayer :: { dir :: Number, dt :: Number, p :: GameObj } → GameObj
-stepPlayer i = i.p
+stepPlayer i =
+  let y = i.p.y + 5.0 * i.dir * i.dt
+   in i.p { y = Math.max 0.0 (Math.min (fieldHeight - i.p.h) y) }
 
-stepMeta :: Int → Int → GameState → GameState
+stepMeta :: Boolean → Boolean → GameState → GameState
 stepMeta s1 s2 s =
-  let s1' = s.scoreP1 + s1
-      s2' = s.scoreP2 + s2
+  let s1' = if s1 then s.scoreP1 + 1 else s.scoreP1
+      s2' = if s2 then s.scoreP2 + 1 else s.scoreP2
       m = if s1' == 10 then P1Win else if s2' == 10 then P2Win else s.mode
    in { mode: m
       , scoreP1: s1'
@@ -283,6 +267,9 @@ updatePos g =
 -- ========================================
 -- MAIN
 
+gameOptions :: App.Options
+gameOptions = App.defaults { width = 600, height = 400 }
+
 main :: ∀ eff h.
   Eff ( frp :: FRP
       , frp :: FRP
@@ -292,17 +279,13 @@ main :: ∀ eff h.
       , dom :: DOM
       | eff ) Unit
 main = do
-  let options = App.defaults { width = 600, height = 400 }
-
-  app <- App.init options "#field"
+  app <- App.init gameOptions "#field"
   animationFrame <- App.tick app
   gameStateRef <- initGame (App.stage app)
-
-  runGame (makeInp <$> fromEff keyboard # sampleBy animationFrame) gameStateRef
+  runGame animationFrame gameStateRef
 
 runGame :: ∀ eff h
-  . Channel GameInput
-  → Number
+  . Channel Number
   → STRef h Game
   → Eff ( frp :: FRP
         , frp :: FRP
@@ -311,12 +294,13 @@ runGame :: ∀ eff h
         , pixi :: PIXI
         , dom :: DOM
         | eff ) Unit
-runGame gameIn tact gameStateRef = do
-  let gameS = fromEff $ readSTRef gameStateRef
+runGame tact gameStateRef = do
+  let gameS :: Stream Game
+      gameS = fromEff $ readSTRef gameStateRef
 
-      write :: ∀ a e. (a → Game) → (a → Eff (st :: ST h | e) Game)
-      write fn = fn >>> writeSTRef gameStateRef
+      inputS :: Stream GameInput
+      inputS = combine makeInp (fromEff keyboard) (fromChannel tact 1.0)
 
-  gameS <#> update <#> write # sampleBy gameIn
+  (combine update gameS inputS) <#> writeSTRef gameStateRef # sample tact
   gameS <#> _.ui <#> I.render # sample tact
   gameS <#> updatePos # sample tact
