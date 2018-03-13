@@ -75,8 +75,8 @@ initBall a ref =
   { pixiRef: ref
   , x: (fieldWidth - ballSize) / 2.0
   , y: (fieldHeight - ballSize) / 2.0
-  , dx: 5.0 * Math.cos(a)
-  , dy: 5.0 * Math.sin(a)
+  , dx: 6.0 * Math.cos(a)
+  , dy: 6.0 * Math.sin(a)
   , w: ballSize
   , h: ballSize
   }
@@ -197,8 +197,8 @@ stepBall i =
 
 score :: GameObj → { s1 :: Boolean, s2 :: Boolean }
 score ball
-  | ball.x <= 0.0 = { s1: true, s2: false }
-  | ball.x + ball.w >= fieldWidth = { s1: false, s2: true }
+  | ball.x <= 0.0 = { s1: false, s2: true }
+  | ball.x + ball.w >= fieldWidth = { s1: true, s2: false }
   | otherwise = { s1: false, s2: false }
 
 stepPos :: Number → GameObj → GameObj

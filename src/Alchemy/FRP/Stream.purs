@@ -6,9 +6,7 @@ module Alchemy.FRP.Stream
   , sample
   , sampleBy
   , combine
-  -- , prod
-  -- , foldlS
-  -- , foldrS
+  , inspect
   ) where
 
 import Prelude
@@ -59,15 +57,6 @@ foreign import sampleBy ::
 foreign import combine ::
   ∀ a b c . (a → b → c) → Stream a → Stream b → Stream c
 
--- prod :: ∀ a b
---   . Stream (Array a)
---   → Stream (Array b)
---   → Stream (Array (Tuple a b))
--- prod =
---   combine (\x y -> Tuple x y)
+foreign import inspect :: ∀ a eff.
+  Stream a → Eff (frp :: FRP | eff) a
 
--- foreign import foldrS ::
---   ∀ a b. (a → b → b) → b → Stream a → Stream b
---
--- foreign import foldlS ::
---   ∀ a b. (b → a → b) → b → Stream a → Stream b
