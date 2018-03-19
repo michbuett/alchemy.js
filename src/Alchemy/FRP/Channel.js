@@ -1,9 +1,6 @@
 'use strict';
 
-var id = 0;
-
 function Channel() {
-    this.id = id++;
     this.handler = [];
 }
 

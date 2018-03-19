@@ -41,9 +41,18 @@ exports.tickP = function (createChannel) {
     return function (app) {
         return function () {
             var channel = createChannel();
+            // var ticker = app.ticker;
+            // var arg = {};
+
             app.ticker.add(function (delta) {
+                // arg.delta = delta;
+                // arg.elapsed = ticker.elapsedMS;
+                // arg.fps = ticker.fps;
+                // arg.now = performance.now();
+
                 channel.send(delta);
             });
+
             return channel;
         };
     };
