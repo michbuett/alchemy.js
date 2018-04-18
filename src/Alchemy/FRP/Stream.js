@@ -5,15 +5,13 @@ function Stream(readValFn) {
 }
 
 exports.fromVal = function (val) {
-    return new Stream(function () {
+    return function () {
         return val;
-    });
+    };
 };
 
 exports.fromEff = function (eff) {
-    return new Stream(function () {
-        return eff();
-    });
+    return eff;
 };
 
 exports.fromChannel = function (channel) {
@@ -24,25 +22,25 @@ exports.fromChannel = function (channel) {
             val = newVal;
         });
 
-        return new Stream(function () {
+        return function () {
             return val;
-        });
+        };
     };
 };
 
 exports.mapImpl = function (fn) {
     return function (s) {
-        return new Stream(function () {
-            return fn(s.val());
-        });
+        return function () {
+            return fn(s());
+        };
     };
 };
 
 exports.applyImpl = function (sf) {
     return function (sa) {
-        return new Stream(function () {
-            return sf.val()(sa.val);
-        });
+        return function () {
+            return sf()(sa);
+        };
     };
 };
 
@@ -50,7 +48,7 @@ exports.sample = function (event) {
     return function (stream) {
         return function () {
             event.subscribe(function () {
-                stream.val()();
+                stream()();
             });
         };
     };
@@ -60,7 +58,7 @@ exports.sampleBy = function (event) {
     return function (stream) {
         return function () {
             event.subscribe(function (a) {
-                stream.val()(a)();
+                stream()(a)();
             });
         };
     };
@@ -70,14 +68,12 @@ exports.combine = function (fn) {
     return function (s1) {
         return function (s2) {
             return new Stream(function () {
-                return fn(s1.val())(s2.val());
+                return fn(s1())(s2());
             });
         };
     };
 };
 
 exports.inspect = function (s) {
-    return function () {
-        return s.val();
-    };
+    return s;
 };
