@@ -1,17 +1,9 @@
 'use strict';
 
-function Stream(readValFn) {
-    this.val = readValFn;
-}
-
 exports.fromVal = function (val) {
     return function () {
         return val;
     };
-};
-
-exports.fromEff = function (eff) {
-    return eff;
 };
 
 exports.fromChannel = function (channel) {
@@ -39,7 +31,7 @@ exports.mapImpl = function (fn) {
 exports.applyImpl = function (sf) {
     return function (sa) {
         return function () {
-            return sf()(sa);
+            return sf()(sa())
         };
     };
 };
@@ -72,8 +64,4 @@ exports.combine = function (fn) {
             });
         };
     };
-};
-
-exports.inspect = function (s) {
-    return s;
 };

@@ -10,22 +10,19 @@ module Alchemy.FRP.Stream
   ) where
 
 import Prelude
-import Control.Monad.Eff (Eff, kind Effect)
--- import Data.Tuple (Tuple(..))
+import Control.Monad.Eff (Eff)
+import Unsafe.Coerce (unsafeCoerce)
 import Alchemy.FRP.Channel (Channel, FRP)
 
--- | A `Stream a` represents a set of 0 or more values of type `a`
--- | which vary over time
+-- | A `Stream a` represents a values of type `a` which varies over time
 foreign import data Stream :: Type → Type
 
-foreign import fromVal :: ∀ a.
-  a → Stream a
+foreign import fromVal :: ∀ a. a → Stream a
 
-foreign import fromEff :: ∀ eff a.
-  Eff eff a → Stream a
+foreign import fromChannel :: ∀ a. Channel a → a → Stream a
 
-foreign import fromChannel :: ∀ a.
-  Channel a → a → Stream a
+fromEff :: ∀ eff a. Eff eff a → Stream a
+fromEff = unsafeCoerce
 
 foreign import mapImpl :: forall a b.
   (a -> b) -> Stream a -> Stream b
@@ -57,6 +54,5 @@ foreign import sampleBy ::
 foreign import combine ::
   ∀ a b c . (a → b → c) → Stream a → Stream b → Stream c
 
-foreign import inspect :: ∀ a eff.
-  Stream a → Eff (frp :: FRP | eff) a
-
+inspect :: ∀ a eff. Stream a → Eff eff a
+inspect = unsafeCoerce
