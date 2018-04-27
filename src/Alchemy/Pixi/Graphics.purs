@@ -8,7 +8,6 @@ module Alchemy.Pixi.Graphics
 
 import Prelude
 
-import Alchemy.Pixi (PIXI)
 import Alchemy.Pixi.Application (Stage)
 import Control.Monad.Eff (Eff)
 
@@ -18,21 +17,21 @@ newtype Color = Color Int
 newtype Ref = Ref Int
 
 foreign import circle ::
-  ∀ e
+  ∀ eff
   . Stage
   → Color
   → Number
-  → Eff ( pixi :: PIXI | e ) Ref
+  → Eff eff Ref
 
 foreign import rect ::
-  ∀ e
+  ∀ eff
   . Stage
   → Color
   → Number
   → Number
-  → Eff ( pixi :: PIXI | e ) Ref
+  → Eff eff Ref
 
 foreign import setPos ::
-  ∀ r e
+  ∀ r eff
   . Array { pixiRef :: Ref, x :: Number, y :: Number | r }
-  → Eff ( pixi :: PIXI | e) Unit
+  → Eff eff Unit

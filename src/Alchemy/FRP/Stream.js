@@ -59,9 +59,9 @@ exports.sampleBy = function (event) {
 exports.combine = function (fn) {
     return function (s1) {
         return function (s2) {
-            return new Stream(function () {
+            return function () {
                 return fn(s1())(s2());
-            });
+            };
         };
     };
 };

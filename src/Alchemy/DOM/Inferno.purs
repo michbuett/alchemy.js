@@ -13,7 +13,6 @@ module Alchemy.DOM.Inferno
 
 import Prelude (Unit)
 import Control.Monad.Eff (Eff)
-import DOM (DOM)
 
 newtype Attribute = Attribute (Array String)
 
@@ -35,4 +34,4 @@ type VDom a =
   | a }
 
 foreign import render ::
-  ∀ a eff. VDom a → Eff (dom :: DOM | eff) Unit
+  ∀ a eff. VDom a → Eff eff Unit

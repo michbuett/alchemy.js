@@ -37,16 +37,3 @@ exports.send = function (channel) {
         };
     };
 };
-
-exports.fps = function (fps) {
-    var ch = new Channel();
-    var time = Date.now();
-
-    setInterval(function () {
-        var now = Date.now();
-        ch.send(now - time);
-        time = now;
-    }, 1000 / (fps || 1));
-
-    return ch;
-};

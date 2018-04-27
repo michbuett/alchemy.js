@@ -5,13 +5,9 @@ module Alchemy.Pixi.Application
   , defaults
   , init
   , stage
-  , tick
   ) where
 
 import Control.Monad.Eff (Eff)
-import DOM (DOM)
-import Alchemy.Pixi (PIXI)
-import Alchemy.FRP.Channel (FRP, Channel, channel)
 
 foreign import data Application :: Type
 foreign import data Stage :: Type
@@ -30,19 +26,9 @@ defaults =
   }
 
 foreign import init ::
-  ∀ e
+  ∀ eff
   . Options
   → String
-  → Eff (pixi :: PIXI, dom :: DOM | e) Application
+  → Eff eff Application
 
 foreign import stage :: Application → Stage
-
-foreign import tickP :: ∀ a e
-  . Eff (frp :: FRP | e) (Channel a)
-  → Application
-  → Eff (pixi :: PIXI, frp :: FRP | e) (Channel Number)
-
-tick :: ∀ e
-  . Application
-  → Eff (pixi :: PIXI, frp :: FRP | e) (Channel Number)
-tick = tickP channel

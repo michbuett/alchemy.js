@@ -12,7 +12,7 @@ module Alchemy.FRP.Stream
 import Prelude
 import Control.Monad.Eff (Eff)
 import Unsafe.Coerce (unsafeCoerce)
-import Alchemy.FRP.Channel (Channel, FRP)
+import Alchemy.FRP.Channel (Channel)
 
 -- | A `Stream a` represents a values of type `a` which varies over time
 foreign import data Stream :: Type → Type
@@ -43,13 +43,13 @@ foreign import sample ::
   ∀ a eff r
   . Channel a
   → Stream (Eff eff r)
-  → Eff (frp :: FRP | eff) Unit
+  → Eff eff Unit
 
 foreign import sampleBy ::
   ∀ a eff r
   . Channel a
   → Stream (a → Eff eff r)
-  → Eff (frp :: FRP | eff) Unit
+  → Eff eff Unit
 
 foreign import combine ::
   ∀ a b c . (a → b → c) → Stream a → Stream b → Stream c

@@ -5,27 +5,27 @@ import Prelude
 
 import Alchemy.DOM.Inferno as I
 import Alchemy.DOM.KeyboardEvent (KeyboardST, keyboard, pressed)
-import Alchemy.FRP.Channel (Channel, FRP)
+import Alchemy.FRP.Channel (Channel)
 import Alchemy.FRP.Stream (Stream, combine, fromEff, sample, sampleBy)
-import Alchemy.Pixi (PIXI)
-import Alchemy.Pixi.Application as App
-import Alchemy.Pixi.Graphics as G
+import Alchemy.FRP.Time (tick)
+import Alchemy.Graphics2d (Graphic, Options, defaults, render)
+import Alchemy.Graphics2d.Attributes (pos)
+import Alchemy.Graphics2d.Colors (Color(..))
+import Alchemy.Graphics2d.Container (box, array)
+import Alchemy.Graphics2d.Shapes as S
 import Control.Monad.Eff (Eff, kind Effect)
 import Control.Monad.Eff.Console (CONSOLE)
 import Control.Monad.ST (ST, STRef, newSTRef, readSTRef, writeSTRef)
-import DOM (DOM)
-import Data.Array (snoc, replicate, uncons)
+import Data.Array (snoc)
 import Data.Int (round)
-import Data.Maybe (Maybe(..))
-import Data.Traversable (foldl, for)
+import Data.Traversable (foldl)
 import Math (sin, cos, min, max) as Math
 
 data GameMode =
   Init | Running | P1Win | P2Win
 
 type GameObj =
-  { pixiRef :: G.Ref
-  , x :: Number
+  { x :: Number
   , y :: Number
   , dx :: Number
   , dy :: Number
@@ -35,8 +35,7 @@ type GameObj =
 
 type Game =
   { mode :: GameMode
-  , activeBalls :: Array GameObj
-  , pooledBalls :: Array G.Ref
+  , balls :: Array GameObj
   , p1 :: GameObj
   , p2 :: GameObj
   , score :: { p1 :: Int
@@ -61,10 +60,9 @@ ballSize = 5.0 :: Number
 -- ========================================
 -- INIT
 
-initBall :: Number → G.Ref → GameObj
-initBall a ref =
-  { pixiRef: ref
-  , x: (fieldWidth - ballSize) / 2.0
+initBall :: Number → GameObj
+initBall a =
+  { x: (fieldWidth - ballSize) / 2.0
   , y: (fieldHeight - ballSize) / 2.0
   , dx: 6.0 * Math.cos(a)
   , dy: 6.0 * Math.sin(a)
@@ -72,45 +70,31 @@ initBall a ref =
   , h: ballSize
   }
 
-initBallGraphics :: ∀ eff.
-  App.Stage → Eff (pixi :: PIXI | eff) (Array G.Ref)
-initBallGraphics stage =
-  for (replicate 10 ballSize) \size -> do
-    G.circle stage (G.Color 0xFFFFFF) size
-
-initGame :: ∀ eff h
-  . App.Stage
-  → Eff (pixi :: PIXI, st :: ST h | eff) (STRef h Game)
-initGame s = do
-  gP1 <- G.rect s (G.Color 0xFFFFFF) paddleWidth paddleHeight
-  gP2 <- G.rect s (G.Color 0xFFFFFF) paddleWidth paddleHeight
-  pooled <- initBallGraphics s
-
-  newSTRef { mode: Init
-           , activeBalls: []
-           , pooledBalls: pooled
-           , p1:
-             { pixiRef: gP1
-             , x: 1.0
-             , y: (fieldHeight - paddleHeight) / 2.0
-             , dx: 0.0
-             , dy: 0.0
-             , w: paddleWidth
-             , h: paddleHeight
-             }
-           , p2:
-             { pixiRef: gP2
-             , x: fieldWidth - paddleWidth - 1.0
-             , y: (fieldHeight - paddleHeight) / 2.0
-             , dx: 0.0
-             , dy: 0.0
-             , w: paddleWidth
-             , h: paddleHeight
-             }
-           , score: { p1: 0, p2: 0 }
-           , time: 0.0
-           , untilNextBall: 3000.0
-           }
+initGame :: ∀ e h. Eff (st :: ST h | e) (STRef h Game)
+initGame = do
+  newSTRef
+    { mode: Init
+    , balls: []
+    , p1:
+      { x: 1.0
+      , y: (fieldHeight - paddleHeight) / 2.0
+      , dx: 0.0
+      , dy: 0.0
+      , w: paddleWidth
+      , h: paddleHeight
+      }
+    , p2:
+      { x: fieldWidth - paddleWidth - 1.0
+      , y: (fieldHeight - paddleHeight) / 2.0
+      , dx: 0.0
+      , dy: 0.0
+      , w: paddleWidth
+      , h: paddleHeight
+      }
+    , score: { p1: 0, p2: 0 }
+    , time: 0.0
+    , untilNextBall: 3000.0
+    }
 
 
 -- ========================================
@@ -127,6 +111,7 @@ makeInp k =
   , space: pressed "Space" k
   }
 
+
 processUserInput :: Game → UserInput → Game
 processUserInput g inp =
   case g.mode of
@@ -142,6 +127,7 @@ processUserInput g inp =
                   }
            else g
 
+
 processTimeDelta :: Game → Number → Game
 processTimeDelta g dt =
   stepTime dt g
@@ -150,15 +136,17 @@ processTimeDelta g dt =
   # stepScore
   # addNewBall
 
+
 stepTime :: Number → Game → Game
 stepTime dt g =
   g { time = g.time + dt
     , untilNextBall = max 0.0 (g.untilNextBall - 16.67 * dt)
     }
 
+
 stepBallsPos :: Number → Game → Game
 stepBallsPos dt g =
-  g { activeBalls = stepSingleBall <$> g.activeBalls }
+  g { balls = stepSingleBall <$> g.balls }
 
   where stepSingleBall b =
           stepPos dt b # collitionHandling
@@ -174,9 +162,10 @@ stepBallsPos dt g =
               b { dy = -b.dy, y = fieldHeight - b.h }
           | otherwise = b
 
+
 stepScore :: Game → Game
 stepScore g =
-  foldl stepSingleBall (g { activeBalls = []}) g.activeBalls
+  foldl stepSingleBall (g { balls = []}) g.balls
 
   where stepSingleBall res b =
           let { s1, s2 } = score b
@@ -187,12 +176,9 @@ stepScore g =
               mode = if s.p1 >= 10 then P1Win
                        else if s.p2 >= 10 then P2Win
                        else res.mode
-           in res { activeBalls = if scored
-                                    then res.activeBalls
-                                    else snoc res.activeBalls b
-                  , pooledBalls = if scored
-                                    then snoc res.pooledBalls b.pixiRef
-                                    else res.pooledBalls
+           in res { balls = if scored
+                              then res.balls
+                              else snoc res.balls b
                   , score = s
                   , mode = mode
                   }
@@ -206,18 +192,11 @@ score ball
 
 addNewBall :: Game → Game
 addNewBall g =
-  addNewBallImpl g (uncons g.pooledBalls) (g.untilNextBall <= 0.0)
-
-addNewBallImpl ::
-  Game → Maybe { head :: G.Ref, tail :: Array G.Ref } → Boolean → Game
-addNewBallImpl g Nothing _ = g
-addNewBallImpl g _ false = g
-addNewBallImpl g (Just { head: r, tail: rs }) _ =
-  g { activeBalls = snoc g.activeBalls $ initBall g.time r
-    , pooledBalls = rs
-    , untilNextBall = 10000.0
-    }
-
+  if g.untilNextBall <= 0.0
+    then g { balls = snoc g.balls $ initBall g.time
+           , untilNextBall = 10000.0
+           }
+    else g
 stepPos :: Number → GameObj → GameObj
 stepPos dt o =
   let x = o.x + dt * o.dx
@@ -248,6 +227,30 @@ stepPlayer dt g =
 
 -- ========================================
 -- VIEW
+
+renderScene :: Stream Game → Graphic
+renderScene gameS =
+  box [ S.rect paddleProps [ pos $ gameS <#> _.p1 ]
+      , S.rect paddleProps [ pos $ gameS <#> _.p2 ]
+      , array renderBall (gameS <#> _.balls)
+      ]
+      where
+        paddleProps :: S.Rect
+        paddleProps =
+          S.defaultRectProps { width = paddleWidth
+                             , height = paddleHeight
+                             }
+
+
+        ballProps :: S.Circle
+        ballProps =
+          S.defaultCircleProps
+            { radius = ballSize
+            , fillColor = Color 0xFF5060
+            }
+
+        renderBall :: Stream GameObj → Graphic
+        renderBall ballS = S.circle ballProps [ pos ballS ]
 
 renderVDom :: String → Game → I.VDom ()
 renderVDom r g =
@@ -281,42 +284,28 @@ renderInfoMsg title subtitle =
     , I.div [ I.className "title" ] [ I.text subtitle]
     ]
 
-updatePos :: ∀ eff. Game → Eff (pixi :: PIXI | eff) Unit
-updatePos g =
-  G.setPos $ g.activeBalls <> [g.p1, g.p2]
-
-
 -- ========================================
 -- MAIN (plugging all parts together)
 
-gameOptions :: App.Options
-gameOptions = App.defaults { width = 600, height = 400 }
+gameOptions :: Options
+gameOptions = defaults { width = 600, height = 400 }
 
 main :: ∀ eff h.
-  Eff ( frp :: FRP
-      , frp :: FRP
-      , st :: ST h
+  Eff ( st :: ST h
       , console :: CONSOLE
-      , pixi :: PIXI
-      , dom :: DOM
       | eff ) Unit
 main = do
-  app <- App.init gameOptions "#field"
-  animationFrame <- App.tick app
-  gameStateRef <- initGame (App.stage app)
+  animationFrame <- tick
+  gameStateRef <- initGame
   runGame animationFrame gameStateRef
 
 runGame :: ∀ eff h
   . Channel Number
   → STRef h Game
-  → Eff ( frp :: FRP
-        , frp :: FRP
-        , st :: ST h
+  → Eff ( st :: ST h
         , console :: CONSOLE
-        , pixi :: PIXI
-        , dom :: DOM
         | eff ) Unit
-runGame tact gameStateRef = do
+runGame animationFrame gameStateRef = do
   let gameS :: Stream Game
       gameS = fromEff $ readSTRef gameStateRef
 
@@ -326,6 +315,7 @@ runGame tact gameStateRef = do
   (combine processUserInput gameS inputS)
     <#> processTimeDelta
     <#> (\f -> f >>> writeSTRef gameStateRef)
-    # sampleBy tact
-  gameS <#> renderVDom "#ui" <#> I.render # sample tact
-  gameS <#> updatePos # sample tact
+    # sampleBy animationFrame
+  gameS <#> renderVDom "#ui" <#> I.render # sample animationFrame
+  renderS <- render gameOptions "#field" (renderScene gameS)
+  sample animationFrame renderS
