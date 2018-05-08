@@ -3,12 +3,14 @@ module Main where
 
 import Prelude
 
-import Alchemy.DOM.Inferno as I
+import Alchemy.DOM as Dom
+import Alchemy.DOM.Attributes as Attr
+import Alchemy.DOM.Elements (div, textS) as Elem
 import Alchemy.DOM.KeyboardEvent (KeyboardST, keyboard, pressed)
 import Alchemy.FRP.Channel (Channel)
 import Alchemy.FRP.Stream (Stream, combine, fromEff, sample, sampleBy)
 import Alchemy.FRP.Time (tick)
-import Alchemy.Graphics2d (Graphic, Options, defaults, render)
+import Alchemy.Graphics2d (Graphic, Options, defaults, render) as Gr
 import Alchemy.Graphics2d.Attributes (pos)
 import Alchemy.Graphics2d.Colors (Color(..))
 import Alchemy.Graphics2d.Container (box, array)
@@ -228,7 +230,7 @@ stepPlayer dt g =
 -- ========================================
 -- VIEW
 
-renderScene :: Stream Game → Graphic
+renderScene :: Stream Game → Gr.Graphic
 renderScene gameS =
   box [ S.rect paddleProps [ pos $ gameS <#> _.p1 ]
       , S.rect paddleProps [ pos $ gameS <#> _.p2 ]
@@ -249,46 +251,56 @@ renderScene gameS =
             , fillColor = Color 0xFF5060
             }
 
-        renderBall :: Stream GameObj → Graphic
+        renderBall :: Stream GameObj → Gr.Graphic
         renderBall ballS = S.circle ballProps [ pos ballS ]
 
-renderVDom :: String → Game → I.VDom ()
-renderVDom r g =
-  { vnode: renderNode g, root: r }
-
-renderNode :: Game → I.VNode
-renderNode g =
-  I.div []
-    [ I.div [ I.id "score" ]
-      [ I.text ((show g.score.p1) <> " : " <> (show g.score.p2)) ]
-    , renderInfo g.mode
-    , I.div [ I.id "until-next-info" ]
-      [ I.text $ untilNextInS <> "s until next ball" ]
+renderHUD :: Stream Game → Dom.DOM
+renderHUD gameS =
+  Elem.div [] []
+    [ Elem.div [ Attr.id "score" ] []
+      [ Elem.textS $ renderScore <$> gameS ]
+    , Elem.div [ Attr.id "info-msg" , Attr.hidden $ isRunning <$> modeS ] []
+      [ Elem.div [ Attr.className "title" ] []
+        [ Elem.textS $ renderInfoTitle <$> modeS ]
+      , Elem.div [ Attr.className "subtitle" ] []
+        [ Elem.textS $ renderInfoSubtitle <$> modeS ]
+      ]
+    , Elem.div [ Attr.id "until-next-info" ] []
+      [ Elem.textS $ untilNextInS <$> gameS ]
     ]
-    where untilNextInS = show $ round (g.untilNextBall / 1000.0)
 
-renderInfo :: GameMode → I.VNode
-renderInfo Init =
-  renderInfoMsg "Welcome to PS-Pong!" "Press [Space] to start"
-renderInfo Running =
-  I.div [] []
-renderInfo P1Win =
-  renderInfoMsg "Player 1 wins!" "Press [Space] to restart"
-renderInfo P2Win =
-  renderInfoMsg "Player 2 wins!" "Press [Space] to restart"
+    where modeS :: Stream GameMode
+          modeS = _.mode <$> gameS
 
-renderInfoMsg :: String → String → I.VNode
-renderInfoMsg title subtitle =
-  I.div [ I.id "info-msg" ]
-    [ I.div [ I.className "title" ] [ I.text title]
-    , I.div [ I.className "title" ] [ I.text subtitle]
-    ]
+          renderScore :: Game → String
+          renderScore g =
+            (show g.score.p1) <> " : " <> (show g.score.p2)
+
+          isRunning :: GameMode → Boolean
+          isRunning Running = true
+          isRunning _ = false
+
+          renderInfoTitle :: GameMode → String
+          renderInfoTitle Init = "Welcome to PS-Pong!"
+          renderInfoTitle Running = ""
+          renderInfoTitle P1Win = "Player 1 wins!"
+          renderInfoTitle P2Win = "Player 2 wins!"
+
+          renderInfoSubtitle :: GameMode → String
+          renderInfoSubtitle Init = "Press [Space] to start"
+          renderInfoSubtitle Running = ""
+          renderInfoSubtitle P1Win = "Press [Space] to restart"
+          renderInfoSubtitle P2Win = "Press [Space] to restart"
+
+          untilNextInS :: Game → String
+          untilNextInS g =
+            (show $ round (g.untilNextBall / 1000.0)) <> "s until next ball"
 
 -- ========================================
 -- MAIN (plugging all parts together)
 
-gameOptions :: Options
-gameOptions = defaults { width = 600, height = 400 }
+gameOptions :: Gr.Options
+gameOptions = Gr.defaults { width = 600, height = 400 }
 
 main :: ∀ eff h.
   Eff ( st :: ST h
@@ -316,6 +328,7 @@ runGame animationFrame gameStateRef = do
     <#> processTimeDelta
     <#> (\f -> f >>> writeSTRef gameStateRef)
     # sampleBy animationFrame
-  gameS <#> renderVDom "#ui" <#> I.render # sample animationFrame
-  renderS <- render gameOptions "#field" (renderScene gameS)
-  sample animationFrame renderS
+  updateScene <- Gr.render gameOptions "#field" (renderScene gameS)
+  updateHUD <- Dom.render "#ui" (renderHUD gameS)
+  sample animationFrame updateScene
+  sample animationFrame updateHUD

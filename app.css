@@ -10,7 +10,7 @@ html, body, #app, #ui, #field {
 #app {
     background: darkgreen;
     color: white;
-    font-family: Bangers;
+    font-family: monospace;
 }
 
 #ui, #field {
@@ -22,6 +22,7 @@ html, body, #app, #ui, #field {
 #ui #score {
     text-align: center;
     font-size: 40px;
+    font-weight: bold;
     padding: .7em 0;
 }
 
