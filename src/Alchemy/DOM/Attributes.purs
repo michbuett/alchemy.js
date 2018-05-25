@@ -18,7 +18,7 @@ module Alchemy.DOM.Attributes
   ) where
 
 import Alchemy.DOM (Node)
-import Alchemy.FRP.Stream (Stream)
+import Alchemy.FRP.TimeFunction (TF)
 import Control.Monad.Eff (Eff)
 import Prelude (Unit)
 
@@ -41,20 +41,20 @@ instance attrValueNumber :: AttrValue Number where
 instance attrValueString :: AttrValue String where
   defineAttr = staticAttr
 
-instance attValueStreamBoolean :: AttrValue (Stream Boolean) where
+instance attValueStreamBoolean :: AttrValue (TF Boolean) where
   defineAttr = dynamicAttr
 
-instance attValueStreamInt :: AttrValue (Stream Int) where
+instance attValueStreamInt :: AttrValue (TF Int) where
   defineAttr = dynamicAttr
 
-instance attValueStreamNumber :: AttrValue (Stream Number) where
+instance attValueStreamNumber :: AttrValue (TF Number) where
   defineAttr = dynamicAttr
 
-instance attValueStreamString :: AttrValue (Stream String) where
+instance attValueStreamString :: AttrValue (TF String) where
   defineAttr = dynamicAttr
 
 foreign import staticAttr :: ∀ a. String → a → Attr
-foreign import dynamicAttr :: ∀ a. String → Stream a → Attr
+foreign import dynamicAttr :: ∀ a. String → TF a → Attr
 
 id :: ∀ a. AttrValue a ⇒ a → Attr
 id = defineAttr "id"

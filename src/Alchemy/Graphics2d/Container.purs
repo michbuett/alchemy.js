@@ -4,17 +4,17 @@ module Alchemy.Graphics2d.Container
   , zlayer
   ) where
 
-import Alchemy.FRP.Stream (Stream)
+import Alchemy.FRP.TimeFunction (TF)
 import Alchemy.Graphics2d (Graphic)
 import Prelude
 
 foreign import arrayImpl :: ∀ m
-  . ((Array m → m) → Stream (Array m) → Stream m)
-  → (Stream m → Graphic)
-  → Stream (Array m) → Graphic
+  . ((Array m → m) → TF (Array m) → TF m)
+  → (TF m → Graphic)
+  → TF (Array m) → Graphic
 
 array :: ∀ m.
-  (Stream m → Graphic) → Stream (Array m) → Graphic
+  (TF m → Graphic) → TF (Array m) → Graphic
 array createChildFn arrayS =
   arrayImpl map createChildFn arrayS
 

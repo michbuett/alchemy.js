@@ -8,7 +8,7 @@ module Alchemy.Graphics2d
   ) where
 
 import Prelude
-import Alchemy.FRP.Stream (Stream)
+import Alchemy.FRP.TimeFunction (TF)
 import Control.Monad.Eff (Eff)
 
 foreign import data Ressource :: Type
@@ -37,4 +37,4 @@ foreign import render :: ∀ e1 e2
   . Options
   → String
   → Graphic
-  → Eff e1 (Stream (Eff e2 Unit))
+  → Eff e1 (TF (Eff e2 Unit))

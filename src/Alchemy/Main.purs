@@ -8,9 +8,9 @@ import Alchemy.DOM.Attributes as Attr
 import Alchemy.DOM.Elements (div, textS) as Elem
 import Alchemy.DOM.KeyboardEvent (KeyboardST, keyboard, pressed)
 import Alchemy.FRP.Channel (Channel)
-import Alchemy.FRP.Stream (Stream, combine, fromEff, sample, sampleBy)
+import Alchemy.FRP.TimeFunction (TF, combine, fromEff, sample, sampleBy)
 import Alchemy.FRP.Time (tick)
-import Alchemy.Graphics2d (Graphic, Options, defaults, render) as Gr
+import Alchemy.Graphics2d (Graphic, Options, defaults, render) as Gfx
 import Alchemy.Graphics2d.Attributes (pos)
 import Alchemy.Graphics2d.Colors (Color(..))
 import Alchemy.Graphics2d.Container (box, array)
@@ -230,7 +230,7 @@ stepPlayer dt g =
 -- ========================================
 -- VIEW
 
-renderScene :: Stream Game → Gr.Graphic
+renderScene :: TF Game → Gfx.Graphic
 renderScene gameS =
   box [ S.rect paddleProps [ pos $ gameS <#> _.p1 ]
       , S.rect paddleProps [ pos $ gameS <#> _.p2 ]
@@ -251,10 +251,10 @@ renderScene gameS =
             , fillColor = Color 0xFF5060
             }
 
-        renderBall :: Stream GameObj → Gr.Graphic
+        renderBall :: TF GameObj → Gfx.Graphic
         renderBall ballS = S.circle ballProps [ pos ballS ]
 
-renderHUD :: Stream Game → Dom.DOM
+renderHUD :: TF Game → Dom.DOM
 renderHUD gameS =
   Elem.div [] []
     [ Elem.div [ Attr.id "score" ] []
@@ -269,7 +269,7 @@ renderHUD gameS =
       [ Elem.textS $ untilNextInS <$> gameS ]
     ]
 
-    where modeS :: Stream GameMode
+    where modeS :: TF GameMode
           modeS = _.mode <$> gameS
 
           renderScore :: Game → String
@@ -299,8 +299,8 @@ renderHUD gameS =
 -- ========================================
 -- MAIN (plugging all parts together)
 
-gameOptions :: Gr.Options
-gameOptions = Gr.defaults { width = 600, height = 400 }
+gameOptions :: Gfx.Options
+gameOptions = Gfx.defaults { width = 600, height = 400 }
 
 main :: ∀ eff h.
   Eff ( st :: ST h
@@ -318,17 +318,17 @@ runGame :: ∀ eff h
         , console :: CONSOLE
         | eff ) Unit
 runGame animationFrame gameStateRef = do
-  let gameS :: Stream Game
+  let gameS :: TF Game
       gameS = fromEff $ readSTRef gameStateRef
 
-      inputS :: Stream UserInput
+      inputS :: TF UserInput
       inputS = makeInp <$> fromEff keyboard
 
   (combine processUserInput gameS inputS)
     <#> processTimeDelta
     <#> (\f -> f >>> writeSTRef gameStateRef)
     # sampleBy animationFrame
-  updateScene <- Gr.render gameOptions "#field" (renderScene gameS)
+  updateScene <- Gfx.render gameOptions "#field" (renderScene gameS)
   updateHUD <- Dom.render "#ui" (renderHUD gameS)
   sample animationFrame updateScene
   sample animationFrame updateHUD

@@ -6,19 +6,19 @@ module Alchemy.Graphics2d.Attributes
 
 import Prelude
 
-import Alchemy.FRP.Stream (Stream)
+import Alchemy.FRP.TimeFunction (TF)
 import Alchemy.Graphics2d (Ressource)
 import Control.Monad.Eff (Eff)
 
 newtype Attr = Attr (Ressource → Eff () Unit)
 
 foreign import setPos :: ∀ r
-  . Stream { x :: Number, y :: Number | r }
+  . TF { x :: Number, y :: Number | r }
   → Ressource
   → Eff () Unit
 
 pos :: ∀ r
-  . Stream { x :: Number, y :: Number | r }
+  . TF { x :: Number, y :: Number | r }
   → Attr
 pos s =
   Attr $ setPos s

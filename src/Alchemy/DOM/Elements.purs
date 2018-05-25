@@ -12,10 +12,10 @@ module Alchemy.DOM.Elements
 import Alchemy.DOM (DOM)
 import Alchemy.DOM.Attributes (Attr)
 import Alchemy.DOM.Events (Handler)
-import Alchemy.FRP.Stream (Stream)
+import Alchemy.FRP.TimeFunction (TF)
 import Data.Function.Uncurried (Fn4, runFn4)
 
-foreign import textS :: Stream String → DOM
+foreign import textS :: TF String → DOM
 
 foreign import text :: String → DOM
 
@@ -41,9 +41,9 @@ p = element "p"
 
 
 foreign import arrayImpl ::
-  ∀ a. Fn4 String (Array Attr) (Stream a → DOM) (Stream (Array a)) DOM
+  ∀ a. Fn4 String (Array Attr) (TF a → DOM) (TF (Array a)) DOM
 
 
 array ::
-  ∀ a. String → Array Attr → (Stream a → DOM) → Stream (Array a) → DOM
+  ∀ a. String → Array Attr → (TF a → DOM) → TF (Array a) → DOM
 array = runFn4 arrayImpl

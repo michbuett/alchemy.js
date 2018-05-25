@@ -6,7 +6,7 @@ module Alchemy.DOM
 
 
 
-import Alchemy.FRP.Stream (Stream)
+import Alchemy.FRP.TimeFunction (TF)
 import Control.Monad.Eff (Eff)
 import Prelude (Unit)
 
@@ -23,4 +23,4 @@ newtype DOM = DOM
 foreign import render :: ∀ e1 e2
   . String
   → DOM
-  → Eff e1 (Stream (Eff e2 Unit))
+  → Eff e1 (TF (Eff e2 Unit))
