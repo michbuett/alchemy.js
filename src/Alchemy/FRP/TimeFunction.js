@@ -33,3 +33,17 @@ exports.applyImpl = function (sf) {
     }
   }
 }
+
+// exports.switcher = function (tf) {
+//   return function (ch) {
+//     var getVal = tf
+//
+//     ch.subscribe(function (newTf) {
+//       getVal = newTf
+//     })
+//
+//     return function () {
+//       getVal()
+//     }
+//   }
+// }

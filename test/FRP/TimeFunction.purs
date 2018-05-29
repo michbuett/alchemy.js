@@ -80,7 +80,7 @@ tests =
           c <- channel
           r <- newSTRef 0
           s <- pure (fromEff $ readSTRef r <#> \n -> writeSTRef r (n + 1))
-          sample c s
+          _ <- sample c s
           send c 0
           send c 0
           send c 0
@@ -90,7 +90,7 @@ tests =
         unsafePerformEff (do
           c <- channel
           r <- newSTRef 1
-          sampleBy c (fromEff $ readSTRef r
+          _ <- sampleBy c (fromEff $ readSTRef r
                           <#> (\x y -> writeSTRef r (x + y)))
           send c 2
           send c 3

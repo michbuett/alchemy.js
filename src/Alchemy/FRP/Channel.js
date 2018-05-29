@@ -6,7 +6,7 @@ function Channel() {
 }
 
 Channel.prototype.subscribe = function (handler) {
-  console.log('subscribe', this.lastVal)
+  // console.log('subscribe', this.lastVal)
   this.handler.push(handler)
 
   if (this.lastVal !== undefined) {
@@ -23,7 +23,7 @@ Channel.prototype.subscribe = function (handler) {
 }
 
 Channel.prototype.send = function (val) {
-  console.log('send', val)
+  // console.log('send', val)
   for (var i = 0, l = this.handler.length; i < l; i++) {
     this.handler[i](val)
   }
@@ -51,5 +51,17 @@ exports.send = function (channel) {
       channel.send(val)
       return {}
     }
+  }
+}
+
+exports.last = function (def) {
+  return function (channel) {
+    return typeof channel.lastVal === 'undefined' ? def : channel.lastVal
+  }
+}
+
+exports.mapImpl = function (f) {
+  return function (channel) {
+    return new Channel()
   }
 }

@@ -7,11 +7,12 @@ module Alchemy.FRP.TimeFunction
   , sampleBy
   , combine
   , inspect
+  , switcher
   ) where
 
 import Prelude
 
-import Alchemy.FRP.Channel (Channel, subscribe)
+import Alchemy.FRP.Channel (Channel, subscribe, last)
 import Control.Monad.Eff (Eff)
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -44,7 +45,7 @@ instance applicativeTF :: Applicative TF where
 
 
 sample ::
-  ∀ a eff r. Channel a → TF (Eff eff r) → Eff eff Unit
+  ∀ a e1 e2 e3 r. Channel a → TF (Eff e1 r) → Eff e2 (Eff e3 Unit)
 sample c s =
   subscribe handler c
   where handler _ = do
@@ -53,7 +54,7 @@ sample c s =
 
 
 sampleBy ::
-  ∀ a eff r. Channel a → TF (a → Eff eff r) → Eff eff Unit
+  ∀ a e1 e2 e3 r. Channel a → TF (a → Eff e1 r) → Eff e2 (Eff e3 Unit)
 sampleBy c s =
   subscribe handler c
   where handler val = do
@@ -75,24 +76,16 @@ inspect = unsafeCoerce
 ------------------------------------------------------------
 ------------------------------------------------------------
 
-newtype Sample e = Sample { start :: Eff e Unit, stop :: Eff e Unit }
+type Consumer = ∀ e1 e2. Eff e1 (Eff e2 Unit)
 
-run :: ∀ switch e
-  . Channel switch
-  → (switch → Boolean)
-  → Sample e
-  → Eff e Unit
-run c contFn (Sample { start, stop }) =
-  subscribe switchContext c
-  where switchContext switch =
-          if contFn switch
-            then start
-            else stop
+sample3 :: ∀ a e. TF (a → Eff e Unit) → Channel a → Consumer
+sample3 tf ch = subscribe handler ch
+  where handler val = do
+          fn <- inspect tf
+          fn val
 
+switcher :: ∀ a. TF a → Channel (TF a) → TF a
+switcher tf = last tf
 
-sample2 ::
-  ∀ a e r. Channel a → TF (Eff e r) → Sample e
-sample2 c s =
-  Sample { start: pure unit
-         , stop: pure unit
-         }
+-- stepper :: ∀ a. a → Channel a → TF a
+-- stepper a0 e = switcher (pure a0) (pure <$> e)

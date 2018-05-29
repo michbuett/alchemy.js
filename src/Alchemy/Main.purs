@@ -6,7 +6,7 @@ import Prelude
 import Alchemy.DOM as Dom
 import Alchemy.DOM.Attributes as Attr
 import Alchemy.DOM.Elements (div, textS) as Elem
-import Alchemy.DOM.KeyboardEvent (KeyboardST, keyboard, pressed)
+import Alchemy.DOM.Events.Keyboard (KeyboardST, keyboard, pressed)
 import Alchemy.FRP.Channel (Channel)
 import Alchemy.FRP.TimeFunction (TF, combine, fromEff, sample, sampleBy)
 import Alchemy.FRP.Time (tick)
@@ -324,11 +324,18 @@ runGame animationFrame gameStateRef = do
       inputS :: TF UserInput
       inputS = makeInp <$> fromEff keyboard
 
-  (combine processUserInput gameS inputS)
+  _ <- (combine processUserInput gameS inputS)
     <#> processTimeDelta
     <#> (\f -> f >>> writeSTRef gameStateRef)
     # sampleBy animationFrame
   updateScene <- Gfx.render gameOptions "#field" (renderScene gameS)
   updateHUD <- Dom.render "#ui" (renderHUD gameS)
-  sample animationFrame updateScene
-  sample animationFrame updateHUD
+  _ <- sample animationFrame updateScene
+  _ <- sample animationFrame updateHUD
+  pure unit
+
+-- runInit :: ∀ eff h
+--   . Channel GameMode
+--   → Eff (st :: ST h | eff) Unit
+-- runInit switchMode =
+--   ?run

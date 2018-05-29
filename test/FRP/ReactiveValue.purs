@@ -5,7 +5,7 @@ module Test.Alchemy.FRP.ReactiveValue
 import Prelude
 
 import Alchemy.FRP.Channel (channel, send)
-import Alchemy.FRP.ReactiveValue (RV, constant, inspect, step, run)
+import Alchemy.FRP.ReactiveValue (RV, constant, inspect, run, simpleMap, step, testRV)
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Unsafe (unsafePerformEff)
@@ -114,12 +114,18 @@ tests =
         let c1 = unsafePerformEff channel
             c2 = unsafePerformEff channel
             rv = step 0 c1
+            r_ = simpleMap (\x -> x + 2000) rv
+            r_1 = r_ <#> \x -> x + 200
+            r_2 = r_ <#> \x -> x + 300
             f = \x -> (step 0 c2) <#> (\y -> x + y)
 
         unsafePerformEff (do
           ref <- newSTRef []
           run $ rv >>= f <#> collect ref
           -- start with [0] (0 + 0)
+          testRV r_1
+          testRV r_2
+          testRV rv
           send c1 1 -- add 1 (1 + 0)
           send c1 2 -- add 2 (2 + 0)
           send c2 10 -- add 12 (2 + 10)

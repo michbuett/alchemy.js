@@ -1,4 +1,4 @@
-module Alchemy.DOM.KeyboardEvent
+module Alchemy.DOM.Events.Keyboard
  ( KeyboardST
  , pressed
  , keyboard
