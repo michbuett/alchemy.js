@@ -1,33 +1,31 @@
 'use strict'
 
 function Channel() {
-  this.handler = []
-  this.lastVal = undefined
+  this._subscribers = []
+  this._last = undefined
 }
 
-Channel.prototype.subscribe = function (handler) {
-  // console.log('subscribe', this.lastVal)
-  this.handler.push(handler)
+Channel.prototype.subscribe = function (sub) {
+  var subs = this._subscribers
+  subs.push(sub)
 
-  if (this.lastVal !== undefined) {
-    handler(this.lastVal)
-  }
-
-  var hl = this.handler
   return function () {
-    var index = hl.indexOf(handler)
+    var index = subs.indexOf(sub)
     if (index >= 0) {
-      hl.splice(index, 1)
+      subs.splice(index, 1)
     }
   }
 }
 
+Channel.prototype.lastVal = function () {
+  return this._last
+}
+
 Channel.prototype.send = function (val) {
-  // console.log('send', val)
-  for (var i = 0, l = this.handler.length; i < l; i++) {
-    this.handler[i](val)
+  for (var i = 0, l = this._subscribers.length; i < l; i++) {
+    this._subscribers[i](val)
   }
-  this.lastVal = val
+  this._last = val
 }
 
 exports.channel = function () {
@@ -37,10 +35,9 @@ exports.channel = function () {
 exports.subscribe = function (handler) {
   return function (channel) {
     return function () {
-      channel.subscribe(function (val) {
+      return channel.subscribe(function (val) {
         handler(val)()
       })
-      return {}
     }
   }
 }
@@ -54,14 +51,11 @@ exports.send = function (channel) {
   }
 }
 
-exports.last = function (def) {
+exports.last = function (defaultVal) {
   return function (channel) {
-    return typeof channel.lastVal === 'undefined' ? def : channel.lastVal
-  }
-}
-
-exports.mapImpl = function (f) {
-  return function (channel) {
-    return new Channel()
+    return function () {
+      var val = channel.lastVal()
+      return typeof val === 'undefined' ? defaultVal : val
+    }
   }
 }

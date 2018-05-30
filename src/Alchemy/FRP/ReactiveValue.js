@@ -1,73 +1,75 @@
-function dropRepeat(subscriber) {
-  var lastVal
-  return function (newVal) {
-    if (lastVal === newVal) {
-      return
-    }
-    lastVal = newVal
-    subscriber(newVal)
+function dropRepeat(subscribe) {
+  return function (handler) {
+    var lastVal
+
+    return subscribe(function (newVal) {
+      if (lastVal !== newVal) {
+        lastVal = newVal
+        handler(newVal)
+      }
+    })
   }
 }
 
-function make(subscribeToParent) {
-  var currVal, unsubscribe
-  var subs = []
-
-  var setVal = function (newVal) {
-    if (newVal === currVal) {
-      return
-    }
-
-    currVal = newVal
-    for (var i = 0, l = subs.length; i < l; i++) {
-      subs[i](newVal)
-    }
+exports.constantRV = function (v) {
+  return function constRV(handler) {
+    handler(v)
+    return function () {}
   }
+}
 
-  return function (o) {
-    if (subs.length === 0) {
-      // first time someone is interessed in an actual value
-      // => start listening to changes
-      unsubscribe = subscribeToParent(setVal)
-    }
+exports.stepRV = function (v) {
+  return function (c) {
+    return dropRepeat(function (handler) {
+      var lastVal = c.lastVal()
 
-    subs.push(o)
-    o(currVal)
+      if (typeof lastVal === 'undefined') {
+        handler(v)
+      } else {
+        handler(lastVal)
+      }
 
-    return function () {
-      var index = subs.indexOf(o)
-      if (index >= 0) {
-        subs.splice(index, 1)
-        if (subs.length === 0 && typeof unsubscribe === 'function') {
-          // the last listener was removed and nobody is interessted in
-          // updates anymore
-          // => stop listening (a channel records further events an
-          // we can continue to listen if there are new subscribers)
-          unsubscribe()
-          unsubscribe = undefined
+      return c.subscribe(handler)
+    })
+  }
+}
+
+exports.createRV = function (initialVal) {
+  return function () {
+    var currVal = initialVal
+    var subs = []
+
+    return {
+      rv: function (sub) {
+        subs.push(sub)
+        sub(currVal)
+
+        return function () {
+          var idx = subs.indexOf(sub)
+          if (idx >= 0) {
+            subs.splice(idx, 1)
+          }
+        }
+      },
+
+      setValue: function (newVal) {
+        return function () {
+          if (newVal === currVal) {
+            return
+          }
+
+          currVal = newVal
+          for (var i = 0, l = subs.length; i < l; i++) {
+            subs[i](newVal)
+          }
         }
       }
     }
   }
 }
 
-exports.constant = function (v) {
-  return make(function (handler) {
-    handler(v)
-  })
-}
-
-exports.step = function (v) {
-  return function (c) {
-    return make(function (handler) {
-      handler(v)
-      return c.subscribe(handler)
-    })
-  }
-}
-
 exports.mapImpl = function (f, rv) {
-  return make(function (handler) {
+  return dropRepeat(function (handler) {
     return rv(function (v) {
       handler(f(v))
     })
@@ -75,7 +77,7 @@ exports.mapImpl = function (f, rv) {
 }
 
 exports.applyImpl = function (rvF, rvA) {
-  return make(function (handler) {
+  return dropRepeat(function (handler) {
     var currF, currA
 
     var unsubscribeF = rvF(function (f) {
@@ -98,7 +100,7 @@ exports.applyImpl = function (rvF, rvA) {
 }
 
 exports.bindImpl = function (rv, f) {
-  return make(function (handler) {
+  return dropRepeat(function (handler) {
     var unsubscribeTmp
 
     var unsubscribeIn = rv(function (a) {
@@ -116,7 +118,7 @@ exports.bindImpl = function (rv, f) {
   })
 }
 
-exports.run = function (rv) {
+exports.sinkRV = function (rv) {
   return function () {
     return rv(function (eff) {
       eff()
@@ -124,45 +126,12 @@ exports.run = function (rv) {
   }
 }
 
-exports.inspect = function (rv) {
+exports.inspectRV = function (rv) {
+  var currVal
+  var getCurrVal = function (v) { currVal = v }
+
   return function () {
-    var result
-    rv(function (v) {
-      result = v
-    })()
-    return result
-  }
-}
-
-exports.merge = function (rv1) {
-  return function (rv2) {
-    return make(function (handler) {
-      var setVal = function (v) { handler(v) }
-      var unsubscribe1 = rv1(setVal)
-      var unsubscribe2 = rv2(setVal)
-
-      return function () {
-        unsubscribe1()
-        unsubscribe2()
-      }
-    })
-  }
-}
-
-exports.testRV = function (rv) {
-  return function () {
-    rv(function (val) {
-      console.log('[test log]', val)
-    })
-  }
-}
-
-exports.simpleMap = function (f) {
-  return function (e) {
-    return dropRepeat(function (sub) {
-      return e(function (a) {
-        sub(f(a))
-      })
-    })
+    rv(getCurrVal)()
+    return currVal
   }
 }

@@ -36,3 +36,11 @@ exports.render = function (rootSelector) {
     }
   }
 }
+
+exports.render2 = function (rootSelector) {
+  return function (dom) {
+    return function () {
+      return dom(document.querySelector(rootSelector))()
+    }
+  }
+}

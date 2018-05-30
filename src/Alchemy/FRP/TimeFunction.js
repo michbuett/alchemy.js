@@ -1,19 +1,23 @@
-exports.fromVal = function (val) {
+exports.constantTF = function (val) {
   return function () {
     return val
   }
 }
 
-exports.fromChannel = function (channel) {
-  return function (initialVal) {
-    var val = initialVal
+exports.createTF = function (initialVal) {
+  return function () {
+    var currVal = initialVal
 
-    channel.subscribe(function (newVal) {
-      val = newVal
-    })
+    return {
+      tf: function () {
+        return currVal
+      },
 
-    return function () {
-      return val
+      setValue: function (newVal) {
+        return function () {
+          currVal = newVal
+        }
+      }
     }
   }
 }
@@ -33,17 +37,3 @@ exports.applyImpl = function (sf) {
     }
   }
 }
-
-// exports.switcher = function (tf) {
-//   return function (ch) {
-//     var getVal = tf
-//
-//     ch.subscribe(function (newTf) {
-//       getVal = newTf
-//     })
-//
-//     return function () {
-//       getVal()
-//     }
-//   }
-// }

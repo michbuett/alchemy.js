@@ -7,7 +7,7 @@ module Alchemy.FRP.Channel
   ) where
 
 import Control.Monad.Eff (Eff)
-import Prelude (class Functor, Unit)
+import Prelude (Unit)
 
 foreign import data Channel :: Type → Type
 
@@ -24,10 +24,4 @@ foreign import send ::
   ∀ a eff. Channel a → a → Eff eff Unit
 
 foreign import last ::
-  ∀ a. a → Channel a → a
-
-foreign import mapImpl ::
-  ∀ a b. (a -> b) -> Channel a -> Channel b
-
-instance functorChannel :: Functor Channel where
-  map = mapImpl
+  ∀ a e. a → Channel a → Eff e a

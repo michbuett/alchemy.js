@@ -8,8 +8,9 @@ import Alchemy.DOM.Attributes as Attr
 import Alchemy.DOM.Elements (div, textS) as Elem
 import Alchemy.DOM.Events.Keyboard (KeyboardST, keyboard, pressed)
 import Alchemy.FRP.Channel (Channel)
-import Alchemy.FRP.TimeFunction (TF, combine, fromEff, sample, sampleBy)
+import Alchemy.FRP.Subscription (together)
 import Alchemy.FRP.Time (tick)
+import Alchemy.FRP.TimeFunction (TF, map2, fromEff, sample, sampleBy)
 import Alchemy.Graphics2d (Graphic, Options, defaults, render) as Gfx
 import Alchemy.Graphics2d.Attributes (pos)
 import Alchemy.Graphics2d.Colors (Color(..))
@@ -324,14 +325,17 @@ runGame animationFrame gameStateRef = do
       inputS :: TF UserInput
       inputS = makeInp <$> fromEff keyboard
 
-  _ <- (combine processUserInput gameS inputS)
-    <#> processTimeDelta
-    <#> (\f -> f >>> writeSTRef gameStateRef)
-    # sampleBy animationFrame
   updateScene <- Gfx.render gameOptions "#field" (renderScene gameS)
   updateHUD <- Dom.render "#ui" (renderHUD gameS)
-  _ <- sample animationFrame updateScene
-  _ <- sample animationFrame updateHUD
+
+  tick <- together [ (map2 processUserInput gameS inputS)
+                        <#> processTimeDelta
+                        <#> (\f -> f >>> writeSTRef gameStateRef)
+                        # sampleBy animationFrame
+                   , sample animationFrame updateScene
+                   , sample animationFrame updateHUD
+                   ]
+  _ <- tick
   pure unit
 
 -- runInit :: ∀ eff h

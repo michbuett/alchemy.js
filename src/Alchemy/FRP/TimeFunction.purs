@@ -1,18 +1,20 @@
 module Alchemy.FRP.TimeFunction
   ( TF
-  , fromVal
+  , constantTF
   , fromEff
-  , fromChannel
+  , stepTF
+  , createTF
   , sample
   , sampleBy
-  , combine
-  , inspect
-  , switcher
+  , map2
+  , inspectTF
   ) where
 
 import Prelude
 
-import Alchemy.FRP.Channel (Channel, subscribe, last)
+import Alchemy.FRP.Channel (Channel, subscribe)
+import Alchemy.FRP.ReactiveValue (RV, inspectRV)
+import Alchemy.FRP.Subscription (Subscription)
 import Control.Monad.Eff (Eff)
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -21,9 +23,16 @@ import Unsafe.Coerce (unsafeCoerce)
 -- | values time functions are evaluated of demand (Pull-FRP)
 foreign import data TF :: Type → Type
 
-foreign import fromVal :: ∀ a. a → TF a
+foreign import constantTF ::
+  ∀ a. a → TF a
 
-foreign import fromChannel :: ∀ a. Channel a → a → TF a
+stepTF ::
+  ∀ a. RV a → TF a
+stepTF rv =
+  fromEff $ inspectRV rv
+
+foreign import createTF ::
+  ∀ a e. a → Eff e { tf :: TF a, setValue :: a → Eff e Unit }
 
 fromEff :: ∀ eff a. Eff eff a → TF a
 fromEff = unsafeCoerce
@@ -41,51 +50,33 @@ instance applyTF :: Apply TF where
   apply = applyImpl
 
 instance applicativeTF :: Applicative TF where
-  pure = fromVal
+  pure = constantTF
 
 
 sample ::
-  ∀ a e1 e2 e3 r. Channel a → TF (Eff e1 r) → Eff e2 (Eff e3 Unit)
+  ∀ a e r. Channel a → TF (Eff e r) → Subscription
 sample c s =
   subscribe handler c
   where handler _ = do
-          eff <- inspect s
+          eff <- inspectTF s
           eff
 
 
 sampleBy ::
-  ∀ a e1 e2 e3 r. Channel a → TF (a → Eff e1 r) → Eff e2 (Eff e3 Unit)
+  ∀ a e r. Channel a → TF (a → Eff e r) → Subscription
 sampleBy c s =
   subscribe handler c
   where handler val = do
-          fn <- inspect s
+          fn <- inspectTF s
           fn val
+
+
+-- | Returns the current value the time function has "now"
+inspectTF :: ∀ a eff. TF a → Eff eff a
+inspectTF = unsafeCoerce
+
 
 -- | Allows to combine values from two TF using a merge function
-combine ::
+map2 ::
   ∀ a b c. (a → b → c) → TF a → TF b → TF c
-combine fn sa sb = fromEff $ do
-  a <- inspect sa
-  b <- inspect sb
-  pure (fn a b)
-
-inspect :: ∀ a eff. TF a → Eff eff a
-inspect = unsafeCoerce
-
-
-------------------------------------------------------------
-------------------------------------------------------------
-
-type Consumer = ∀ e1 e2. Eff e1 (Eff e2 Unit)
-
-sample3 :: ∀ a e. TF (a → Eff e Unit) → Channel a → Consumer
-sample3 tf ch = subscribe handler ch
-  where handler val = do
-          fn <- inspect tf
-          fn val
-
-switcher :: ∀ a. TF a → Channel (TF a) → TF a
-switcher tf = last tf
-
--- stepper :: ∀ a. a → Channel a → TF a
--- stepper a0 e = switcher (pure a0) (pure <$> e)
+map2 f a b = f <$> a <*> b
