@@ -7,20 +7,12 @@ module Alchemy.Graphics2d
   , render
   ) where
 
-import Prelude
-import Alchemy.FRP.TimeFunction (TF)
-import Control.Monad.Eff (Eff)
+import Alchemy.FRP.Subscription (Subscription)
 
 foreign import data Ressource :: Type
 foreign import data Scene :: Type
 
-newtype Graphic = Graphic
-  ( ∀ e
-    . Ressource
-    → Eff () { update :: Eff e Unit
-             , remove :: Eff e Unit
-             }
-  )
+newtype Graphic = Graphic (Ressource → Subscription)
 
 type Options =
   { width :: Int
@@ -33,8 +25,5 @@ defaults =
   , height: 600
   }
 
-foreign import render :: ∀ e1 e2
-  . Options
-  → String
-  → Graphic
-  → Eff e1 (TF (Eff e2 Unit))
+foreign import render ::
+  Options → String → Graphic → Subscription

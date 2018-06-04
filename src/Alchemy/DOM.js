@@ -1,46 +1,10 @@
-'use strict'
-
 exports.render = function (rootSelector) {
   return function (dom) {
-    return function () { // Eff (Stream (Eff ...))
-      var updates
-      var unit = {}
-
-      function updateDOM() {
-        if (!updates) {
-          var root = document.querySelector(rootSelector)
-          if (root) {
-            var elem = dom(root)()
-            updates = elem.updates
-
-            window.addEventListener('unload', function () {
-              elem.remove()
-            })
-          }
-        }
-
-        if (updates && updates.length > 0) {
-          // console.time('update DOM')
-          for (var i = 0, l = updates.length; i < l; i++) {
-            updates[i]()
-          }
-          // console.timeEnd('update DOM')
-        }
-
-        return unit
-      }
-
-      return function () { // Stream ( Eff ...)
-        return updateDOM
-      }
-    }
-  }
-}
-
-exports.render2 = function (rootSelector) {
-  return function (dom) {
+    // console.log('[DOM render] create render effect')
     return function () {
-      return dom(document.querySelector(rootSelector))()
+      // console.log('[DOM render] run effect')
+      var node = document.querySelector(rootSelector)
+      return dom(node)()
     }
   }
 }

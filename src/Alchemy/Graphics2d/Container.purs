@@ -4,19 +4,22 @@ module Alchemy.Graphics2d.Container
   , zlayer
   ) where
 
-import Alchemy.FRP.TimeFunction (TF)
-import Alchemy.Graphics2d (Graphic)
 import Prelude
 
-foreign import arrayImpl :: ∀ m
-  . ((Array m → m) → TF (Array m) → TF m)
-  → (TF m → Graphic)
-  → TF (Array m) → Graphic
+import Alchemy.FRP.ReactiveValue (RV)
+import Alchemy.Graphics2d (Graphic)
+import Data.Function.Uncurried (Fn3, runFn3)
+
+foreign import arrayImpl :: ∀ m.
+  Fn3 ((Array m → m) → RV (Array m) → RV m)
+      (RV m → Graphic)
+      (RV (Array m))
+      Graphic
 
 array :: ∀ m.
-  (TF m → Graphic) → TF (Array m) → Graphic
-array createChildFn arrayS =
-  arrayImpl map createChildFn arrayS
+  (RV m → Graphic) → RV (Array m) → Graphic
+array =
+  runFn3 arrayImpl map
 
 foreign import box ::
   Array Graphic → Graphic

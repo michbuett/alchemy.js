@@ -5,6 +5,7 @@ exports.together = function (consumerArr) {
     })
 
     return function () {
+      // console.trace()
       unsubs.forEach(function (unsub) {
         unsub()
       })

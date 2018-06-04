@@ -4,23 +4,11 @@ module Alchemy.DOM
   , render
   ) where
 
-
-
-import Alchemy.FRP.TimeFunction (TF)
-import Control.Monad.Eff (Eff)
-import Prelude (Unit)
+import Alchemy.FRP.Subscription (Subscription)
 
 foreign import data Node :: Type
 
-newtype DOM = DOM
-  ( ∀ e
-    . Node
-    → Eff () { updates :: Array (Eff e Unit)
-             , remove :: Eff e Unit
-             }
-  )
+newtype DOM = DOM (Node → Subscription)
 
-foreign import render :: ∀ e1 e2
-  . String
-  → DOM
-  → Eff e1 (TF (Eff e2 Unit))
+foreign import render ::
+  String → DOM → Subscription

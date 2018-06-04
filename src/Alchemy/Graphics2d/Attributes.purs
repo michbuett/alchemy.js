@@ -4,21 +4,12 @@ module Alchemy.Graphics2d.Attributes
   )
   where
 
-import Prelude
-
-import Alchemy.FRP.TimeFunction (TF)
+import Alchemy.FRP.ReactiveValue (RV)
+import Alchemy.FRP.Subscription (Subscription)
 import Alchemy.Graphics2d (Ressource)
-import Control.Monad.Eff (Eff)
 
-newtype Attr = Attr (Ressource → Eff () Unit)
+newtype Attr = Attr (Ressource → Subscription)
 
-foreign import setPos :: ∀ r
-  . TF { x :: Number, y :: Number | r }
-  → Ressource
-  → Eff () Unit
-
-pos :: ∀ r
-  . TF { x :: Number, y :: Number | r }
+foreign import pos :: ∀ r
+  . RV { x :: Number, y :: Number | r }
   → Attr
-pos s =
-  Attr $ setPos s

@@ -37,3 +37,27 @@ exports.applyImpl = function (sf) {
     }
   }
 }
+
+exports.sampleRV = function (tf) {
+  return function (channel) {
+    return function (handler) {
+      handler(tf())
+      return channel.subscribe(function () {
+        handler(tf())
+      })
+    }
+  }
+}
+
+exports.sampleRVBy = function (tf) {
+  return function (channel) {
+    return function (initialVal) {
+      return function (handler) {
+        handler(tf()(initialVal))
+        return channel.subscribe(function (newVal) {
+          handler(tf()(newVal))
+        })
+      }
+    }
+  }
+}

@@ -1,78 +1,55 @@
-'use strict';
+exports.arrayImpl = function (map, createGraphic, rvArray) {
+  return function (resource) { // Graphic (Resource → Subscription)
+    return function mountGraphicsList() {
+      var children = []
 
-exports.arrayImpl = function (map) {
-    return function (createGraphic) {
-        return function (arrayS) {
-            return function (resource) { // Graphic (Resource → Effect (...))
-                return function () { // Effect { update, remove }
-                    var children = [];
+      // subscribe to updates of the data array
+      var unsubArr = rvArray(function (arr) {
+        var newLength = arr.length
+        while (children.length < newLength) {
+          var s = createRValFromIndex(map, rvArray, children.length)
+          var g = createGraphic(s)
+          children.push(g(resource)())
+        }
 
-                    function createStreamFromIndex(i) {
-                        return map(function (arr) {
-                            return arr[i];
-                        })(arrayS);
-                    }
+        while (children.length > newLength) {
+          children.pop()()
+        }
+      })
 
-                    function updateArray() {
-                        var newLength = arrayS().length;
-                        while (children.length < newLength) {
-                            var s = createStreamFromIndex(children.length);
-                            var g = createGraphic(s)
-                            children.push(g(resource)());
-                        }
+      return function removeGraphicsList() {
+        unsubArr()
+        while (children.length > 0) {
+          children.pop().remove()
+        }
+      }
+    }
+  }
+}
 
-                        while (children.length > newLength) {
-                            children.pop().remove();
-                        }
-
-                        for (var i = 0; i < newLength; i++) {
-                            children[i].update();
-                        }
-                    }
-
-                    function removeArray() {
-                        while (children.length > 0) {
-                            children.pop().remove();
-                        }
-                    };
-
-                    return {
-                        update: updateArray,
-                        remove: removeArray
-                    };
-                };
-            };
-        };
-    };
-};
+// little helper :: Array (RV a) -> Int -> RV a
+function createRValFromIndex(map, rvArray, i) {
+  return map(function (arr) {
+    return arr[i]
+  })(rvArray)
+}
 
 exports.box = function (graphics) {
-    return function (resource) {
-        return function () {
-            var children = graphics.map(function (g) {
-                return g(resource)();
-            });
+  return function (resource) {
+    return function mountBox() {
+      var onRemove = graphics.map(function (g) {
+        return g(resource)()
+      })
 
-            function updateBox () {
-                for (var i = 0, l = children.length; i < l; i++) {
-                    children[i].update();
-                }
-            }
-
-            function removeBox() {
-                while (children.length > 0) {
-                    children.pop().remove();
-                }
-            };
-
-            return {
-                update: updateBox,
-                remove: removeBox
-            };
-        };
-    };
-};
+      return function removeBox() {
+        while (onRemove.length > 0) {
+          onRemove.pop().remove()
+        }
+      }
+    }
+  }
+}
 
 exports.zlayer = function () {
-    // TODO implement me
-};
+  // TODO implement me
+}

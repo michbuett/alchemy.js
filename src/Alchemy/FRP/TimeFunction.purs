@@ -6,6 +6,8 @@ module Alchemy.FRP.TimeFunction
   , createTF
   , sample
   , sampleBy
+  , sampleRV
+  , sampleRVBy
   , map2
   , inspectTF
   ) where
@@ -69,6 +71,14 @@ sampleBy c s =
   where handler val = do
           fn <- inspectTF s
           fn val
+
+
+foreign import sampleRV ::
+  ∀ a b. TF a → Channel b → RV a
+
+
+foreign import sampleRVBy ::
+  ∀ a b. TF (a → b) → Channel a → RV a
 
 
 -- | Returns the current value the time function has "now"

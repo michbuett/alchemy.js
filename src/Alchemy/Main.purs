@@ -5,12 +5,13 @@ import Prelude
 
 import Alchemy.DOM as Dom
 import Alchemy.DOM.Attributes as Attr
-import Alchemy.DOM.Elements (div, textS) as Elem
+import Alchemy.DOM.Elements2 (div, text) as Elem
 import Alchemy.DOM.Events.Keyboard (KeyboardST, keyboard, pressed)
 import Alchemy.FRP.Channel (Channel)
+import Alchemy.FRP.ReactiveValue (RV)
 import Alchemy.FRP.Subscription (together)
 import Alchemy.FRP.Time (tick)
-import Alchemy.FRP.TimeFunction (TF, map2, fromEff, sample, sampleBy)
+import Alchemy.FRP.TimeFunction (TF, fromEff, map2, sampleBy, sampleRV)
 import Alchemy.Graphics2d (Graphic, Options, defaults, render) as Gfx
 import Alchemy.Graphics2d.Attributes (pos)
 import Alchemy.Graphics2d.Colors (Color(..))
@@ -231,11 +232,11 @@ stepPlayer dt g =
 -- ========================================
 -- VIEW
 
-renderScene :: TF Game → Gfx.Graphic
-renderScene gameS =
-  box [ S.rect paddleProps [ pos $ gameS <#> _.p1 ]
-      , S.rect paddleProps [ pos $ gameS <#> _.p2 ]
-      , array renderBall (gameS <#> _.balls)
+renderScene :: RV Game → Gfx.Graphic
+renderScene game =
+  box [ S.rect paddleProps [ pos $ game <#> _.p1 ]
+      , S.rect paddleProps [ pos $ game <#> _.p2 ]
+      , array renderBall (game <#> _.balls)
       ]
       where
         paddleProps :: S.Rect
@@ -244,7 +245,6 @@ renderScene gameS =
                              , height = paddleHeight
                              }
 
-
         ballProps :: S.Circle
         ballProps =
           S.defaultCircleProps
@@ -252,26 +252,27 @@ renderScene gameS =
             , fillColor = Color 0xFF5060
             }
 
-        renderBall :: TF GameObj → Gfx.Graphic
-        renderBall ballS = S.circle ballProps [ pos ballS ]
+        renderBall :: RV GameObj → Gfx.Graphic
+        renderBall ball = S.circle ballProps [ pos ball ]
 
-renderHUD :: TF Game → Dom.DOM
-renderHUD gameS =
+
+renderHUD :: RV Game → Dom.DOM
+renderHUD game =
   Elem.div [] []
-    [ Elem.div [ Attr.id "score" ] []
-      [ Elem.textS $ renderScore <$> gameS ]
-    , Elem.div [ Attr.id "info-msg" , Attr.hidden $ isRunning <$> modeS ] []
-      [ Elem.div [ Attr.className "title" ] []
-        [ Elem.textS $ renderInfoTitle <$> modeS ]
-      , Elem.div [ Attr.className "subtitle" ] []
-        [ Elem.textS $ renderInfoSubtitle <$> modeS ]
+    [ Elem.div [ Attr.id $ pure "score" ] []
+      [ Elem.text $ renderScore <$> game ]
+    , Elem.div [ Attr.id $ pure "info-msg" , Attr.hidden $ isRunning <$> modeS ] []
+      [ Elem.div [ Attr.className $ pure "title" ] []
+        [ Elem.text $ renderInfoTitle <$> modeS ]
+      , Elem.div [ Attr.className $ pure "subtitle" ] []
+        [ Elem.text $ renderInfoSubtitle <$> modeS ]
       ]
-    , Elem.div [ Attr.id "until-next-info" ] []
-      [ Elem.textS $ untilNextInS <$> gameS ]
+    , Elem.div [ Attr.id $ pure "until-next-info" ] []
+      [ Elem.text $ untilNextInS <$> game ]
     ]
 
-    where modeS :: TF GameMode
-          modeS = _.mode <$> gameS
+    where modeS :: RV GameMode
+          modeS = _.mode <$> game
 
           renderScore :: Game → String
           renderScore g =
@@ -322,21 +323,20 @@ runGame animationFrame gameStateRef = do
   let gameS :: TF Game
       gameS = fromEff $ readSTRef gameStateRef
 
+      gameRV :: RV Game
+      gameRV = sampleRV gameS animationFrame
+
       inputS :: TF UserInput
       inputS = makeInp <$> fromEff keyboard
 
-  updateScene <- Gfx.render gameOptions "#field" (renderScene gameS)
-  updateHUD <- Dom.render "#ui" (renderHUD gameS)
 
-  tick <- together [ (map2 processUserInput gameS inputS)
+  void $ together [ (map2 processUserInput gameS inputS)
                         <#> processTimeDelta
                         <#> (\f -> f >>> writeSTRef gameStateRef)
                         # sampleBy animationFrame
-                   , sample animationFrame updateScene
-                   , sample animationFrame updateHUD
+                   , Gfx.render gameOptions "#field" (renderScene gameRV)
+                   , Dom.render "#ui" (renderHUD gameRV)
                    ]
-  _ <- tick
-  pure unit
 
 -- runInit :: ∀ eff h
 --   . Channel GameMode

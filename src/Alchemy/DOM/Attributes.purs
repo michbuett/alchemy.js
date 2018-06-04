@@ -1,7 +1,5 @@
 module Alchemy.DOM.Attributes
   ( Attr
-  , class AttrValue
-  , defineAttr
   , id
   , className
   , value
@@ -18,79 +16,51 @@ module Alchemy.DOM.Attributes
   ) where
 
 import Alchemy.DOM (Node)
-import Alchemy.FRP.TimeFunction (TF)
-import Control.Monad.Eff (Eff)
-import Prelude (Unit)
+import Alchemy.FRP.ReactiveValue (RV)
+import Alchemy.FRP.Subscription (Subscription)
 
-newtype Attr =
-  Attr (Node → Eff () (Array (Eff () Unit)))
-
+-- | Represents an (IDL) attribute of a DOM element
 -- | https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes#Content_versus_IDL_attributes
-class AttrValue a where
-  defineAttr :: String → a → Attr
+newtype Attr = Attr (Node → Subscription)
 
-instance attrValueBoolean :: AttrValue Boolean where
-  defineAttr = staticAttr
+foreign import unsafeAttr ::
+  ∀ a. String → RV a → Attr
 
-instance attrValueInt :: AttrValue Int where
-  defineAttr = staticAttr
+id :: RV String → Attr
+id = unsafeAttr "id"
 
-instance attrValueNumber :: AttrValue Number where
-  defineAttr = staticAttr
+className :: RV String → Attr
+className = unsafeAttr "class"
 
-instance attrValueString :: AttrValue String where
-  defineAttr = staticAttr
+value :: RV String → Attr
+value = unsafeAttr "value"
 
-instance attValueStreamBoolean :: AttrValue (TF Boolean) where
-  defineAttr = dynamicAttr
+checked :: RV Boolean → Attr
+checked = unsafeAttr "checked"
 
-instance attValueStreamInt :: AttrValue (TF Int) where
-  defineAttr = dynamicAttr
+readOnly :: RV Boolean → Attr
+readOnly = unsafeAttr "readOnly"
 
-instance attValueStreamNumber :: AttrValue (TF Number) where
-  defineAttr = dynamicAttr
+hidden :: RV Boolean → Attr
+hidden = unsafeAttr "hidden"
 
-instance attValueStreamString :: AttrValue (TF String) where
-  defineAttr = dynamicAttr
+disabled :: RV Boolean → Attr
+disabled = unsafeAttr "disabled"
 
-foreign import staticAttr :: ∀ a. String → a → Attr
-foreign import dynamicAttr :: ∀ a. String → TF a → Attr
+inputType :: RV String → Attr
+inputType = unsafeAttr "type"
 
-id :: ∀ a. AttrValue a ⇒ a → Attr
-id = defineAttr "id"
+src :: RV String → Attr
+src = unsafeAttr "src"
 
-className :: ∀ a. AttrValue a ⇒ a → Attr
-className = defineAttr "class"
+tabIndex :: RV Int → Attr
+tabIndex = unsafeAttr "tapindex"
 
-value :: ∀ a. AttrValue a ⇒ a → Attr
-value = defineAttr "value"
+min :: RV Int → Attr
+min = unsafeAttr "min"
 
-checked :: ∀ a. AttrValue a ⇒ a → Attr
-checked = defineAttr "checked"
+max :: RV Int → Attr
+max = unsafeAttr "max"
 
-readOnly :: ∀ a. AttrValue a ⇒ a → Attr
-readOnly = defineAttr "readOnly"
-
-hidden :: ∀ a. AttrValue a ⇒ a → Attr
-hidden = defineAttr "hidden"
-
-disabled :: ∀ a. AttrValue a ⇒ a → Attr
-disabled = defineAttr "disabled"
-
-inputType :: ∀ a. AttrValue a ⇒ a → Attr
-inputType = defineAttr "type"
-
-src :: ∀ a. AttrValue a ⇒ a → Attr
-src = defineAttr "src"
-
-tabIndex :: ∀ a. AttrValue a ⇒ a → Attr
-tabIndex = defineAttr "tapindex"
-
-min :: ∀ a. AttrValue a ⇒ a → Attr
-min = defineAttr "min"
-
-max :: ∀ a. AttrValue a ⇒ a → Attr
-max = defineAttr "max"
-
-step :: ∀ a. AttrValue a ⇒ a → Attr
-step = defineAttr "step"
+step :: RV Int → Attr
+step = unsafeAttr "step"

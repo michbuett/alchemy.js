@@ -135,3 +135,28 @@ exports.inspectRV = function (rv) {
     return currVal
   }
 }
+
+exports.open = function () {
+  var subs = []
+
+  return {
+    event: function (sub) {
+      subs.push(sub)
+
+      return function () {
+        var idx = subs.indexOf(sub)
+        if (idx >= 0) {
+          subs.splice(idx, 1)
+        }
+      }
+    },
+
+    channel: function (newVal) {
+      return function () {
+        for (var i = 0; i < subs.length; i++) {
+          subs[i](newVal)
+        }
+      }
+    }
+  }
+}

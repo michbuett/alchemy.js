@@ -51,3 +51,13 @@ foreign import inspectRV ::
 
 foreign import sinkRV ::
   ∀ e a. RV (Eff e a) → Subscription
+
+foreign import data Event :: Type → Type
+
+foreign import open ::
+  ∀ a e. Eff e { event :: Event a, channel :: Channel a }
+
+test :: ∀ e. Eff e Unit
+test = do
+  x@{ event, channel } <- open
+  pure unit

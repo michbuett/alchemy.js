@@ -11,3 +11,5 @@ foreign import data KeyboardST :: Type
 foreign import pressed :: String → KeyboardST → Boolean
 
 foreign import keyboard :: ∀ eff. Eff eff KeyboardST
+
+-- foreign import onKey :: ∀ e. Eff e (Channel KeyboardST)

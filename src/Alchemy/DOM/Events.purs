@@ -4,11 +4,11 @@ module Alchemy.DOM.Events
   ) where
 
 import Alchemy.DOM (Node)
+import Alchemy.FRP.Subscription (Subscription)
 import Control.Monad.Eff (Eff)
 import Prelude (Unit)
 
-newtype Handler = Handler
-  (∀ e1 e2. Node → Eff e1 (Eff e2 Unit))
+newtype Handler = Handler (Node → Subscription)
 
 foreign import unsafeHandler ::
   ∀ event e. String → (event → Eff e Unit) → Handler
