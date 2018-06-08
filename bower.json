@@ -8,12 +8,7 @@
   ],
   "dependencies": {
     "purescript-prelude": "^3.0.0",
-    "purescript-console": "^3.0.0",
-    "purescript-maybe": "^3.0.0",
-    "purescript-signal": "^9.0.0",
-    "purescript-typelevel-prelude": "^2.4.0",
-    "purescript-record": "^0.2.3",
-    "purescript-math": "^2.1.0"
+    "purescript-typelevel-prelude": "^2.4.0"
   },
   "devDependencies": {
     "purescript-psci-support": "^3.0.0",
