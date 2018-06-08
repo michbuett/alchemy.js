@@ -4,7 +4,6 @@ module Alchemy.DOM.Elements
   , span
   , p
   , text
-  , textS
   , array
   ) where
 
@@ -12,12 +11,10 @@ module Alchemy.DOM.Elements
 import Alchemy.DOM (DOM)
 import Alchemy.DOM.Attributes (Attr)
 import Alchemy.DOM.Events (Handler)
-import Alchemy.FRP.TimeFunction (TF)
+import Alchemy.FRP.Event (Event)
 import Data.Function.Uncurried (Fn4, runFn4)
 
-foreign import textS :: TF String → DOM
-
-foreign import text :: String → DOM
+foreign import text :: Event String → DOM
 
 foreign import elementImpl ::
   Fn4 String (Array Attr) (Array Handler) (Array DOM) DOM
@@ -41,9 +38,9 @@ p = element "p"
 
 
 foreign import arrayImpl ::
-  ∀ a. Fn4 String (Array Attr) (TF a → DOM) (TF (Array a)) DOM
+  ∀ a. Fn4 String (Array Attr) (Event a → DOM) (Event (Array a)) DOM
 
 
 array ::
-  ∀ a. String → Array Attr → (TF a → DOM) → TF (Array a) → DOM
+  ∀ a. String → Array Attr → (Event a → DOM) → Event (Array a) → DOM
 array = runFn4 arrayImpl

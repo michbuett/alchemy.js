@@ -16,7 +16,7 @@ module Alchemy.DOM.Attributes
   ) where
 
 import Alchemy.DOM (Node)
-import Alchemy.FRP.ReactiveValue (RV)
+import Alchemy.FRP.Event (Event)
 import Alchemy.FRP.Subscription (Subscription)
 
 -- | Represents an (IDL) attribute of a DOM element
@@ -24,43 +24,43 @@ import Alchemy.FRP.Subscription (Subscription)
 newtype Attr = Attr (Node → Subscription)
 
 foreign import unsafeAttr ::
-  ∀ a. String → RV a → Attr
+  ∀ a. String → Event a → Attr
 
-id :: RV String → Attr
+id :: Event String → Attr
 id = unsafeAttr "id"
 
-className :: RV String → Attr
+className :: Event String → Attr
 className = unsafeAttr "class"
 
-value :: RV String → Attr
+value :: Event String → Attr
 value = unsafeAttr "value"
 
-checked :: RV Boolean → Attr
+checked :: Event Boolean → Attr
 checked = unsafeAttr "checked"
 
-readOnly :: RV Boolean → Attr
+readOnly :: Event Boolean → Attr
 readOnly = unsafeAttr "readOnly"
 
-hidden :: RV Boolean → Attr
+hidden :: Event Boolean → Attr
 hidden = unsafeAttr "hidden"
 
-disabled :: RV Boolean → Attr
+disabled :: Event Boolean → Attr
 disabled = unsafeAttr "disabled"
 
-inputType :: RV String → Attr
+inputType :: Event String → Attr
 inputType = unsafeAttr "type"
 
-src :: RV String → Attr
+src :: Event String → Attr
 src = unsafeAttr "src"
 
-tabIndex :: RV Int → Attr
+tabIndex :: Event Int → Attr
 tabIndex = unsafeAttr "tapindex"
 
-min :: RV Int → Attr
+min :: Event Int → Attr
 min = unsafeAttr "min"
 
-max :: RV Int → Attr
+max :: Event Int → Attr
 max = unsafeAttr "max"
 
-step :: RV Int → Attr
+step :: Event Int → Attr
 step = unsafeAttr "step"

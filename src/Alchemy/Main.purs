@@ -5,21 +5,18 @@ import Prelude
 
 import Alchemy.DOM as Dom
 import Alchemy.DOM.Attributes as Attr
-import Alchemy.DOM.Elements2 (div, text) as Elem
-import Alchemy.DOM.Events.Keyboard (KeyboardST, keyboard, pressed)
-import Alchemy.FRP.Channel (Channel)
-import Alchemy.FRP.ReactiveValue (RV)
+import Alchemy.DOM.Elements (div, text) as Elem
+import Alchemy.DOM.Events.Keyboard (KeyboardST, keyboard, onKeyChange, pressed)
+import Alchemy.FRP.Event (Event, dropRepeats, foldp)
 import Alchemy.FRP.Subscription (together)
 import Alchemy.FRP.Time (tick)
-import Alchemy.FRP.TimeFunction (TF, fromEff, map2, sampleBy, sampleRV)
+import Alchemy.FRP.Behavior (fromEff, sampleBy)
 import Alchemy.Graphics2d (Graphic, Options, defaults, render) as Gfx
 import Alchemy.Graphics2d.Attributes (pos)
 import Alchemy.Graphics2d.Colors (Color(..))
 import Alchemy.Graphics2d.Container (box, array)
 import Alchemy.Graphics2d.Shapes as S
-import Control.Monad.Eff (Eff, kind Effect)
-import Control.Monad.Eff.Console (CONSOLE)
-import Control.Monad.ST (ST, STRef, newSTRef, readSTRef, writeSTRef)
+import Control.Monad.Eff (Eff)
 import Data.Array (snoc)
 import Data.Int (round)
 import Data.Traversable (foldl)
@@ -27,6 +24,13 @@ import Math (sin, cos, min, max) as Math
 
 data GameMode =
   Init | Running | P1Win | P2Win
+
+instance eqGameMode :: Eq GameMode where
+  eq Init Init = true
+  eq Running Running = true
+  eq P1Win P1Win = true
+  eq P2Win P2Win = true
+  eq _ _ = false
 
 type GameObj =
   { x :: Number
@@ -49,10 +53,11 @@ type Game =
   , untilNextBall :: Number
   }
 
-type UserInput =
+type GameInput =
   { p1 :: Number
   , p2 :: Number
   , space :: Boolean
+  , dt :: Number
   }
 
 fieldWidth = 600.0 :: Number
@@ -74,38 +79,37 @@ initBall a =
   , h: ballSize
   }
 
-initGame :: ∀ e h. Eff (st :: ST h | e) (STRef h Game)
-initGame = do
-  newSTRef
-    { mode: Init
-    , balls: []
-    , p1:
-      { x: 1.0
-      , y: (fieldHeight - paddleHeight) / 2.0
-      , dx: 0.0
-      , dy: 0.0
-      , w: paddleWidth
-      , h: paddleHeight
-      }
-    , p2:
-      { x: fieldWidth - paddleWidth - 1.0
-      , y: (fieldHeight - paddleHeight) / 2.0
-      , dx: 0.0
-      , dy: 0.0
-      , w: paddleWidth
-      , h: paddleHeight
-      }
-    , score: { p1: 0, p2: 0 }
-    , time: 0.0
-    , untilNextBall: 3000.0
+newGame :: Game
+newGame =
+  { mode: Init
+  , balls: []
+  , p1:
+    { x: 1.0
+    , y: (fieldHeight - paddleHeight) / 2.0
+    , dx: 0.0
+    , dy: 0.0
+    , w: paddleWidth
+    , h: paddleHeight
     }
+  , p2:
+    { x: fieldWidth - paddleWidth - 1.0
+    , y: (fieldHeight - paddleHeight) / 2.0
+    , dx: 0.0
+    , dy: 0.0
+    , w: paddleWidth
+    , h: paddleHeight
+    }
+  , score: { p1: 0, p2: 0 }
+  , time: 0.0
+  , untilNextBall: 3000.0
+  }
 
 
 -- ========================================
 -- UPDATE
 
-makeInp :: KeyboardST → UserInput
-makeInp k =
+makeInp :: KeyboardST → Number → GameInput
+makeInp k dt =
   { p1: if pressed "KeyQ" k then -1.0
         else if pressed "KeyA" k then 1.0
         else 0.0
@@ -113,11 +117,21 @@ makeInp k =
         else if pressed "ArrowDown" k then 1.0
         else 0.0
   , space: pressed "Space" k
+  , dt: dt
   }
 
 
-processUserInput :: Game → UserInput → Game
-processUserInput g inp =
+processInput :: GameInput -> Game -> Game
+processInput inp g =
+  processUserInput inp g
+  # stepTime inp.dt
+  # stepPlayer inp.dt
+  # stepBallsPos inp.dt
+  # stepScore
+  # addNewBall
+
+processUserInput :: GameInput → Game → Game
+processUserInput inp g =
   case g.mode of
        Running ->
          g { p1 = g.p1 { dy = inp.p1 }
@@ -130,15 +144,6 @@ processUserInput g inp =
                   , score = { p1: 0, p2: 0 }
                   }
            else g
-
-
-processTimeDelta :: Game → Number → Game
-processTimeDelta g dt =
-  stepTime dt g
-  # stepPlayer dt
-  # stepBallsPos dt
-  # stepScore
-  # addNewBall
 
 
 stepTime :: Number → Game → Game
@@ -232,7 +237,7 @@ stepPlayer dt g =
 -- ========================================
 -- VIEW
 
-renderScene :: RV Game → Gfx.Graphic
+renderScene :: Event Game → Gfx.Graphic
 renderScene game =
   box [ S.rect paddleProps [ pos $ game <#> _.p1 ]
       , S.rect paddleProps [ pos $ game <#> _.p2 ]
@@ -252,11 +257,11 @@ renderScene game =
             , fillColor = Color 0xFF5060
             }
 
-        renderBall :: RV GameObj → Gfx.Graphic
+        renderBall :: Event GameObj → Gfx.Graphic
         renderBall ball = S.circle ballProps [ pos ball ]
 
 
-renderHUD :: RV Game → Dom.DOM
+renderHUD :: Event Game → Dom.DOM
 renderHUD game =
   Elem.div [] []
     [ Elem.div [ Attr.id $ pure "score" ] []
@@ -271,8 +276,8 @@ renderHUD game =
       [ Elem.text $ untilNextInS <$> game ]
     ]
 
-    where modeS :: RV GameMode
-          modeS = _.mode <$> game
+    where modeS :: Event GameMode
+          modeS = dropRepeats $ _.mode <$> game
 
           renderScore :: Game → String
           renderScore g =
@@ -304,42 +309,21 @@ renderHUD game =
 gameOptions :: Gfx.Options
 gameOptions = Gfx.defaults { width = 600, height = 400 }
 
-main :: ∀ eff h.
-  Eff ( st :: ST h
-      , console :: CONSOLE
-      | eff ) Unit
+main :: ∀ e.  Eff e Unit
 main = do
   animationFrame <- tick
-  gameStateRef <- initGame
-  runGame animationFrame gameStateRef
+  keyboardInp <- onKeyChange
+  runGame animationFrame keyboardInp
 
-runGame :: ∀ eff h
-  . Channel Number
-  → STRef h Game
-  → Eff ( st :: ST h
-        , console :: CONSOLE
-        | eff ) Unit
-runGame animationFrame gameStateRef = do
-  let gameS :: TF Game
-      gameS = fromEff $ readSTRef gameStateRef
+runGame :: ∀ e
+  . Event Number
+ -> Event KeyboardST
+ -> Eff e Unit
+runGame animationFrame keyboardInp = do
+  let game :: Event Game
+      game = foldp processInput newGame
+              (sampleBy (makeInp <$> fromEff keyboard) animationFrame)
 
-      gameRV :: RV Game
-      gameRV = sampleRV gameS animationFrame
-
-      inputS :: TF UserInput
-      inputS = makeInp <$> fromEff keyboard
-
-
-  void $ together [ (map2 processUserInput gameS inputS)
-                        <#> processTimeDelta
-                        <#> (\f -> f >>> writeSTRef gameStateRef)
-                        # sampleBy animationFrame
-                   , Gfx.render gameOptions "#field" (renderScene gameRV)
-                   , Dom.render "#ui" (renderHUD gameRV)
-                   ]
-
--- runInit :: ∀ eff h
---   . Channel GameMode
---   → Eff (st :: ST h | eff) Unit
--- runInit switchMode =
---   ?run
+  void $ together [ Gfx.render gameOptions "#field" (renderScene game)
+                  , Dom.render "#ui" (renderHUD game)
+                  ]

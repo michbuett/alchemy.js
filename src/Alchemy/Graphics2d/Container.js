@@ -7,7 +7,7 @@ exports.arrayImpl = function (map, createGraphic, rvArray) {
       var unsubArr = rvArray(function (arr) {
         var newLength = arr.length
         while (children.length < newLength) {
-          var s = createRValFromIndex(map, rvArray, children.length)
+          var s = createEventalFromIndex(map, rvArray, children.length)
           var g = createGraphic(s)
           children.push(g(resource)())
         }
@@ -27,8 +27,8 @@ exports.arrayImpl = function (map, createGraphic, rvArray) {
   }
 }
 
-// little helper :: Array (RV a) -> Int -> RV a
-function createRValFromIndex(map, rvArray, i) {
+// little helper :: Array (Event a) -> Int -> Event a
+function createEventalFromIndex(map, rvArray, i) {
   return map(function (arr) {
     return arr[i]
   })(rvArray)

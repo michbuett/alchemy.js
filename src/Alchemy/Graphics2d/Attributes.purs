@@ -4,12 +4,12 @@ module Alchemy.Graphics2d.Attributes
   )
   where
 
-import Alchemy.FRP.ReactiveValue (RV)
+import Alchemy.FRP.Event (Event)
 import Alchemy.FRP.Subscription (Subscription)
 import Alchemy.Graphics2d (Ressource)
 
 newtype Attr = Attr (Ressource → Subscription)
 
 foreign import pos :: ∀ r
-  . RV { x :: Number, y :: Number | r }
+  . Event { x :: Number, y :: Number | r }
   → Attr

@@ -46,5 +46,6 @@ function applyProps(s, props) {
   s.x = props.xpos
   s.y = props.ypos
   s.alpha = props.alpha
+  s.interactive = false
   return s
 }
