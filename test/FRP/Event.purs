@@ -5,28 +5,28 @@ module Test.Alchemy.FRP.Event
 import Prelude
 
 import Alchemy.FRP.Event (Channel, dropRepeats, dropRepeats', filter, foldp, openChannel, send, subscribe)
-import Control.Monad.Aff (Aff)
-import Control.Monad.Eff.Unsafe (unsafePerformEff)
-import Control.Monad.ST (newSTRef, readSTRef, writeSTRef)
+import Effect.Aff (Aff)
+import Effect.Unsafe (unsafePerformEffect)
+import Effect.Ref (new, read, write)
 import Control.Monad.State (StateT)
 import Data.Identity (Identity)
 import Test.Alchemy.FRP.TestUtils (testEvent)
 import Test.Spec (Group, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 
-tests :: forall t1. StateT (Array (Group (Aff t1 Unit))) Identity Unit
+tests :: StateT (Array (Group (Aff Unit))) Identity Unit
 tests =
   describe "Alchemy.FRP.Event" do
     describe "smart constructors" do
       it "allows to create together with a channel function" do
-        unsafePerformEff ( do
-          ref <- newSTRef "foo"
+        unsafePerformEffect ( do
+          ref <- new "foo"
           { send: s, event: e } :: Channel String String <- openChannel
-          unsub <- subscribe e (\str -> writeSTRef ref str)
+          unsub <- subscribe e (\str -> write str ref)
           send s "bar"
           unsub
           send s "baz"
-          readSTRef ref
+          read ref
         ) `shouldEqual` "bar"
 
     describe "as a Functor" do
@@ -46,8 +46,8 @@ tests =
         let f x = "f(" <> x <> ")"
             g x = "g(" <> x <> ")"
             xs = ["foo", "bar", "baz"]
-            v1 = testEvent (\e -> id e) xs
-            v2 = testEvent (\e -> id <$> e) xs
+            v1 = testEvent (\e -> identity e) xs
+            v2 = testEvent (\e -> identity <$> e) xs
           in
          v1 `shouldEqual` v2
 
@@ -96,7 +96,7 @@ tests =
 
       it "Identity: (pure identity) <*> v = v"
         let right = [1, 2, 3]
-            left = testEvent (\e -> (pure id) <*> e) right
+            left = testEvent (\e -> (pure identity) <*> e) right
         in
         left `shouldEqual` right
 
@@ -130,12 +130,12 @@ tests =
 
     describe "folding" do
       it "allows to create events from past values" do
-        let collect r x = (readSTRef r) >>= (\arr -> writeSTRef r (arr <> [x]))
+        let collect r x = (read r) >>= (\arr -> write (arr <> [x]) r)
 
-            {v1, v2} = unsafePerformEff $ do
+            {v1, v2} = unsafePerformEffect $ do
                        { send: sSource, event: eSource } <- openChannel
-                       sink1Ref <- newSTRef [0]
-                       sink2Ref <- newSTRef [0]
+                       sink1Ref <- new [0]
+                       sink2Ref <- new [0]
                        eFold <- pure $ foldp (+) 0 eSource
                        sink1 <- subscribe ((*) 10 <$> eFold) (collect sink1Ref)
                        sink2 <- subscribe ((*) 100 <$> eFold) (collect sink2Ref)
@@ -144,8 +144,8 @@ tests =
                        send sSource 1
                        send sSource 1
                        send sSource 1
-                       sink1Val <- readSTRef sink1Ref
-                       sink2Val <- readSTRef sink2Ref
+                       sink1Val <- read sink1Ref
+                       sink2Val <- read sink2Ref
                        pure { v1: sink1Val, v2: sink2Val }
 
         v1 `shouldEqual` [0,  10,  20,  30,  40,  50]
@@ -154,13 +154,13 @@ tests =
 
     describe "filtering" do
       it "allows to filter event occurances with a filtering function" do
-        let collect r x = (readSTRef r) >>= (\arr -> writeSTRef r (arr <> [x]))
+        let collect r x = (read r) >>= (\arr -> write (arr <> [x]) r)
 
-            {v1, v2, v3} = unsafePerformEff $ do
+            {v1, v2, v3} = unsafePerformEffect $ do
                        { send: sSource, event: eSource } <- openChannel
-                       sinkRef1 <- newSTRef []
-                       sinkRef2 <- newSTRef []
-                       sinkRef3 <- newSTRef []
+                       sinkRef1 <- new []
+                       sinkRef2 <- new []
+                       sinkRef3 <- new []
                        eFilter1 <- pure $ filter (\i -> i >= 10) eSource
                        eFilter2 <- pure $ filter (\i -> i < 10) eSource
                        sink1 <- subscribe eFilter1 (collect sinkRef1)
@@ -172,9 +172,9 @@ tests =
                        send sSource 25
                        send sSource 1
                        send sSource 15
-                       sink1Val <- readSTRef sinkRef1
-                       sink2Val <- readSTRef sinkRef2
-                       sink3Val <- readSTRef sinkRef3
+                       sink1Val <- read sinkRef1
+                       sink2Val <- read sinkRef2
+                       sink3Val <- read sinkRef3
                        pure { v1: sink1Val, v2: sink2Val, v3: sink3Val }
 
         v1 `shouldEqual` [11, 25, 15]
@@ -182,12 +182,12 @@ tests =
         v3 `shouldEqual` [2, 10, 2]
 
       it "allows to drop repeating values" do
-        let collect r x = (readSTRef r) >>= (\arr -> writeSTRef r (arr <> [x]))
+        let collect r x = (read r) >>= (\arr -> write (arr <> [x]) r)
 
-            {v1, v2} = unsafePerformEff $ do
+            {v1, v2} = unsafePerformEffect $ do
                        { send: sSource, event: eSource } <- openChannel
-                       sinkRef1 <- newSTRef []
-                       sinkRef2 <- newSTRef []
+                       sinkRef1 <- new []
+                       sinkRef2 <- new []
                        eFilter <- pure $ dropRepeats' eSource
                        sink1 <- subscribe ((+) 1 <$> eFilter) (collect sinkRef1)
                        sink2 <- subscribe ((*) 2 <$> eFilter) (collect sinkRef2)
@@ -197,8 +197,8 @@ tests =
                        send sSource 25
                        send sSource 25
                        send sSource 15
-                       sink1Val <- readSTRef sinkRef1
-                       sink2Val <- readSTRef sinkRef2
+                       sink1Val <- read sinkRef1
+                       sink2Val <- read sinkRef2
                        pure { v1: sink1Val, v2: sink2Val }
 
         v1 `shouldEqual` [2, 12, 26, 16]
@@ -206,12 +206,12 @@ tests =
 
 
       it "allows to drop repeating values (Eq type class)" do
-        let collect r x = (readSTRef r) >>= (\arr -> writeSTRef r (arr <> [x]))
+        let collect r x = (read r) >>= (\arr -> write (arr <> [x]) r)
 
-            {v1, v2} = unsafePerformEff $ do
+            {v1, v2} = unsafePerformEffect $ do
                        { send: sSource, event: eSource } <- openChannel
-                       sinkRef1 <- newSTRef []
-                       sinkRef2 <- newSTRef []
+                       sinkRef1 <- new []
+                       sinkRef2 <- new []
                        eFilter <- pure $ dropRepeats eSource
                        sink1 <- subscribe ((+) 1 <$> eFilter) (collect sinkRef1)
                        sink2 <- subscribe ((*) 2 <$> eFilter) (collect sinkRef2)
@@ -221,8 +221,8 @@ tests =
                        send sSource 25
                        send sSource 25
                        send sSource 15
-                       sink1Val <- readSTRef sinkRef1
-                       sink2Val <- readSTRef sinkRef2
+                       sink1Val <- read sinkRef1
+                       sink2Val <- read sinkRef2
                        pure { v1: sink1Val, v2: sink2Val }
 
         v1 `shouldEqual` [2, 12, 26, 16]

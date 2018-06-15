@@ -17,9 +17,10 @@ module Alchemy.Entity.Storage
   ) where
 
 import Prelude
-import Control.Monad.Eff (Eff)
-import Control.Monad.ST (ST)
+
 import Data.Symbol (class IsSymbol, SProxy, reflectSymbol)
+import Effect (Effect)
+import Prim.Row (class Union, class Cons)
 import Type.Row (RProxy)
 
 class RowSubset (r :: # Type) (s :: # Type)
@@ -52,17 +53,17 @@ foreign import init ::
   → Storage ( entityId :: EntityId | entity )
 
 foreign import setFn ::
-  ∀ s1 s2 e h entity
+  ∀ s1 s2 entity
   . Record ( entityId :: EntityId | entity )
   → Storage s1
-  → Eff ( st :: ST h | e ) (Storage s2)
+  → Effect (Storage s2)
 
 set ::
-  ∀ s e eff h
+  ∀ s e
   . RowSubset e s
   ⇒ Entity e
   → Storage s
-  → Eff ( st :: ST h | eff ) (Storage s)
+  → Effect (Storage s)
 set e s =
   setFn e s
 
@@ -77,8 +78,8 @@ foreign import withFn :: ∀ c r1 r2
 with ::
   ∀ c ca l a r1 r2
   . IsSymbol l
-  ⇒ RowCons l a ca c
-  ⇒ RowCons l a r1 r2
+  ⇒ Cons l a ca c
+  ⇒ Cons l a r1 r2
   ⇒ SProxy l
   → Accessor c r1
   → Accessor c r2
@@ -92,22 +93,22 @@ foreign import whereId ::
   → Accessor w c
 
 foreign import read ::
-  ∀ store entity eff h
+  ∀ store entity
   . Accessor store entity
-  → Eff (st :: ST h | eff) (EntityList entity)
+  → Effect (EntityList entity)
 
 foreign import runFn ::
-  ∀ store ei eo eff h
+  ∀ store ei eo
   . (Record ei → Record eo)
   → Accessor store ei
-  → Eff (st :: ST h | eff) Unit
+  → Effect Unit
 
 run ::
-  ∀ store ei eo eff h
+  ∀ store ei eo
   . RowSubset ei store
   ⇒ RowSubset eo store
   ⇒ (Record ei → Record eo)
   → Accessor store ei
-  → Eff (st :: ST h | eff) Unit
+  → Effect Unit
 run fn acc =
   runFn fn acc

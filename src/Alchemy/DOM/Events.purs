@@ -3,12 +3,12 @@ module Alchemy.DOM.Events
   , unsafeHandler
   ) where
 
+import Effect (Effect)
+import Data.Unit (Unit)
 import Alchemy.DOM (Node)
 import Alchemy.FRP.Subscription (Subscription)
-import Control.Monad.Eff (Eff)
-import Prelude (Unit)
 
 newtype Handler = Handler (Node → Subscription)
 
 foreign import unsafeHandler ::
-  ∀ event e. String → (event → Eff e Unit) → Handler
+  ∀ event. String → (event → Effect Unit) → Handler

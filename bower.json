@@ -7,12 +7,13 @@
     "output"
   ],
   "dependencies": {
-    "purescript-prelude": "^3.0.0",
-    "purescript-typelevel-prelude": "^2.4.0"
+    "purescript-prelude": "^4.0.0",
+    "purescript-typelevel-prelude": "^3.0.0",
+    "purescript-effect": "^2.0.0"
   },
   "devDependencies": {
-    "purescript-psci-support": "^3.0.0",
-    "purescript-spec": "^2.0.0",
-    "purescript-st": "^3.0.0"
+    "purescript-psci-support": "^4.0.0",
+    "purescript-spec": "^3.0.0",
+    "purescript-st": "^4.0.0"
   }
 }

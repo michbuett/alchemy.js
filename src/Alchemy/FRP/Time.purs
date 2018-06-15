@@ -2,12 +2,12 @@ module Alchemy.FRP.Time
   ( tick
   ) where
 
-import Control.Monad.Eff (Eff)
+import Effect (Effect)
 import Alchemy.FRP.Event (Event, Channel, openChannel)
 
 foreign import tickImpl :: ∀ a e
-  . Eff e (Channel a a)
-  → Eff e (Event Number)
+  . Effect (Channel a a)
+  → Effect (Event Number)
 
-tick :: ∀ e. Eff e (Event Number)
+tick :: ∀ e. Effect (Event Number)
 tick = tickImpl openChannel

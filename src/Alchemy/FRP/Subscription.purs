@@ -3,10 +3,10 @@ module Alchemy.FRP.Subscription
   , together
   ) where
 
-import Control.Monad.Eff (Eff)
-import Prelude (Unit)
+import Effect (Effect)
+import Data.Unit (Unit)
 
-type Subscription = ∀ e1 e2. Eff e1 (Eff e2 Unit)
+type Subscription = Effect (Effect Unit)
 
 foreign import together ::
   Array Subscription → Subscription

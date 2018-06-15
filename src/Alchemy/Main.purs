@@ -2,6 +2,7 @@ module Main where
 
 
 import Prelude
+import Data.Unit (Unit)
 
 import Alchemy.DOM as Dom
 import Alchemy.DOM.Attributes as Attr
@@ -16,7 +17,7 @@ import Alchemy.Graphics2d.Attributes (pos)
 import Alchemy.Graphics2d.Colors (Color(..))
 import Alchemy.Graphics2d.Container (box, array)
 import Alchemy.Graphics2d.Shapes as S
-import Control.Monad.Eff (Eff)
+import Effect (Effect)
 import Data.Array (snoc)
 import Data.Int (round)
 import Data.Traversable (foldl)
@@ -309,16 +310,13 @@ renderHUD game =
 gameOptions :: Gfx.Options
 gameOptions = Gfx.defaults { width = 600, height = 400 }
 
-main :: ∀ e.  Eff e Unit
+main :: Effect Unit
 main = do
   animationFrame <- tick
   keyboardInp <- onKeyChange
   runGame animationFrame keyboardInp
 
-runGame :: ∀ e
-  . Event Number
- -> Event KeyboardST
- -> Eff e Unit
+runGame :: Event Number -> Event KeyboardST -> Effect Unit
 runGame animationFrame keyboardInp = do
   let game :: Event Game
       game = foldp processInput newGame

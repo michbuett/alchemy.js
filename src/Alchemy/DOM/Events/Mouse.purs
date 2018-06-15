@@ -7,8 +7,8 @@ module Alchemy.DOM.Events.Mouse
   ) where
 
 import Alchemy.DOM.Events (Handler, unsafeHandler)
-import Control.Monad.Eff (Eff)
-import Prelude (Unit)
+import Effect (Effect)
+import Data.Unit (Unit)
 
 -- | The MouseEvent interface represents events that occur due to the user
 -- | interacting with a pointing device (such as a mouse). Common events using
@@ -67,17 +67,17 @@ type MouseEvent =
   }
 
 
-click :: ∀ e. (MouseEvent → Eff e Unit) → Handler
+click :: ∀ e. (MouseEvent → Effect Unit) → Handler
 click = unsafeHandler "click"
 
 
-dblclick :: ∀ e. (MouseEvent → Eff e Unit) → Handler
+dblclick :: ∀ e. (MouseEvent → Effect Unit) → Handler
 dblclick = unsafeHandler "dblclick"
 
 
-mousedown :: ∀ e. (MouseEvent → Eff e Unit) → Handler
+mousedown :: ∀ e. (MouseEvent → Effect Unit) → Handler
 mousedown = unsafeHandler "mousedown"
 
 
-mouseup :: ∀ e. (MouseEvent → Eff e Unit) → Handler
+mouseup :: ∀ e. (MouseEvent → Effect Unit) → Handler
 mouseup = unsafeHandler "mouseup"

@@ -16,7 +16,7 @@ module Alchemy.FRP.Event
 import Prelude
 
 import Alchemy.FRP.Subscription (Subscription)
-import Control.Monad.Eff (Eff)
+import Effect (Effect)
 import Data.Function.Uncurried (Fn2, runFn2)
 
 type Channel i o = { send :: Send i, event :: Event o }
@@ -44,10 +44,10 @@ instance applicativeEvent :: Applicative Event where
   pure = pureImpl
 
 foreign import subscribe ::
-  ∀ e a r. Event a → (a → Eff e r) → Subscription
+  ∀ e a r. Event a → (a → Effect r) → Subscription
 
 foreign import openChannel ::
-  ∀ a e. Eff e (Channel a a)
+  ∀ a e. Effect (Channel a a)
 
 foreign import multiplex ::
   ∀ a. Event a -> Event a
@@ -56,7 +56,7 @@ foreign import foldp ::
   ∀ a b. (a -> b -> b) -> b -> Event a -> Event b
 
 foreign import send ::
-  ∀ a e. Send a -> a -> Eff e Unit
+  ∀ a e. Send a -> a -> Effect Unit
 
 foreign import filter ::
   ∀ a. (a -> Boolean) -> Event a -> Event a
