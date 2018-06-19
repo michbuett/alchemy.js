@@ -1,8 +1,7 @@
-module Main where
+module Example.Pong.Main where
 
 
 import Prelude
-import Data.Unit (Unit)
 
 import Alchemy.DOM as Dom
 import Alchemy.DOM.Attributes as Attr

@@ -7,4 +7,5 @@ output/*
 examples/**/bower_components/*
 examples/**/node_modules/*
 examples/**/output/*
+examples/**/app.js
 tags

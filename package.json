@@ -24,8 +24,8 @@
     "eslint-plugin-standard": "^3.1.0"
   },
   "scripts": {
-    "test": "pulp browserify --to output/app.js",
-    "build-examples": ""
+    "test": "pulp test",
+    "build-examples": "pulp browserify -m Example.Pong.Main -I examples/pong/ -t examples/pong/app.js"
   },
   "dependencies": {
     "pixi.js": "^4.5.2"
