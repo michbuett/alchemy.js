@@ -16,14 +16,18 @@
   ],
   "license": "JSON",
   "devDependencies": {
+    "bower": "^1.8.4",
     "eslint": "^4.19.1",
     "eslint-config-standard": "^11.0.0",
     "eslint-plugin-import": "^2.11.0",
     "eslint-plugin-node": "^6.0.1",
     "eslint-plugin-promise": "^3.7.0",
-    "eslint-plugin-standard": "^3.1.0"
+    "eslint-plugin-standard": "^3.1.0",
+    "pulp": "^12.3.0",
+    "purescript": "^0.12.0"
   },
   "scripts": {
+    "install_purescript_dependencies": "bower install",
     "test": "pulp test",
     "build-examples": "pulp browserify -m Example.Pong.Main -I examples/pong/ -t examples/pong/app.js"
   },
