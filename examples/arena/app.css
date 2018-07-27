@@ -1,0 +1,36 @@
+html, body, #app, #ui {
+  border: none;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  text-align: center;
+}
+
+#ui {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+#field {
+  position: relative;
+  margin: 40px auto;
+  display: inline-block;
+}
+
+#field::before {
+  width: 100%;
+  height: 100%;
+  content: " ";
+  border: solid black 3px;
+  position: absolute;
+  box-sizing: border-box;
+  border-width: 5px 4px 7px 5px;
+  border-radius: 1% 105% 1% 100%/100% 1% 105% 1%;
+  transform: rotate(-.5deg);<Paste>
+}

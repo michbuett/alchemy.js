@@ -12,6 +12,7 @@
     "purescript-effect": "^2.0.0"
   },
   "devDependencies": {
+    "purescript-arrays": "^5.0.0",
     "purescript-psci-support": "^4.0.0",
     "purescript-spec": "^3.0.0",
     "purescript-st": "^4.0.0"

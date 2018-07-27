@@ -29,7 +29,8 @@
   "scripts": {
     "install_purescript_dependencies": "bower install",
     "test": "pulp test",
-    "build-examples": "pulp browserify -m Example.Pong.Main -I examples/pong/ -t examples/pong/app.js"
+    "build-example-arena": "pulp browserify -m Example.Arena.Main -I examples/arena/src/ -t examples/arena/app.js",
+    "build-example-pong": "pulp browserify -m Example.Pong.Main -I examples/pong/ -t examples/pong/app.js"
   },
   "dependencies": {
     "pixi.js": "^4.5.2"
