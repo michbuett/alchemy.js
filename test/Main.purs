@@ -8,8 +8,10 @@ import Test.Spec.Runner (run)
 
 import Test.Alchemy.FRP.Behavior as Behavior
 import Test.Alchemy.FRP.Event as Event
+import Test.Alchemy.Data.Incremental as Incremental
 
 main :: Effect Unit
 main = run [consoleReporter] do
   Behavior.tests
   Event.tests
+  Incremental.tests

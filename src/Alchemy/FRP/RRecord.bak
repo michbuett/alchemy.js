@@ -1,0 +1,111 @@
+module Alchemy.FRP.RRecord
+   where
+
+import Prelude
+
+import Alchemy.FRP.Event (Channel, openChannel)
+import Data.Array (foldr)
+import Data.Function.Uncurried (Fn2, Fn3, runFn2, runFn3)
+import Data.Newtype (class Newtype, unwrap)
+import Data.Symbol (class IsSymbol, SProxy(..), reflectSymbol)
+import Effect (Effect)
+import Prim.Row as Row
+import Prim.RowList as RL
+import Type.Row (Nil, kind RowList)
+import Unsafe.Coerce (unsafeCoerce)
+-- import Prim.Row (class Cons, class Union)
+
+
+newtype Atomic a = Atomic a
+
+derive instance eqAtomic :: Eq a => Eq (Atomic a)
+derive instance ordAtomic :: Ord a => Ord (Atomic a)
+derive instance newtypeAtomic :: Newtype (Atomic a) _
+
+instance showAtomic :: Show a => Show (Atomic a) where
+  show (Atomic a) = "Atomic(" <> show a <> ")"
+
+
+newtype AtomicUpdate a = AtomicUpdate a
+
+
+newtype Change d i o = Change { delta :: d, patch :: (i -> o) }
+
+
+patch :: ∀ d i o. Change d i o -> i -> o
+patch (Change { patch: f }) = f
+
+
+atomicUpdate :: ∀ a. a -> Change (AtomicUpdate a) (Atomic a) (Atomic a)
+atomicUpdate newVal =
+  Change { delta: AtomicUpdate newVal
+         , patch: (\_ -> Atomic newVal)
+         }
+
+
+class ChangeRL
+        (i :: # Type) (il :: RowList)
+        (o :: # Type) (ol :: RowList)
+        (d :: # Type) (dl :: RowList)
+        | il -> i, ol -> o, dl -> d, dl -> il, dl -> ol
+
+instance changeRLNil :: ChangeRL i il o ol () Nil
+
+instance changeRLCons
+  :: ( IsSymbol l
+     , ChangeRL i1 il o1 ol d1 dl
+     , Row.Cons l a i1 i2
+     , Row.Cons l b o1 o2
+     , Row.Cons l (Change da a b) d1 d2
+     , Row.Lacks l i1
+     , Row.Lacks l o1
+     , Row.Lacks l d1
+     )
+  => ChangeRL i2 il o2 ol d2 (RL.Cons l (Change da a b) dl)
+
+
+recordChange
+  :: ∀ i il o ol d dl
+  . RL.RowToList i il
+ => RL.RowToList o ol
+ => RL.RowToList d dl
+ => ChangeRL i il o ol d dl
+ => Record d -> Change (Record d) (Record i) (Record o)
+recordChange rd =
+  Change { delta: rd
+         , patch: unsafePatchRecord rd
+         }
+
+
+foreign import unsafePatchRecord ::
+  ∀ i o d. Record d -> Record i -> Record o
+
+
+
+-- ===============================================
+-- ===============================================
+-- ===============================================
+
+type F =
+  { foo :: Atomic String
+  , bar :: Atomic String
+  , baz :: Atomic String
+  }
+
+--
+rec1 :: F
+rec1 =
+  { foo: Atomic "Foo"
+  , bar: Atomic "Bar"
+  , baz: Atomic "Baz"
+  }
+
+rec2 :: F
+rec2 = patch recChange rec1
+
+recChange =
+  recordChange { foo: atomicUpdate "FOOFOO"
+               -- , bar: atomicUpdate "BARBAR"
+               -- , baz: atomicUpdate "BAZZZZ"
+               }
+

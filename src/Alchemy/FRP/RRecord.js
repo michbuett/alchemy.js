@@ -83,58 +83,53 @@ exports.parseChanges = function (changeRecord) {
   return result
 }
 
-exports.unsafePatchRecord = function (r) {
-  return function (changes) {
-  }
-}
-
-/*
-exports.patchOneRecordEntry = function (arg1) {
-  console.log('[patchOneRecordEntry] 1', arg1)
-  return function (arg2) {
-    console.log('[patchOneRecordEntry] 2', arg2)
-    return function (arg3) {
-      console.log('[patchOneRecordEntry] 3', arg3)
-      return function (arg4) {
-        console.log('[patchOneRecordEntry] 4', arg4)
-        return function (arg5) {
-          console.log('[patchOneRecordEntry] 5', arg5)
-          return function (arg6) {
-            console.log('[patchOneRecordEntry] 6', arg6)
-          }
-        }
-      }
-    }
-  }
-}
-*/
-
-function patchRecord(r) {
-  return function changes(dr) {
-    var data = r.get()
-    var newData = {}
-    var keys = Object.keys(data)
-    var observations = []
+exports.unsafePatchRecord = function (changes) {
+  return function (r) {
+    var target = {}
+    var keys = Object.keys(r)
 
     for (var i = 0, l = keys.length; i < l; i++) {
       var key = keys[i]
-      var subData = data[key]
-      var change = dr[key]
+      var val = r[key]
+      var change = changes[key]
 
       if (change) {
-        newData[key] = patch(subData, change)
-
-        if (isReactivData(subData)) {
-          observations.push(makeObservation(change, newData[key]))
-        }
+        target[key] = change.patch(val)
       } else {
-        newData[key] = subData
+        target[key] = val
       }
     }
 
-    observations.push(makeObservation(dr, newData))
+    return target
+  }
+}
 
-    return { result: newData, observation: observations }
+exports.cloneArray = function (a) {
+  return [].concat(a)
+}
+
+exports.unsafeUpdateAt = function (i) {
+  return function (patchFn) {
+    return function (a) {
+      a[i] = patchFn(a[i])
+      return a
+    }
+  }
+}
+
+exports.unsafeInsertAt = function (i) {
+  return function (v) {
+    return function (a) {
+      a.splice(i, 0, v)
+      return a
+    }
+  }
+}
+
+exports.unsafeDeleteAt = function (i) {
+  return function (a) {
+    a.splice(i, 1)
+    return a
   }
 }
 
@@ -155,7 +150,3 @@ Store.prototype.key = function (key) {
 Store.prototype.observe = function (observer) {
 }
 */
-
-exports.cloneRecord = function (r) {
-  return Object.assign({}, r)
-}

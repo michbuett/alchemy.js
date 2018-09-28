@@ -1,15 +1,14 @@
-module Alchemy.Data.Incrementals
-  where
---    ( Change
---    , patch
---    , Atomic
---    , AtomicUpdate
---    , changeAtomic
---    , class ChangeRL
---    , changeRecord
---    , ArrayUpdate
---    , changeArray
---    ) where
+module Alchemy.Data.Incremental2
+   ( Change
+   , patch
+   , Atomic(..)
+   , AtomicUpdate
+   , changeAtomic
+   , class ChangeRL
+   , changeRecord
+   , ArrayUpdate
+   , changeArray
+   ) where
 
 import Prelude
 
@@ -81,12 +80,12 @@ changeRecord
  => Record d -> Change (Record r) (Record d)
 changeRecord rd =
   Change { delta: rd
-         , patch: (\r -> r)
+         , patch: unsafePatchRecord rd
          }
 
 
 foreign import unsafePatchRecord ::
-  ∀ r p. Record r -> Array { key :: String, patch :: p } -> Record r
+  ∀ r rd. Record rd -> Record r -> Record r
 
 
 
@@ -139,34 +138,3 @@ foreign import unsafeInsertAt :: ∀ a.
 
 foreign import unsafeDeleteAt :: ∀ a.
   Int -> Array a -> Array a
-
-type F =
-  { foo :: Atomic String
-  , bar :: Atomic String
-  , baz :: Atomic String
-  }
-
---
-rec1 :: F
-rec1 =
-  { foo: Atomic "Foo"
-  , bar: Atomic "Bar"
-  , baz: Atomic "Baz"
-  }
-
-rec2 :: F
-rec2 = patch recChange rec1
-
--- recChange :: ∀ df. Change F df
--- recChange :: ∀ df. Change F df
--- recChange ::
---   Change F { foo :: Change (Atomic String) (AtomicUpdate String)
---            , bar :: Change (Atomic String) (AtomicUpdate String)
---            -- , baz :: Change (Atomic String) (AtomicUpdate String)
---            }
-recChange =
-  changeRecord { foo: changeAtomic "FOOFOO"
-               , bar: changeAtomic "BARBAR"
-               -- , baz: changeAtomic "BARBAR"
-               }
-
