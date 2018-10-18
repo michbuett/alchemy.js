@@ -21,7 +21,7 @@ tests =
       it "allows to create together with a channel function" do
         unsafePerformEffect ( do
           ref <- new "foo"
-          { send: s, event: e } :: Channel String String <- openChannel
+          { sender: s, event: e } :: Channel String String <- openChannel
           unsub <- subscribe e (\str -> write str ref)
           send s "bar"
           unsub
@@ -133,7 +133,7 @@ tests =
         let collect r x = (read r) >>= (\arr -> write (arr <> [x]) r)
 
             {v1, v2} = unsafePerformEffect $ do
-                       { send: sSource, event: eSource } <- openChannel
+                       { sender: sSource, event: eSource } <- openChannel
                        sink1Ref <- new [0]
                        sink2Ref <- new [0]
                        eFold <- pure $ foldp (+) 0 eSource
@@ -157,7 +157,7 @@ tests =
         let collect r x = (read r) >>= (\arr -> write (arr <> [x]) r)
 
             {v1, v2, v3} = unsafePerformEffect $ do
-                       { send: sSource, event: eSource } <- openChannel
+                       { sender: sSource, event: eSource } <- openChannel
                        sinkRef1 <- new []
                        sinkRef2 <- new []
                        sinkRef3 <- new []
@@ -185,7 +185,7 @@ tests =
         let collect r x = (read r) >>= (\arr -> write (arr <> [x]) r)
 
             {v1, v2} = unsafePerformEffect $ do
-                       { send: sSource, event: eSource } <- openChannel
+                       { sender: sSource, event: eSource } <- openChannel
                        sinkRef1 <- new []
                        sinkRef2 <- new []
                        eFilter <- pure $ dropRepeats' eSource
@@ -209,7 +209,7 @@ tests =
         let collect r x = (read r) >>= (\arr -> write (arr <> [x]) r)
 
             {v1, v2} = unsafePerformEffect $ do
-                       { send: sSource, event: eSource } <- openChannel
+                       { sender: sSource, event: eSource } <- openChannel
                        sinkRef1 <- new []
                        sinkRef2 <- new []
                        eFilter <- pure $ dropRepeats eSource

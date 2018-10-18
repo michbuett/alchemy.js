@@ -1,18 +1,23 @@
 exports.initStorage = function (openChannel, v) {
   var changesChannel = openChannel()
-  var storage = liftIncrementalValue(openChannel(), v)
+  var currentOIV = liftIncrementalValue(openChannel(), v)
 
   changesChannel.event(function (changes) {
-    storage.patch(changes)
+    var newOIV = currentOIV.patch(changes)
+
+    // mutate references to remember state changes
+    currentOIV.value = newOIV.value
+    currentOIV.patch = newOIV.patch
   })
 
   return {
-    storage: storage,
-    send: changesChannel.send
+    oiValue: currentOIV,
+    sender: changesChannel.sender
   }
 }
 
 exports.updates = function (o) {
+  // console.log('[updates]', o)
   return o.updates
 }
 
@@ -25,7 +30,14 @@ exports.sample = function (o) {
 exports.subImpl = function (openChannel) {
   return function (key) {
     return function (oiRecord) {
-      return {} // TODO
+      var sub = oiRecord.value[key]
+
+      if (!sub.updates) {
+        sub = liftIncrementalValue(openChannel(), sub)
+        oiRecord.value[key] = sub
+      }
+
+      return sub
     }
   }
 }
@@ -184,10 +196,10 @@ function liftIncrementalValue(updateChannel, currentVal) {
     patch: function (delta) {
       var newVal = currentVal.patch(delta)
 
-      // console.log('[patch] send update')
-      updateChannel.send({
-        oldValue: currentVal.value,
-        newValue: newVal.value,
+      // console.log('[patch] send update', currentVal.value, newVal.value)
+      updateChannel.sender({
+        oldValue: currentVal,
+        newValue: newVal,
         delta: delta
       })
 

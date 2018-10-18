@@ -9,7 +9,7 @@ import Effect.Unsafe (unsafePerformEffect)
 
 inspectChannel ::
   ∀ i o. Monoid o => Channel i o → i → Effect o
-inspectChannel { send: s, event } v = do
+inspectChannel { sender: s, event } v = do
   ref <- new mempty
   unsubscribe <- subscribe event (\x -> write x ref)
   send s v
@@ -37,7 +37,7 @@ testEvent :: ∀ a b. (Event a -> Event b) -> Array a -> Array b
 testEvent f xs =
   unsafePerformEffect (do
     ref <- new []
-    { send: s, event } <- openChannel
+    { sender: s, event } <- openChannel
     unsubscribe <- subscribe (f event) (\x -> do
                                           arr <- read ref
                                           write (arr <> [x]) ref)

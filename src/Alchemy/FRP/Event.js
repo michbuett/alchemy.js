@@ -62,10 +62,10 @@ exports.foldp = function (fn) {
   }
 }
 
-exports.send = function (send) {
+exports.send = function (sender) {
   return function (val) {
     return function () {
-      send(val)
+      sender(val)
       return {}
     }
   }
@@ -156,7 +156,7 @@ function openChannel() {
       }
     },
 
-    send: function (newVal) {
+    sender: function (newVal) {
       for (runIdx = 0; runIdx < subs.length; runIdx++) {
         subs[runIdx](newVal)
       }
@@ -179,7 +179,7 @@ function multiplex(f, ev) {
       out = openChannel()
       unsubscribe = out.event(handler)
       unsubParent = ev(function (newVal) {
-        out.send(f(newVal))
+        out.sender(f(newVal))
       })
     }
 

@@ -3,7 +3,10 @@ module Test.Alchemy.Data.Incremental
 
 import Prelude
 
-import Alchemy.Data.Incremental (ArrayUpdate(..), Atomic(..), atomic, array, record, patch, value)
+import Alchemy.Data.Incremental (patch, value)
+import Alchemy.Data.Incremental.Array (ArrayUpdate(..), array)
+import Alchemy.Data.Incremental.Atomic (Atomic(..), atomic)
+import Alchemy.Data.Incremental.Record (record, mergeRec)
 import Control.Monad.State (StateT)
 import Data.Identity (Identity)
 import Effect.Aff (Aff)
@@ -53,7 +56,7 @@ tests =
                  , baz: atomic "BAZBAZ"
                  }
 
-            dr = { foo: "FOOFOO", baz: "BAZBAZ" }
+            dr = mergeRec { foo: "FOOFOO", baz: "BAZBAZ" }
 
         (patch (record r1) dr) `shouldEqual` record r2
 
@@ -78,8 +81,9 @@ tests =
                    }
                  }
 
-            dr = { foo: "FOOFOO"
-                 , baz: { pong: { bla: 4242 }}
+            dr = mergeRec
+                 { foo: "FOOFOO"
+                 , baz: mergeRec { pong: mergeRec { bla: 4242 }}
                  }
 
         (patch r1 dr) `shouldEqual` r2
@@ -95,7 +99,8 @@ tests =
                  , bar: array [ record { ping: atomic "BONG" } ]
                  }
 
-            dr = { bar: UpdateAt 0 { ping: "BONG" } }
+            dr = mergeRec
+                 { bar: UpdateAt 0 (mergeRec { ping: "BONG" }) }
 
         (patch r1 dr) `shouldEqual` r2
 

@@ -1,4 +1,4 @@
-module Alchemy.Data.OIValue
+module Alchemy.Data.Observable
   where
   -- ( OResult
   -- , OIValue
@@ -6,7 +6,7 @@ module Alchemy.Data.OIValue
 
 
 import Alchemy.Data.Incremental (IValue)
-import Alchemy.FRP.Event (Channel, Event, Send, openChannel)
+import Alchemy.FRP.Event (Channel, Event, Sender, openChannel)
 import Data.Function.Uncurried (Fn2, runFn2)
 import Data.Symbol (class IsSymbol, SProxy, reflectSymbol)
 import Effect (Effect)
@@ -73,13 +73,13 @@ foreign import initStorage ::
   ∀ a da
   . Fn2 (Effect (Channel a a))
         (IValue a da)
-        ({ oiValue :: OIValue a da, send :: Send da })
+        ({ oiValue :: OIValue a da, sender :: Sender da })
 
 
 makeObservable ::
   ∀ a da
   . IValue a da
- -> { oiValue :: OIValue a da, send :: Send da }
+ -> { oiValue :: OIValue a da, sender :: Sender da }
 makeObservable = runFn2 initStorage openChannel
 
 

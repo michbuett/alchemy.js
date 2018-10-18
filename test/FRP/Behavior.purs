@@ -70,7 +70,7 @@ tests =
     describe "sampling" do
       it "can sample a time function of effects by an event" do
         unsafePerformEffect (do
-          { send: c, event: eIn } <- openChannel
+          { sender: c, event: eIn } <- openChannel
           r <- new ""
           b <- pure $ pure "foo"
           eOut <- pure $ sample b eIn
@@ -84,7 +84,7 @@ tests =
 
       it "can sample a time function of effects by an event using the event data" do
         unsafePerformEffect (do
-          { send: c, event: eIn } <- openChannel
+          { sender: c, event: eIn } <- openChannel
           r <- new ""
           b <- pure $ pure (\s -> "<foo" <> s <> ">")
           eOut <- pure $ sampleBy b eIn
