@@ -6,12 +6,12 @@ module Alchemy.Data.Observable
 
 
 import Alchemy.Data.Incremental (IValue)
+import Alchemy.Data.Incremental.Array (ArrayUpdate)
+import Alchemy.Data.Incremental.Record (RecordUpdate)
 import Alchemy.FRP.Event (Channel, Event, Sender, openChannel)
 import Data.Function.Uncurried (Fn2, runFn2)
 import Data.Symbol (class IsSymbol, SProxy, reflectSymbol)
 import Effect (Effect)
--- import Prelude (Unit)
--- import Prim.RowList as RL
 import Type.Row (kind RowList, class Cons)
 
 
@@ -100,14 +100,24 @@ foreign import subImpl ::
 
 
 get ::
-  ∀ l a da rs r dr
+  ∀ l a da rs r
   . IsSymbol l
- => Cons l a rs r
+ => Cons l (IValue a da) rs r
  => SProxy l
- -> OIValue { | r } { | dr }
+ -> OIValue (Record r) (RecordUpdate r)
  -> OIValue a da
 get key =
   subImpl openChannel (reflectSymbol key)
+
+
+-- NO! better allow observe mapped values or folds
+-- at ::
+--   ∀ a da
+--   . Int
+--  -> OIValue (Array (IValue a da)) (ArrayUpdate a da)
+--  -> OIValue a da
+-- at =
+--   subImpl openChannel
 
 --
 -- foreign import debug :: // TODO

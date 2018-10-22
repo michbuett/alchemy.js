@@ -18,6 +18,17 @@ data ArrayUpdate a da
   | UpdateAt Int da
 
 
+instance eqArrayUpdate :: (Eq a, Eq da) => Eq (ArrayUpdate a da) where
+  eq (InsertAt i1 v1) (InsertAt i2 v2) = i1 == i2 && (eq v1 v2)
+  eq (DeleteAt i1) (DeleteAt i2) = i1 == i2
+  eq (UpdateAt i1 v1) (UpdateAt i2 v2) = i1 == i2 && (eq v1 v2)
+  eq _ _ = false
+
+instance showArrayUpdate :: (Show a, Show da) => Show (ArrayUpdate a da) where
+  show (InsertAt i v) = "InsertAt(" <> (show i) <> ", " <> (show v) <> ")"
+  show (DeleteAt i) = "DeleteAt(" <> (show i) <> ")"
+  show (UpdateAt i v) = "UpdateAt(" <> (show i) <> ", " <> (show v) <> ")"
+
 array ::
   ∀ a da. Array (IValue a da) -> IArray a da
 array a =
