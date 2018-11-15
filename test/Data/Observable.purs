@@ -4,12 +4,13 @@ module Test.Alchemy.Data.Observable
 import Prelude
 
 import Alchemy.Data.Incremental.Array (IArray, ArrayUpdate(..), array)
-import Alchemy.Data.Incremental.Atomic (IAtomic, Atomic, atomic)
+import Alchemy.Data.Incremental.Atomic (AtomicUpdate(..), IAtomic, atomic, setValue)
 import Alchemy.Data.Incremental.Record (IRecord, RecordUpdate, record, mergeRec)
-import Alchemy.Data.Observable (Update, get, makeObservable, updates)
+import Alchemy.Data.Observable (get, makeObservable, updates)
 import Alchemy.FRP.Event (send, subscribe)
 import Control.Monad.State (StateT)
 import Data.Identity (Identity)
+import Data.Maybe (Maybe(..))
 import Data.Symbol (SProxy(..))
 import Effect (Effect)
 import Effect.Aff (Aff)
@@ -23,14 +24,19 @@ tests =
   describe "Alchemy.Data.Observable" do
      it "allows to observe patching incremental values" do
         let iv = atomic "Foo"
+
             { oiValue, sender } = makeObservable iv
-            expected = [(update "Foo" "Bar"), (update "Bar" "Baz")]
+
+            expected =
+              [ (Replace (Just "Foo") "Bar")
+              , (Replace (Just "Bar") "Baz")
+              ]
 
         unsafePerformEffect (do
           ref <- new []
           _ <- subscribe (updates oiValue) (collect ref)
-          send sender "Bar"
-          send sender "Baz"
+          send sender (setValue "Bar")
+          send sender (setValue "Baz")
           read ref
           ) `shouldEqual` expected
 
@@ -45,56 +51,26 @@ tests =
             { oiValue, sender } = makeObservable ivalue
 
             d1 :: RecordUpdate SomeRecord
-            d1 = mergeRec { foo: "FOOFOO" }
+            d1 = mergeRec { foo: setValue "FOOFOO" }
 
             d2 :: RecordUpdate SomeRecord
-            d2 = mergeRec { bar: UpdateAt 0 (mergeRec { ping: "BOONG" }) }
+            d2 = mergeRec { bar: UpdateAt 0 (mergeRec { ping: setValue "BOONG" }) }
 
             d3 :: RecordUpdate SomeRecord
             d3 = mergeRec { bar: InsertAt 1 (record { ping: atomic "Bang!"}) }
 
+            expected :: Array (RecordUpdate SomeRecord)
             expected =
               [
                 -- 1st update: "Foo" -> "FOOFOO"
-                { oldValue:
-                  record
-                  { foo: atomic "Foo"
-                  , bar: array [ record { ping: atomic "bing" } ]
-                  }
-                , newValue:
-                  record
-                  { foo: atomic "FOOFOO"
-                  , bar: array [ record { ping: atomic "bing" } ]
-                  }
-                , delta: d1
-                },
+                mergeRec { foo: Replace (Just "Foo") "FOOFOO" }
                 -- 2nd update: "bing" -> "BOONG"
-                { oldValue:
-                  record
-                  { foo: atomic "FOOFOO"
-                  , bar: array [ record { ping: atomic "bing" } ]
-                  }
-                , newValue:
-                  record
-                  { foo: atomic "FOOFOO"
-                  , bar: array [ record { ping: atomic "BOONG" } ]
-                  }
-                , delta: d2
-                },
-                -- 3rd update add "Bang!"
-                { oldValue:
-                  record
-                  { foo: atomic "FOOFOO"
-                  , bar: array [ record { ping: atomic "BOONG" } ]
-                  }
-                , newValue:
-                  record
-                  { foo: atomic "FOOFOO"
-                  , bar: array [ record { ping: atomic "BOONG" }
-                               , record { ping: atomic "Bang!" } ]
-                  }
-                , delta: d3
+              , mergeRec
+                { bar: UpdateAt 0 (mergeRec
+                                    { ping: Replace (Just "bing") "BOONG" })
                 }
+                -- 3rd update add "Bang!"
+              , mergeRec { bar: InsertAt 1 (record { ping: atomic "Bang!"})}
               ]
 
         unsafePerformEffect (do
@@ -118,48 +94,31 @@ tests =
 
             sub = oiValue # get (SProxy :: SProxy "bar")
 
-            d1 = UpdateAt 0 (mergeRec { ping: "BOONG" })
+            d1 = UpdateAt 0 (mergeRec { ping: setValue "BOONG" })
 
             d2 = InsertAt 1 (record { ping: atomic "Bang!"})
 
             expectedSubUpdates =
-              [
-                { oldValue:
-                    array [ record { ping: atomic "bing" } ]
-                , newValue:
-                    array [ record { ping: atomic "BOONG" } ]
-                , delta: d1
-                },
-                { oldValue:
-                    array [ record { ping: atomic "BOONG" } ]
-                , newValue:
-                    array [ record { ping: atomic "BOONG" }
-                          , record { ping: atomic "Bang!" } ]
-                , delta: d2
-                }
+              [ UpdateAt 0 (mergeRec { ping: Replace (Just "bing") "BOONG" })
+              , InsertAt 1 (record { ping: atomic "Bang!"})
               ]
 
         unsafePerformEffect (do
           ref <- new []
           _ <- subscribe (updates sub) (collect ref)
-          send sender (mergeRec { foo: "FOOFOO" })
+          send sender (mergeRec { foo: setValue "ZOOM" })
           send sender (mergeRec { bar: d1 })
           send sender (mergeRec { bar: d2 })
           read ref
           ) `shouldEqual` expectedSubUpdates
 
 
-collect :: ∀ a da.
-  Ref (Array (Update a da))
-  -> Update a da
-  -> Effect Unit
+collect :: ∀ a.
+  Ref (Array a) -> a -> Effect Unit
 collect r x = do
   _ <- modify (\s -> s <> [x]) r
   pure unit
 
-update :: String -> String -> Update (Atomic String) String
-update old new =
-  { oldValue: atomic old , newValue: atomic new , delta: new }
 
 type SomeRecord =
   ( foo :: IAtomic String

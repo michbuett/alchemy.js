@@ -8,7 +8,7 @@ module Alchemy.Data.Incremental.Record
 
 import Prelude
 
-import Alchemy.Data.Incremental (IValue(..))
+import Alchemy.Data.Incremental (IValue(..), Increment)
 import Data.Symbol (class IsSymbol)
 import Prim.Row as Row
 import Prim.RowList as RL
@@ -71,4 +71,4 @@ record r =
 
 
 foreign import unsafePatchRecord ::
-  ∀ r. Record r -> RecordUpdate r -> IValue (Record r) (RecordUpdate r)
+  ∀ r. Record r -> RecordUpdate r -> Increment (Record r) (RecordUpdate r)

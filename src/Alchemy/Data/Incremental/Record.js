@@ -2,6 +2,7 @@ exports.unsafePatchRecord = function unsafePatchRecord(r) {
   return function (changes) {
     var target = {}
     var keys = Object.keys(r)
+    var applied = {}
 
     for (var i = 0, l = keys.length; i < l; i++) {
       var key = keys[i]
@@ -9,15 +10,21 @@ exports.unsafePatchRecord = function unsafePatchRecord(r) {
       var change = changes[key]
 
       if (change) {
-        target[key] = val.patch(change)
+        var increment = val.patch(change)
+
+        target[key] = increment.new
+        applied[key] = increment.delta
       } else {
         target[key] = val
       }
     }
 
     return {
-      value: target,
-      patch: unsafePatchRecord(target)
+      new: {
+        value: target,
+        patch: unsafePatchRecord(target)
+      },
+      delta: applied
     }
   }
 }

@@ -1,5 +1,6 @@
 module Alchemy.Data.Incremental
    ( IValue(..)
+   , Increment
    , patch
    , value
    ) where
@@ -8,8 +9,15 @@ import Prelude
 
 
 
-newtype IValue a da = IValue { value :: a, patch :: (da -> IValue a da) }
+newtype IValue a da =
+  IValue { value :: a
+         , patch :: da -> Increment a da
+         }
 
+type Increment a da =
+  { new :: IValue a da
+  , delta :: da
+  }
 
 instance showIValue :: Show a => Show (IValue a da) where
   show (IValue { value: v }) = "IValue(" <> show v <> ")"
@@ -19,7 +27,7 @@ instance eqIValue :: Eq a => Eq (IValue a da) where
 
 
 -- | Create a new value based on a given change
-patch :: ∀ a da. IValue a da -> da -> IValue a da
+patch :: ∀ a da. IValue a da -> da -> Increment a da
 patch (IValue { patch: f }) = f
 
 
