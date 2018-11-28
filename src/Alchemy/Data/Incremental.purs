@@ -1,35 +1,27 @@
 module Alchemy.Data.Incremental
-   ( IValue(..)
-   , Increment
-   , patch
-   , value
-   ) where
-
-import Prelude
+  ( Patch(..)
+  , Increment
+  , patch
+  , noop
+  ) where
 
 
+import Alchemy.Data.Incremental.Types (Change)
+import Data.Maybe (Maybe(..))
 
-newtype IValue a da =
-  IValue { value :: a
-         , patch :: da -> Increment a da
-         }
+-- | A patch is a thing where you can feed a value in and get a new value
+-- | paired witch the respectable changes
+newtype Patch a = Patch (a -> Increment a)
 
-type Increment a da =
-  { new :: IValue a da
-  , delta :: da
+type Increment a =
+  { new :: a
+  , delta :: Maybe (Change a)
   }
 
-instance showIValue :: Show a => Show (IValue a da) where
-  show (IValue { value: v }) = "IValue(" <> show v <> ")"
-
-instance eqIValue :: Eq a => Eq (IValue a da) where
-  eq (IValue { value: v1 }) (IValue { value: v2 }) = eq v1 v2
-
-
 -- | Create a new value based on a given change
-patch :: ∀ a da. IValue a da -> da -> Increment a da
-patch (IValue { patch: f }) = f
+patch :: ∀ a. Patch a -> a -> Increment a
+patch (Patch runPatch) = runPatch
 
-
-value :: ∀ a da. IValue a da -> a
-value (IValue { value: v }) = v
+-- | A patch that does nothing
+noop :: ∀ a. Patch a
+noop = Patch (\x -> { new: x, delta: Nothing })
