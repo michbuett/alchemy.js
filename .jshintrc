@@ -1,7 +1,0 @@
-{
-  "strict": "global",
-  "browserify": true,
-  "undef": true,
-  "unused": true
-}
-

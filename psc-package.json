@@ -1,0 +1,16 @@
+{
+  "name": "alchemy.js",
+  "set": "psc-0.12.1",
+  "source": "https://github.com/purescript/package-sets.git",
+  "depends": [
+    "arrays",
+    "effect",
+    "functions",
+    "maybe",
+    "prelude",
+    "refs",
+    "spec",
+    "typelevel-prelude",
+    "unsafe-coerce"
+  ]
+}
