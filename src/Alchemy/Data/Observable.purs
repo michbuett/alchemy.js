@@ -1,54 +1,37 @@
 module Alchemy.Data.Observable
   ( OV
   , create
-  , bimap
+  , foldEvent
   , increments
   , changes
   , values
   , read
+  , get
   ) where
 
 
 import Prelude
 
-import Alchemy.Data.Incremental (Increment)
-import Alchemy.Data.Incremental.Types (class Patchable, Change, fromChange)
+import Alchemy.Data.Incremental (Increment, Patch, noop, patch)
+import Alchemy.Data.Incremental (const) as P
+import Alchemy.Data.Incremental.Types (class Patchable, fromChange)
 import Alchemy.FRP.Event (Event, Sender, multiplex, openChannel, send, subscribe)
 import Data.Maybe (Maybe(..), fromJust)
 import Effect (Effect)
 import Effect.Ref as Ref
+import Effect.Unsafe (unsafePerformEffect)
 import Partial.Unsafe (unsafePartial)
 import Prim.Row (class Cons)
-import Type.Prelude (class IsSymbol, SProxy(..))
+import Record.Unsafe (unsafeGet)
+import Type.Prelude (class IsSymbol, SProxy, reflectSymbol)
 
 
 -- | An incremental and observable value
 newtype OV a = OV { value :: Effect a, increments :: Event (Increment a) }
 
 
-bimap ::
-  ∀ a b
-  . (a -> b)
- -> (Change a -> Change b)
- -> OV a
- -> OV b
-bimap mapV mapD (OV { value, increments: i }) =
-  OV { value: mapV <$> value
-     , increments: multiplex mapChanges i
-     }
-
-  where
-    mapChanges :: Sender (Increment b) -> Increment a -> Effect Unit
-    mapChanges s { new: a, delta: da } =
-      let db = mapD <$> da
-       in case db of
-            Nothing -> pure unit
-            Just _  -> send s { new: mapV a, delta: db }
-
-
 create ::
   ∀ a b
-  -- . (a -> Patch b)
   . (a -> b -> Increment b)
  -> b
  -> Effect { ov :: OV b, sender :: Sender a }
@@ -64,7 +47,6 @@ create f b = do
     handle r s a = do
        b' <- Ref.read r
        notify r s (f a b')
-       -- notify r s (patch (f a) b')
 
     notify _ _ { delta: Nothing } = pure unit
     notify r s i = do
@@ -87,35 +69,44 @@ changes ov = getDelta <$> increments ov
 read :: ∀ a. OV a -> Effect a
 read (OV { value }) = value
 
--- get ::
---   ∀ l a rs r
---   . IsSymbol l
---  => Cons l a rs r
---  => SProxy l
---  -> OV (Record r)
---  -> OV a
--- get key ov =
---   bimap (
---
---
--- -- NO! better allow observe mapped values or folds
--- -- at ::
--- --   ∀ a da
--- --   . Int
--- --  -> OV (Array (IValue a da)) (ArrayUpdate a da)
--- --  -> OV a da
--- -- at =
--- --   subImpl openChannel
---
--- --
--- -- foreign import debug :: // TODO
--- --   ∀ a. a -> Effect Unit
--- --
--- -- -- newtype OChange a da oa =
--- -- --   OChange { delta :: da, patch :: (a -> OResult a oa) }
--- -- --
--- -- -- oberveChange obs dx x =
--- -- --   { oldValue: x
--- -- --   , newValue: patch x
--- -- --   , delta: dx
--- -- --   }
+get ::
+  ∀ l a d rs r
+  . IsSymbol l
+ => Cons l a rs r
+ => Patchable (Record r) (Record d)
+ => SProxy l
+ -> OV (Record r)
+ -> OV a
+get key (OV { value, increments: i }) =
+  foldEvent f v i
+  where
+    v =
+      getValue (unsafePerformEffect value)
+
+    f { delta: Nothing } = noop
+    f { new: r, delta: Just ir } =
+      P.const { new: getValue r, delta: getChange ir }
+
+    getValue =
+      unsafeGet (reflectSymbol key)
+
+    getChange =
+      unsafeGet (reflectSymbol key) <<< fromChange
+
+
+foldEvent :: ∀ a b. (a -> Patch b) -> b -> Event a -> OV b
+foldEvent f initialVal e =
+  OV { value: v, increments: i }
+  where
+    v = Ref.read ref
+
+    i = multiplex update e
+
+    ref = unsafePerformEffect (Ref.new initialVal)
+
+    update s a = do
+       currVal <- Ref.read ref
+       notify s (patch (f a) currVal)
+
+    notify _ { delta: Nothing } = pure unit
+    notify send incr = send incr

@@ -3,6 +3,7 @@ module Alchemy.Data.Incremental
   , Increment
   , patch
   , noop
+  , const
   ) where
 
 
@@ -11,6 +12,7 @@ import Data.Maybe (Maybe(..))
 
 -- | A patch is a thing where you can feed a value in and get a new value
 -- | paired witch the respectable changes
+-- newtype Patch a = Patch (a -> Increment a)
 newtype Patch a = Patch (a -> Increment a)
 
 type Increment a =
@@ -25,3 +27,7 @@ patch (Patch runPatch) = runPatch
 -- | A patch that does nothing
 noop :: ∀ a. Patch a
 noop = Patch (\x -> { new: x, delta: Nothing })
+
+-- | A patch that allways produces a predefined increment
+const :: ∀ a. Increment a -> Patch a
+const i = Patch (\_ -> i)

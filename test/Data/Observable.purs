@@ -3,12 +3,12 @@ module Test.Alchemy.Data.Observable
 
 import Prelude
 
-import Alchemy.Data.Incremental (Patch(..), Increment, patch)
-import Alchemy.Data.Incremental.Array (snoc, updateAt)
+import Alchemy.Data.Incremental (patch)
+import Alchemy.Data.Incremental.Array (snoc)
 import Alchemy.Data.Incremental.Atomic (set)
 import Alchemy.Data.Incremental.Record (assign)
-import Alchemy.Data.Incremental.Types (ArrayUpdate(..), AtomicUpdate(..), Change, toChange)
-import Alchemy.Data.Observable (create, increments)
+import Alchemy.Data.Incremental.Types (ArrayUpdate(..), AtomicUpdate(..), toChange)
+import Alchemy.Data.Observable (create, get, increments)
 import Alchemy.FRP.Event (send, subscribe)
 import Control.Monad.State (StateT)
 import Data.Identity (Identity)
@@ -16,8 +16,8 @@ import Data.Maybe (Maybe(..))
 import Data.Symbol (SProxy(..))
 import Effect (Effect)
 import Effect.Aff (Aff)
+import Effect.Class (liftEffect)
 import Effect.Ref (Ref, modify, read, new)
-import Effect.Unsafe (unsafePerformEffect)
 import Test.Spec (Group, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 
@@ -30,7 +30,7 @@ tests =
               , { new: "Baz", delta: Just $ toChange (Replace "Bar" "Baz") }
               ]
 
-        unsafePerformEffect (do
+        actual <- liftEffect do
           { ov, sender } <- create (\a b -> patch (set a) b) "Foo"
           ref <- new []
           _ <- subscribe (increments ov) (collect ref)
@@ -38,25 +38,20 @@ tests =
           send sender "Baz"
           send sender "Baz" -- => no event if nothing is changed
           read ref
-          ) `shouldEqual` expected
+
+        actual `shouldEqual` expected
 
      it "allows to observe patching nested data structures" do
-        let -- v :: R
-            v =
+        let v =
               { foo: "Foo"
               , bar: [{ ping: "bing" }]
               }
 
-            -- p1 :: Patch R
             p1 =
               assign { foo: set "FOOFOO" }
 
-            -- p2 :: Patch DR R R
             p2 =
               assign { bar: snoc { ping: "bong" }}
-
-            -- d3 :: RecordUpdate SomeRecord
-            -- d3 = mergeRec { bar: InsertAt 1 (record { ping: atomic "Bang!"}) }
 
             expected =
               [ { new:
@@ -80,62 +75,39 @@ tests =
                   }
                 }
               ]
-            -- expected :: Array (RecordUpdate SomeRecord)
-            -- expected =
-            --   [
-            --     -- 1st update: "Foo" -> "FOOFOO"
-            --     mergeRec { foo: Replace (Just "Foo") "FOOFOO" }
-            --     -- 2nd update: "bing" -> "BOONG"
-            --   , mergeRec
-            --     { bar: UpdateAt 0 (mergeRec
-            --                         { ping: Replace (Just "bing") "BOONG" })
-            --     }
-            --     -- 3rd update add "Bang!"
-            --   , mergeRec { bar: InsertAt 1 (record { ping: atomic "Bang!"})}
-            --   ]
 
-        unsafePerformEffect (do
+        actual <- liftEffect do
           ref <- new []
           { ov, sender } <- create patch v
-          -- { ov, sender } <- create (\a b -> patch a b) v
           _ <- subscribe (increments ov) (collect ref)
           send sender p1
           send sender p2
-          -- send sender d2
-          -- send sender d3
           read ref
-          -- ) `shouldEqual` []
-          ) `shouldEqual` expected
 
-     -- it "allows to observe subvalues of nested data structures" do
-     --    let ivalue :: IRecord SomeRecord
-     --        ivalue =
-     --          record
-     --          { foo: atomic "Foo"
-     --          , bar: array [ record { ping: atomic "bing" }]
-     --          }
+        actual  `shouldEqual` expected
 
-     --        { oiValue, sender } = makeObservable ivalue
+     it "allows to observe subvalues of nested data structures" do
+        let r = { foo: "Foo", bar: "Bar" }
 
-     --        sub = oiValue # get (SProxy :: SProxy "bar")
+            expected =
+              [ { new: "Foo2"
+                , delta: Just $ toChange (Replace "Foo" "Foo2")
+                }
+              ]
 
-     --        d1 = UpdateAt 0 (mergeRec { ping: setValue "BOONG" })
+        actual <- liftEffect do
+          ref <- new []
+          { ov, sender } <- create patch r
+          sub <- pure $ get (SProxy :: SProxy "foo") ov
+          unsub <- subscribe (increments sub) (collect ref)
+          sender $ assign { foo: set "Foo2" }
+          sender $ assign { bar: set "Bar2" }
+          unsub
+          -- no further updates after canceling subscription
+          sender $ assign { foo: set "Foo3" }
+          read ref
 
-     --        d2 = InsertAt 1 (record { ping: atomic "Bang!"})
-
-     --        expectedSubUpdates =
-     --          [ UpdateAt 0 (mergeRec { ping: Replace (Just "bing") "BOONG" })
-     --          , InsertAt 1 (record { ping: atomic "Bang!"})
-     --          ]
-
-     --    unsafePerformEffect (do
-     --      ref <- new []
-     --      _ <- subscribe (updates sub) (collect ref)
-     --      send sender (mergeRec { foo: setValue "ZOOM" })
-     --      send sender (mergeRec { bar: d1 })
-     --      send sender (mergeRec { bar: d2 })
-     --      read ref
-     --      ) `shouldEqual` expectedSubUpdates
+        actual `shouldEqual` expected
 
 
 collect :: ∀ a.
@@ -143,22 +115,3 @@ collect :: ∀ a.
 collect r x = do
   _ <- modify (\s -> s <> [x]) r
   pure unit
-
-
--- type SomeRecord =
---   ( foo :: IAtomic String
---   , bar :: IArray (Record SomeOtherRecord) (RecordUpdate SomeOtherRecord)
---   )
---
--- type SomeOtherRecord =
---   ( ping :: IAtomic String )
-
-type R =
-  { foo :: String
-  , bar :: Array { ping :: String }
-  }
-
-type DR = { foo :: Maybe (Change String)
-  , bar :: Maybe (Array (ArrayUpdate (Change { ping :: Maybe (Change String)})))
-  }
-
