@@ -11,6 +11,7 @@
     "refs",
     "spec",
     "typelevel-prelude",
-    "unsafe-coerce"
+    "unsafe-coerce",
+    "unsafe-reference"
   ]
 }

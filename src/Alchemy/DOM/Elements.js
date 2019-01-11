@@ -28,17 +28,13 @@ exports.arrayImpl = function (tag, attributes, createChildFn, arrayStream) {
   }
 }
 
-exports.text = function (text) {
+exports.text = function (observableTxt) {
   return function (parentNode) {
     return function () {
-      var textNode = document.createTextNode('')
-      var lastText
-      var unsub = text(function (newText) {
-        if (newText === lastText) {
-          return
-        }
-        textNode.textContent = newText
-        lastText = newText
+      var text = observableTxt.value()
+      var textNode = document.createTextNode(text)
+      var unsub = observableTxt.increments(function (i) {
+        textNode.textContent = i.new
       })
 
       parentNode.appendChild(textNode)
@@ -50,3 +46,31 @@ exports.text = function (text) {
     }
   }
 }
+//
+// exports.appendChild = function (parent) {
+//   return function (child) {
+//     return function () {
+//       parent.appendChild(child)
+//     }
+//   }
+// }
+//
+// exports.removeChild = function (parent) {
+//   return function (child) {
+//     return function () {
+//       parent.removeChild(child)
+//     }
+//   }
+// }
+//
+// exports.createElement = function (tagname) {
+//   return function () {
+//     document.createElement(tagname)
+//   }
+// }
+//
+// exports.createTextNode = function (txt) {
+//   return function () {
+//     return document.createTextNode(txt)
+//   }
+// }

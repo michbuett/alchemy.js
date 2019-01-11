@@ -1,0 +1,52 @@
+exports.unsafeSetAttr = function (name, val, node) {
+  return function () {
+    if (val === false) {
+      node.removeAttribute(name)
+    } else if (val === true) {
+      node.setAttribute(name, name)
+    } else {
+      node.setAttribute(name, val)
+    }
+  }
+}
+
+// exports.staticAttr = function (name) {
+//   return function (val) {
+//     return function (node) {
+//       return function () {
+//         setAttribute(node, name, val)
+//         return function () {}
+//       }
+//     }
+//   }
+// }
+//
+// exports.dynamicAttr = function (name) {
+//   return function (rv) {
+//     return function (node) {
+//       return function () {
+//         var lastVal
+//
+//         return rv(function (newVal) {
+//           if (newVal === lastVal) {
+//             return
+//           }
+//
+//           setAttribute(node, name, newVal)
+//
+//           lastVal = newVal
+//         })
+//       }
+//     }
+//   }
+// }
+//
+// function setAttribute(node, name, val) {
+//   if (val === false) {
+//     node.removeAttribute(name)
+//   } else if (val === true) {
+//     node.setAttribute(name, name)
+//   } else {
+//     node.setAttribute(name, val)
+//   }
+// }

@@ -1,6 +1,6 @@
 module Alchemy.FRP.Event
   ( Channel
-  , Event
+  , Event(..)
   , Sender
   , openChannel
   , multiplex

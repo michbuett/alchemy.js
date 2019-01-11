@@ -1,0 +1,44 @@
+module Alchemy.DOM.Attributes
+  ( Attr(..)
+  , dynamicAttr
+  , staticAttr
+  ) where
+
+import Prelude
+
+import Alchemy.DOM (Node)
+import Alchemy.Data.Observable (OV, values, read)
+import Alchemy.FRP.Event (subscribe)
+import Alchemy.FRP.Subscription (Subscription)
+import Data.Function.Uncurried (Fn3, runFn3)
+import Effect (Effect)
+
+-- | Represents an (IDL) attribute of a DOM element
+-- | https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes#Content_versus_IDL_attributes
+newtype Attr = Attr (Node → Subscription)
+
+-- foreign import dynamicAttr ::
+--   ∀ a. String → OV a → Attr
+
+dynamicAttr :: ∀ a. String → OV a → Attr
+dynamicAttr name ov =
+  Attr \n -> do
+    val <- read ov
+    _ <- updateAttr n val
+    subscribe (values ov) (updateAttr n)
+
+  where
+    updateAttr node newVal =
+      runFn3 unsafeSetAttr name newVal node
+
+--foreign import staticAttr ::
+--  ∀ a. String → a → Attr
+
+staticAttr :: ∀ a. String → a → Attr
+staticAttr name val =
+  Attr \n -> do
+    _ <- runFn3 unsafeSetAttr name val n
+    pure (pure unit)
+
+foreign import unsafeSetAttr ::
+  ∀ a. Fn3 String a Node (Effect Unit)

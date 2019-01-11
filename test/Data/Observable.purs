@@ -8,7 +8,7 @@ import Alchemy.Data.Incremental.Array (snoc)
 import Alchemy.Data.Incremental.Atomic (set)
 import Alchemy.Data.Incremental.Record (assign)
 import Alchemy.Data.Incremental.Types (ArrayUpdate(..), AtomicUpdate(..), toChange)
-import Alchemy.Data.Observable (create, get, increments)
+import Alchemy.Data.Observable (constant, create, get, increments, mapOV, sample, values)
 import Alchemy.FRP.Event (send, subscribe)
 import Control.Monad.State (StateT)
 import Data.Identity (Identity)
@@ -17,7 +17,7 @@ import Data.Symbol (SProxy(..))
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
-import Effect.Ref (Ref, modify, read, new)
+import Effect.Ref as Ref
 import Test.Spec (Group, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 
@@ -32,12 +32,12 @@ tests =
 
         actual <- liftEffect do
           { ov, sender } <- create (\a b -> patch (set a) b) "Foo"
-          ref <- new []
+          ref <- Ref.new []
           _ <- subscribe (increments ov) (collect ref)
           send sender "Bar"
           send sender "Baz"
           send sender "Baz" -- => no event if nothing is changed
-          read ref
+          Ref.read ref
 
         actual `shouldEqual` expected
 
@@ -77,12 +77,12 @@ tests =
               ]
 
         actual <- liftEffect do
-          ref <- new []
+          ref <- Ref.new []
           { ov, sender } <- create patch v
           _ <- subscribe (increments ov) (collect ref)
           send sender p1
           send sender p2
-          read ref
+          Ref.read ref
 
         actual  `shouldEqual` expected
 
@@ -96,7 +96,7 @@ tests =
               ]
 
         actual <- liftEffect do
-          ref <- new []
+          ref <- Ref.new []
           { ov, sender } <- create patch r
           sub <- pure $ get (SProxy :: SProxy "foo") ov
           unsub <- subscribe (increments sub) (collect ref)
@@ -105,13 +105,47 @@ tests =
           unsub
           -- no further updates after canceling subscription
           sender $ assign { foo: set "Foo3" }
-          read ref
+          Ref.read ref
 
         actual `shouldEqual` expected
 
 
-collect :: ∀ a.
-  Ref (Array a) -> a -> Effect Unit
+     it "allows to map observable values" do
+        let ov1 = constant 1
+            ov2 = mapOV show ov1
+            expected =
+              [ { new: "1"
+                , delta: Just $ toChange (Replace "0" "1")
+                }
+              , { new: "2"
+                , delta: Just $ toChange (Replace "1" "2")
+                }
+              , { new: "3"
+                , delta: Just $ toChange (Replace "2" "3")
+                }
+              ]
+
+        v1 <- liftEffect $ sample ov1
+        v2 <- liftEffect $ sample ov2
+        v3 <- liftEffect do
+          ref <- Ref.new []
+          { ov, sender } <- create patch 0
+          ov3 <- pure $ mapOV show ov
+          _ <- subscribe (increments ov3) (collect ref)
+          sender $ set 1
+          sender $ set 1
+          sender $ set 1
+          sender $ set 2
+          sender $ set 3
+          sender $ set 3
+          Ref.read ref
+
+        v1 `shouldEqual` 1
+        v2 `shouldEqual` "1"
+        v3 `shouldEqual` expected
+
+
+collect :: ∀ a. Ref.Ref (Array a) -> a -> Effect Unit
 collect r x = do
-  _ <- modify (\s -> s <> [x]) r
+  _ <- Ref.modify (\s -> s <> [x]) r
   pure unit

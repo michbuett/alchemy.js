@@ -31,6 +31,7 @@
     "install_purescript_dependencies": "psc-package install",
     "test": "pulp --psc-package test",
     "build-example-arena": "pulp --psc-package browserify -m Example.Arena.Main -I examples/arena/src/ -t examples/arena/app.js",
+    "build-example-todo": "pulp --psc-package browserify -m Example.Todo.Main -I examples/todo/src/ -t examples/todo/app.js",
     "build-example-pong": "pulp --psc-package browserify -m Example.Pong.Main -I examples/pong/ -t examples/pong/app.js"
   },
   "dependencies": {

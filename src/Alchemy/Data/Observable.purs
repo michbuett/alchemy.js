@@ -1,22 +1,29 @@
 module Alchemy.Data.Observable
   ( OV
   , create
+  , create'
+  , constant
   , foldEvent
   , increments
   , changes
   , values
-  , read
+  , sample
   , get
+  , mapOV
   ) where
 
 
-import Prelude
+import Prelude hiding (map)
 
-import Alchemy.Data.Incremental (Increment, Patch, noop, patch)
+import Alchemy.Data.Incremental (Increment, Patch, noop, runPatch)
 import Alchemy.Data.Incremental (const) as P
-import Alchemy.Data.Incremental.Types (class Patchable, fromChange)
-import Alchemy.FRP.Event (Event, Sender, multiplex, openChannel, send, subscribe)
-import Data.Maybe (Maybe(..), fromJust)
+import Alchemy.Data.Incremental.Array (updateAt)
+import Alchemy.Data.Incremental.Atomic (set)
+import Alchemy.Data.Incremental.Types (class Patchable, fromChange, mapChange)
+import Alchemy.FRP.Event (Event(..), Sender, multiplex, openChannel, send, subscribe)
+import Alchemy.FRP.RV (RV)
+import Alchemy.FRP.RV as RV
+import Data.Maybe (Maybe(..), fromJust, isJust)
 import Effect (Effect)
 import Effect.Ref as Ref
 import Effect.Unsafe (unsafePerformEffect)
@@ -24,11 +31,21 @@ import Partial.Unsafe (unsafePartial)
 import Prim.Row (class Cons)
 import Record.Unsafe (unsafeGet)
 import Type.Prelude (class IsSymbol, SProxy, reflectSymbol)
+import Unsafe.Coerce (unsafeCoerce)
 
 
 -- | An incremental and observable value
-newtype OV a = OV { value :: Effect a, increments :: Event (Increment a) }
+newtype OV a =
+  OV { value :: Effect a
+     , increments :: Event (Increment a)
+     }
 
+-- | A constant (never changing) observable value
+constant :: ∀ a. a -> OV a
+constant a =
+  OV { value: pure a
+     , increments: pure { new: a, delta: Nothing }
+     }
 
 create ::
   ∀ a b
@@ -53,6 +70,20 @@ create f b = do
        Ref.write i.new r
        send s i
 
+create' :: ∀ a. a -> Effect { ov :: OV a, sender :: Sender (Increment a) }
+create' b = do
+  { event: ea, sender: sa } <- openChannel
+  { event: eb, sender: sb } <- openChannel
+  r <- Ref.new b
+  _ <- subscribe ea (handle r sb)
+  pure { ov: OV { value: Ref.read r, increments: eb }, sender: sa }
+
+  where
+    handle _ _ { delta: Nothing } = pure unit
+    handle r s i = do
+       Ref.write i.new r
+       send s i
+
 increments :: ∀ a. OV a -> Event (Increment a)
 increments (OV { increments: i }) = i
 
@@ -66,8 +97,8 @@ changes ov = getDelta <$> increments ov
       -- unsafePartial is safe because an OV triggers only if there are changes
       fromChange (unsafePartial (fromJust d))
 
-read :: ∀ a. OV a -> Effect a
-read (OV { value }) = value
+sample :: ∀ a. OV a -> Effect a
+sample (OV { value }) = value
 
 get ::
   ∀ l a d rs r
@@ -106,7 +137,77 @@ foldEvent f initialVal e =
 
     update s a = do
        currVal <- Ref.read ref
-       notify s (patch (f a) currVal)
+       notify s (runPatch (f a) currVal)
 
     notify _ { delta: Nothing } = pure unit
-    notify send incr = send incr
+    notify send incr = do
+      _ <- Ref.write incr.new ref
+      send incr
+
+foldOV :: ∀ a da b
+  . Patchable a da => (da -> b -> Increment b) -> b -> OV a -> OV b
+foldOV f b (OV { value: va, increments: eia }) =
+  OV { value: v, increments: ei }
+  where
+    v = Ref.read ref
+
+    ei = multiplex update eia
+
+    ref = unsafePerformEffect (Ref.new b)
+
+    update _ { delta: Nothing } = pure unit
+    update s { delta: Just da } = do
+       currVal :: b <- v
+       notify s (f (fromChange da) currVal)
+
+    notify _ { delta: Nothing } = pure unit
+    notify send incr = do
+      _ <- Ref.write incr.new ref
+      send incr
+
+mapOV :: ∀ a b f
+  . Functor f
+ => Patchable a (f a)
+ => Patchable b (f b)
+ => (a -> b)
+ -> OV a
+ -> OV b
+mapOV f (OV { value, increments: i }) =
+  OV { value: f <$> value
+     , increments: mapi <$> i
+     }
+  where
+    mapi :: Increment a -> Increment b
+    mapi { new: a, delta: Nothing } = { new: f a, delta: Nothing }
+    mapi { new: a, delta: Just da } = { new: f a, delta: Just (mapChange f da) }
+
+
+newtype OV2 a = OV2 (RV (Increment a) (Increment a))
+
+createFromRV :: ∀ a. a -> Effect { ov :: OV2 a, send :: Sender (Patch a) }
+createFromRV a = do
+  rv <- RV.create (\i -> if isJust i.delta then Just i else Nothing) ia
+
+  pure { ov: OV2 rv
+       , send: \p -> do
+          i <- RV.get rv
+          RV.set rv (runPatch p i.new)
+       }
+
+  where
+    ia = { new: a, delta: Nothing }
+
+
+filterIncrements :: ∀ a. Increment a -> Maybe (Increment a)
+filterIncrements { delta: Nothing } = Nothing
+filterIncrements i = Just i
+
+
+-- foldOV2 :: ∀ a da b
+--   . Patchable a da => (da -> b -> Increment b) -> b -> OV2 a -> OV2 b
+-- foldOV2 f b (OV2 rv) =
+--   OV $ RV
+--   { i: \i -> pure unit
+--   ,
+--
+--   out = unsafePerformEffect $ RV.create filterIncrements (liftIncr b)

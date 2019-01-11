@@ -6,6 +6,7 @@ module Alchemy.Data.Incremental.Types
   , Change
   , fromChange
   , toChange
+  , mapChange
   ) where
 
 import Prelude
@@ -37,6 +38,9 @@ instance patchableArrayUpdate ::
   (Patchable a da) => Patchable (Array a) (Array (ArrayUpdate a))
 
 data AtomicUpdate a = Replace a a
+
+instance functorAtomicUpdate :: Functor AtomicUpdate where
+  map f (Replace a b) = Replace (f a) (f b)
 
 instance showAtomicUpdate :: Show a => Show (AtomicUpdate a) where
   show (Replace x y) =
@@ -91,18 +95,73 @@ instance showArrayUpdate ::
   show (UpdateAt i v) = "UpdateAt(" <> (show i) <> ", " <> (show  v) <> ")"
 
 
--- | A type level function which maps a type to the type of its change structure.
+-- | A type level function which maps a type to the type of its change structure
 -- |
--- | Uniqueness of instances makes the coercions `fromChange` and `toChange` safe,
--- | since the functional dependency makes the change structure type unique.
+-- | Uniqueness of instances makes the coercions `fromChange` and `toChange`
+-- | safe, since the functional dependency makes the change structure type
+-- | unique.
 data Change a
 
 instance showChange :: (Patchable a da, Show da) => Show (Change a) where
-  show c = show (fromChange c :: da)
+  show = show <<< fromChange
 
 instance eqChange :: (Patchable a da, Eq da) => Eq (Change a) where
-  eq c1 c2 = eq (fromChange c1 :: da) (fromChange c2 :: da)
+  eq c1 c2 = eq (fromChange c1) (fromChange c2)
 
+instance semigroupChange :: (Patchable a da, Semigroup da) => Semigroup (Change a) where
+  append x y = toChange (fromChange x <> fromChange y)
+
+instance monoidChange :: (Patchable a da, Monoid da) => Monoid (Change a) where
+  mempty = toChange mempty
+
+-- newtype Delta f a = Delta (Patchable a (f a) => f a)
+--
+-- instance functorDelta ::
+--   ( Functor f
+--   , Patchable a (f a)
+--   , Patchable b (f b)
+--   ) => Functor (Delta f) where
+--     -- map :: (a -> b) -> Delta f a -> Delta f b
+--     map f (Delta c) =
+--       let fa = c :: f a
+--        in unsafeCoerce c
+
+-- instance functorChange :: Functor Change where
+instance functorChange ::
+  ( Functor f
+  , Patchable a da
+  , Patchable b (f b)
+  )
+  => Functor Change where
+  -- map :: ∀ a da b. Patchable a da => (a -> b) -> Change a -> Change b
+  map f c =
+    -- let d :: da
+    --     d = fromChange c
+    --  in
+    unsafeCoerce f
+  -- map :: Functor f => Patchable a (f a) => Patchable b (f b)
+  -- map :: ∀ a b f. Functor f => Patchable a (f a) => Patchable b (f b)
+    -- => (a -> b) -> Change a -> Change b
+  -- map :: (a -> b) -> Change a -> Change b
+  -- map = mapChange
+  -- map f ca =
+    -- toChange (f <$> (fromChange ca))
+-- instance functorChange ::  (Patchable a (f a), Patchable b (f b)) => Functor Change where
+  -- map :: ∀ a b. (a -> b) -> Change (a) -> Change (b)
+  -- map f ca =
+    -- let da :: f a
+    --     da = fromChange ca
+    --  in
+     -- unsafeCoerce f
+    -- toChange (f <$> (fromChange ca))
+
+mapChange :: ∀ a b f
+  . Functor f
+ => Patchable a (f a)
+ => Patchable b (f b)
+ => (a -> b) -> Change a -> Change b
+mapChange f ca =
+  toChange (f <$> (fromChange ca))
 
 fromChange :: forall a da. Patchable a da => Change a -> da
 fromChange = unsafeCoerce

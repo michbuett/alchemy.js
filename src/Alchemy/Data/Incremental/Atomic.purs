@@ -8,7 +8,7 @@ module Alchemy.Data.Incremental.Atomic
 import Prelude
 
 import Alchemy.Data.Incremental (Increment, Patch(..))
-import Alchemy.Data.Incremental.Types (class Patchable, AtomicUpdate(..), toChange)
+import Alchemy.Data.Incremental.Types (class Patchable, AtomicUpdate(..), Change, fromChange, toChange)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
 
@@ -24,6 +24,9 @@ instance showAtomic :: Show a => Show (Atomic a) where
 
 instance patchableAtomic ::
   Patchable (Atomic a) (AtomicUpdate (Atomic a))
+
+instance functorAtomic :: Functor Atomic where
+  map f (Atomic a) = Atomic (f a)
 
 set :: ∀ a. Eq a => Patchable a (AtomicUpdate a) => a -> Patch a
 set newVal = Patch (replaceWith newVal)
