@@ -1,18 +1,24 @@
 module Alchemy.Data.Incremental.Record
    ( class RecordPatchRL
    , class RecordChangeRL
-   -- , PRecord
    , assign
+   , prop
    ) where
 
 
-import Alchemy.Data.Incremental (Patch)
+import Prelude
+
+import Alchemy.Data.Increment.Value (IVal(..))
+import Alchemy.Data.Incremental (Patch, fromChange, liftValue)
 import Alchemy.Data.Incremental.Types (class Patchable, Change)
 import Data.Maybe (Maybe(..), isJust)
 import Data.Symbol (class IsSymbol)
 import Prim.Row as Row
 import Prim.RowList as RL
+import Record.Unsafe (unsafeGet)
+import Type.Prelude (SProxy, reflectSymbol)
 import Type.Row (Nil, kind RowList)
+-- import Unsafe.Coerce (unsafeCoerce)
 
 -- type PRecord r d = Patch (Record d) (Record r) (Record r)
 
@@ -62,6 +68,7 @@ assign ::
  -> Patch (Record rs)
 assign dr = unsafePatchRecord isJust Just Nothing dr
 
+
 foreign import unsafePatchRecord ::
   ∀ a b
   . (∀ c. Maybe c -> Boolean) -- isJust
@@ -69,6 +76,35 @@ foreign import unsafePatchRecord ::
  -> (∀ c. Maybe c) -- Nothing
  -> a
  -> b
+
+
+prop ::
+  ∀ l a d rs r
+  . IsSymbol l => Row.Cons l a rs r => Patchable (Record r) (Record d)
+ => SProxy l -> (Record r) -> IVal (Record r) a
+prop key r0 =
+  prop' $ liftValue r0
+  where
+    k = (reflectSymbol key)
+    prop' ir = IVal
+      { inc:
+        { new: unsafeGet k ir.new
+        , delta: ir.delta <#> \dr -> unsafeGet k (fromChange dr)
+        }
+      , next: prop'
+      }
+
+-- t = if _ then "foo" else "bar"
+-- prop ::
+--   ∀ l a d rs r
+--   . IsSymbol l => Row.Cons l a rs r => Patchable (Record r) (Record d)
+--  => SProxy l -> Increment (Record r) -> Increment a
+-- prop key { new, delta } =
+--   let k = (reflectSymbol key) in
+--   { new: unsafeGet k new
+--   , delta: delta <#> (\dr -> unsafeGet k (fromChange dr))
+--   }
+
 
 -- import Alchemy.Data.Incremental (class Change, Patch)
 -- import Data.Maybe (Maybe(..), isJust)

@@ -5,7 +5,7 @@ module Test.Alchemy.FRP.Behavior
 import Prelude
 
 import Alchemy.FRP.Behavior (Behavior, map2, fromEff, sampleNow, sample, sampleBy)
-import Alchemy.FRP.Event (openChannel, subscribe, send)
+import Alchemy.FRP.Event (openChannel, subscribe)
 import Control.Monad.State (StateT)
 import Data.Identity (Identity)
 import Effect (Effect)
@@ -75,11 +75,11 @@ tests =
           b <- pure $ pure "foo"
           eOut <- pure $ sample b eIn
           unsubscribe <- subscribe eOut (collect r)
-          send c "foo"
-          send c "bar"
-          send c "baz"
+          c "foo"
+          c "bar"
+          c "baz"
           unsubscribe -- no further changes
-          send c "ping"
+          c "ping"
           read r) `shouldEqual` "foofoofoo"
 
       it "can sample a time function of effects by an event using the event data" do
@@ -89,8 +89,8 @@ tests =
           b <- pure $ pure (\s -> "<foo" <> s <> ">")
           eOut <- pure $ sampleBy b eIn
           unsubscribe <- subscribe eOut (collect r)
-          send c "bar"
-          send c "baz"
+          c "bar"
+          c "baz"
           read r) `shouldEqual` "<foobar><foobaz>"
 
     describe "map2" do

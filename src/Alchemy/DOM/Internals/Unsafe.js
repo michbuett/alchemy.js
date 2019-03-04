@@ -69,3 +69,18 @@ exports.unsafeHandler = function (eventName) {
     }
   }
 }
+
+exports.querySelectorImpl = function (Nothing) {
+  return function (Just) {
+    return function (sel) {
+      return function () {
+        var n = document.querySelector(sel)
+        if (n) {
+          return Just(n)
+        } else {
+          return Nothing
+        }
+      }
+    }
+  }
+}

@@ -2,7 +2,7 @@ module Test.Alchemy.FRP.TestUtils where
 
 import Prelude
 
-import Alchemy.FRP.Event (Channel, Event, openChannel, send, subscribe)
+import Alchemy.FRP.Event (Channel, Event, openChannel, subscribe)
 import Effect (Effect, foreachE)
 import Effect.Ref (new, read, write)
 import Effect.Unsafe (unsafePerformEffect)
@@ -12,7 +12,7 @@ inspectChannel ::
 inspectChannel { sender: s, event } v = do
   ref <- new mempty
   unsubscribe <- subscribe event (\x -> write x ref)
-  send s v
+  s v
   unsubscribe
   read ref
 
@@ -41,6 +41,6 @@ testEvent f xs =
     unsubscribe <- subscribe (f event) (\x -> do
                                           arr <- read ref
                                           write (arr <> [x]) ref)
-    foreachE xs (send s)
+    foreachE xs s
     read ref
   )

@@ -2,14 +2,17 @@ module Example.Todo.Main where
 
 import Prelude
 
-import Alchemy.DOM (render)
-import Alchemy.DOM.Attributes.Dynamic as AttrD
-import Alchemy.DOM.Attributes.Static as AttrS
-import Alchemy.DOM.Elements as El
-import Alchemy.DOM.Internals.Types (DOM)
-import Alchemy.Data.Observable (OV, create', get)
 import Effect (Effect)
 import Type.Prelude (SProxy(..))
+
+import Alchemy.IDOM
+import Alchemy.Data.Increment.Value as IVal
+import Alchemy.Data.Incremental.Atomic as Atomic
+import Alchemy.Data.Incremental.Record as Rec
+import Alchemy.Data.Observable as OVal
+
+data UserInput
+  = AddTodo String
 
 type ToDo =
   { text :: String
@@ -20,62 +23,68 @@ type AppState =
   { todos :: Array ToDo
   }
 
+update :: UserInput -> AppState -> AppState
+update ui state = state
 
-view :: OV AppState -> DOM
+view :: AppState -> Dom AppState
 view state =
-  El.div
-    [ AttrS.className "todoapp" ]
+  div_ [ className_ "todoapp" ]
     [ viewHeader
-    , viewTodos $ get (SProxy :: SProxy "todos") state
+    , viewTodos state
     ]
 
-viewHeader :: DOM
+
+viewHeader :: ∀ a. Dom a
 viewHeader =
-  El.div
-    [ AttrS.className "header" ]
-    [ El.h1 [] [ El.text' "todos" ]
-    , El.inputText
-      [ AttrS.className "new-todo"
-      , AttrS.placeholder "What needs to be done?"
+  div_
+    [ className_ "header" ]
+    [ h1_ [] [ text_ "todos" ]
+    , inputText_
+      [ className_ "new-todo"
+      , placeholder_ "What needs to be done?"
       ] []
     ]
 
-viewTodos :: OV (Array ToDo) -> DOM
-viewTodos todos =
-  El.div [ AttrS.className "main" ]
-    [ El.checkbox
-      [ AttrS.className "toggle-all"
-      , AttrS.id "toggle-all"
-      ] []
-    , El.label
-      [ AttrS.for "toggle-all" ]
-      [ El.text' "Mark all as complete" ]
-    , El.ul
-      [ AttrS.className "todo-list" ]
-      [ El.list viewSingleTodo todos ]
+
+viewTodos :: AppState -> Dom AppState
+viewTodos state =
+  div_ [ className_ "main" ]
+    [ checkbox_ [ id_ "toggle-all", className_ "toggle-all" ] []
+    , label_ [ for_ "toggle-all" ] [ text_ "Mark all as completed" ]
+    , ul [ className_ "todo-list" ]
+        $ list (todos state) viewSingleTodo
     ]
 
-viewSingleTodo :: OV ToDo -> DOM
+  where
+    todos = Rec.prop (SProxy :: SProxy "todos")
+
+
+viewSingleTodo :: ToDo -> Dom ToDo
 viewSingleTodo todo =
-  El.li [ AttrD.checked (get (SProxy :: SProxy "isCompleted") todo) ]
-    [ El.div [ AttrS.className "view" ]
-      [ El.checkbox
-        [ AttrS.className "toggle"
-        , AttrD.checked (isCompleted todo)
-        ] []
-      , El.label [] [ El.text (text todo) ]
-      , El.button [ AttrS.className "destroy" ] []
+  li_
+    [ className $ isCompletedClass todo ]
+    [ div_ [ className_ "view" ]
+      [ checkbox_ [ className_ "toggle" , checked $ isCompleted todo ] []
+      , label_ [] [ text $ txt todo ]
+      , button_ [ className_ "destroy" ] []
       ]
     ]
 
   where
-    isCompleted = get (SProxy :: SProxy "isCompleted")
-    text = get (SProxy :: SProxy "text")
+    txt =
+      Rec.prop (SProxy :: SProxy "text")
+
+    isCompleted =
+      Rec.prop (SProxy :: SProxy "isCompleted")
+
+    isCompletedClass t =
+      IVal.map (Atomic.map (if _ then "completed" else "")) (isCompleted t)
 
 main :: Effect Unit
 main = do
-  { ov: state } <- create' initialState
-  _ <- render "#app" (view state)
+  pure unit
+  { ov: state } <- OVal.create $ IVal.lift initialState
+  _ <- render "#app" state (view initialState)
   pure unit
 
 
@@ -87,6 +96,9 @@ main = do
           }
         , { text: "Text of a second TODO"
           , isCompleted: false
+          }
+        , { text: "And finally the 3rd TODO"
+          , isCompleted: true
           }
         ]
       }

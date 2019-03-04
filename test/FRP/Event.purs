@@ -4,7 +4,7 @@ module Test.Alchemy.FRP.Event
 
 import Prelude
 
-import Alchemy.FRP.Event (Channel, filter, foldp, openChannel, send, subscribe)
+import Alchemy.FRP.Event (Channel, filter, foldp, openChannel, subscribe)
 import Control.Monad.State (StateT)
 import Data.Identity (Identity)
 import Effect.Aff (Aff)
@@ -23,9 +23,9 @@ tests =
           ref <- new "foo"
           { sender: s, event: e } :: Channel String String <- openChannel
           unsub <- subscribe e (\str -> write str ref)
-          send s "bar"
+          s "bar"
           unsub
-          send s "baz"
+          s "baz"
           read ref
 
         result `shouldEqual` "bar"
@@ -142,11 +142,11 @@ tests =
             eFold <- pure $ foldp (+) 0 eSource
             sink1 <- subscribe ((*) 10 <$> eFold) (collect sink1Ref)
             sink2 <- subscribe ((*) 100 <$> eFold) (collect sink2Ref)
-            send sSource 1
-            send sSource 1
-            send sSource 1
-            send sSource 1
-            send sSource 1
+            sSource 1
+            sSource 1
+            sSource 1
+            sSource 1
+            sSource 1
             sink1Val <- read sink1Ref
             sink2Val <- read sink2Ref
             pure { v1: sink1Val, v2: sink2Val }
@@ -169,12 +169,12 @@ tests =
            sink1 <- subscribe eFilter1 (collect sinkRef1)
            sink2 <- subscribe eFilter2 (collect sinkRef2)
            sink3 <- subscribe ((*) 2 <$> eFilter2) (collect sinkRef3)
-           send sSource 1
-           send sSource 5
-           send sSource 11
-           send sSource 25
-           send sSource 1
-           send sSource 15
+           sSource 1
+           sSource 5
+           sSource 11
+           sSource 25
+           sSource 1
+           sSource 15
            sink1Val <- read sinkRef1
            sink2Val <- read sinkRef2
            sink3Val <- read sinkRef3
@@ -194,12 +194,12 @@ tests =
       --      eFilter <- pure $ dropRepeats' eSource
       --      sink1 <- subscribe ((+) 1 <$> eFilter) (collect sinkRef1)
       --      sink2 <- subscribe ((*) 2 <$> eFilter) (collect sinkRef2)
-      --      send sSource 1
-      --      send sSource 1
-      --      send sSource 11
-      --      send sSource 25
-      --      send sSource 25
-      --      send sSource 15
+      --      sSource 1
+      --      sSource 1
+      --      sSource 11
+      --      sSource 25
+      --      sSource 25
+      --      sSource 15
       --      sink1Val <- read sinkRef1
       --      sink2Val <- read sinkRef2
       --      pure { v1: sink1Val, v2: sink2Val }
@@ -218,12 +218,12 @@ tests =
       --      eFilter <- pure $ dropRepeats eSource
       --      sink1 <- subscribe ((+) 1 <$> eFilter) (collect sinkRef1)
       --      sink2 <- subscribe ((*) 2 <$> eFilter) (collect sinkRef2)
-      --      send sSource 1
-      --      send sSource 1
-      --      send sSource 11
-      --      send sSource 25
-      --      send sSource 25
-      --      send sSource 15
+      --      sSource 1
+      --      sSource 1
+      --      sSource 11
+      --      sSource 25
+      --      sSource 25
+      --      sSource 15
       --      sink1Val <- read sinkRef1
       --      sink2Val <- read sinkRef2
       --      pure { v1: sink1Val, v2: sink2Val }

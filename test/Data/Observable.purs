@@ -8,8 +8,8 @@ import Alchemy.Data.Incremental.Array (snoc)
 import Alchemy.Data.Incremental.Atomic (set)
 import Alchemy.Data.Incremental.Record (assign)
 import Alchemy.Data.Incremental.Types (ArrayUpdate(..), AtomicUpdate(..), toChange)
-import Alchemy.Data.Observable (constant, create, get, increments, mapOV, sample, values)
-import Alchemy.FRP.Event (send, subscribe)
+import Alchemy.Data.Observable (constant, create, get, increments, mapOV, sample)
+import Alchemy.FRP.Event (subscribe)
 import Control.Monad.State (StateT)
 import Data.Identity (Identity)
 import Data.Maybe (Maybe(..))
@@ -34,9 +34,9 @@ tests =
           { ov, sender } <- create (\a b -> patch (set a) b) "Foo"
           ref <- Ref.new []
           _ <- subscribe (increments ov) (collect ref)
-          send sender "Bar"
-          send sender "Baz"
-          send sender "Baz" -- => no event if nothing is changed
+          sender "Bar"
+          sender "Baz"
+          sender "Baz" -- => no event if nothing is changed
           Ref.read ref
 
         actual `shouldEqual` expected
@@ -80,8 +80,8 @@ tests =
           ref <- Ref.new []
           { ov, sender } <- create patch v
           _ <- subscribe (increments ov) (collect ref)
-          send sender p1
-          send sender p2
+          sender p1
+          sender p2
           Ref.read ref
 
         actual  `shouldEqual` expected

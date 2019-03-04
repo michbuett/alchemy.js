@@ -10,7 +10,7 @@ module Alchemy.FRP.Behavior
 
 import Prelude
 
-import Alchemy.FRP.Event (Event, multiplex)
+import Alchemy.FRP.Event (Event, shareWhen)
 import Effect (Effect)
 
 -- | `Behavior a` (time function) represents a values of type `a` which varies
@@ -42,13 +42,13 @@ instance monoidBehavior :: Monoid a => Monoid (Behavior a) where
 
 
 sample :: ∀ a b. Behavior b -> Event a → Event b
-sample b e = multiplex smpl e
+sample b e = shareWhen smpl e
   where
     smpl send _ = sampleNow b >>= send
 
 
 sampleBy :: ∀ a b. Behavior (a -> b) -> Event a → Event b
-sampleBy b e = multiplex smpl e
+sampleBy b e = shareWhen smpl e
   where
     smpl send a = do
        f <- sampleNow b

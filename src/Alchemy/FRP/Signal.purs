@@ -1,0 +1,37 @@
+module Alchemy.FRP.Signal
+  where
+
+-- import Prelude
+-- import Effect (Effect)
+-- import Effect.Ref as Ref
+-- import Data.Array (deleteBy)
+-- import Data.Foldable (traverse_)
+-- import Unsafe.Reference (unsafeRefEq)
+--
+-- newtype Signal a
+--   Signal
+--     { send :: (a -> Effect Unit)
+--     , event :: (a -> Effect Unit) -> Effect (Effect Unit)
+--     }
+--
+-- -- | Create an event and a function which supplies a value to that event.
+-- openChannel :: ∀ a
+--   . a
+--  -> Effect (Signal a)
+-- openChannel a0 = do
+--   aRef <- Ref.new a0
+--   subscribers <- Ref.new []
+--   pure
+--     { signal: Signal \k -> do
+--         _ <- Ref.modify (_ <> [k]) subscribers
+--         a <- Ref.read aRef
+--         k a
+--
+--         pure do
+--           _ <- Ref.modify (deleteBy unsafeRefEq k) subscribers
+--           pure unit
+--
+--     , send: \a -> do
+--         Ref.write a aRef
+--         Ref.read subscribers >>= traverse_ \k -> k a
+--     }

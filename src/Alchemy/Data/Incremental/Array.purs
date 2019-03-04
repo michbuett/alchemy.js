@@ -8,9 +8,10 @@ module Alchemy.Data.Incremental.Array
 
 import Prelude
 
-import Alchemy.Data.Incremental (Increment, Patch(..))
+import Alchemy.Data.Incremental (Increment, Patch(..), noop)
 import Alchemy.Data.Incremental.Types (class Patchable, ArrayUpdate(..), fromChange, toChange)
 import Data.Array as Array
+import Data.Foldable (foldMap)
 import Data.Maybe (Maybe(..), fromJust)
 import Partial.Unsafe (unsafePartial)
 -- import Unsafe.Coerce (unsafeCoerce)
@@ -150,3 +151,15 @@ updateAt i f = Patch runPatch
             , delta: Just $ toChange [ UpdateAt i dx ]
             -- , delta: Just $ toChange [ UpdateAt i (fromChange dx) ]
             }
+
+
+-- mapArray :: ∀ a b. (a -> b) -> Increment (Array a) -> Patch (Array b)
+-- mapArray f { delta: Nothing } = noop
+-- mapArray f { delta: Just da } = Patch runPatch
+--   where
+--     runPatch b =
+--       Just $ toChange $ foldMap mapChanges (fromChange da)
+--
+--     mapChanges (InsertAt i a) = InsertAt i (f a)
+--     mapChanges (DeleteAt i ) = DeleteAt i
+--

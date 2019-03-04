@@ -1,6 +1,9 @@
 module Alchemy.Data.Incremental.Types
   ( class Patchable
   , class PatchableRecordRL
+  , Patch(..)
+  , runPatch
+  , Increment
   , ArrayUpdate(..)
   , AtomicUpdate(..)
   , Change
@@ -12,11 +15,29 @@ module Alchemy.Data.Incremental.Types
 import Prelude
 
 import Data.Maybe (Maybe)
+import Data.Newtype (class Newtype)
 import Data.Symbol (class IsSymbol)
 import Prim.Row as Row
 import Prim.RowList as RL
 import Type.Row (Nil, kind RowList)
 import Unsafe.Coerce (unsafeCoerce)
+
+-- | A patch is a thing where you can feed a value in and get a new value
+-- | paired witch the respectable changes
+newtype Patch a = Patch (a -> Increment a)
+
+derive instance newtypePatch :: Newtype (Patch a) _
+
+runPatch :: ∀ a. Patch a -> a -> Increment a
+runPatch (Patch p) = p
+
+-- | An increment is the result on an incremental computation: the new value
+-- | and the delta (the difference between the old and the new value)
+type Increment a =
+  { new :: a
+  , delta :: Maybe (Change a)
+  }
+
 
 -- | A type class to connect a type with its change structure
 -- | This allows the type checker to infere the type of the change da
@@ -53,8 +74,9 @@ instance semigroupAtomicUpdate :: Semigroup (AtomicUpdate a) where
   append (Replace x _) (Replace _ y) = Replace x y
 
 
-class PatchableRecordRL (r :: # Type) (rl :: RowList) (d :: # Type) (dl :: RowList)
-         | rl -> dl, dl -> d, rl -> r
+class PatchableRecordRL
+  (r :: # Type) (rl :: RowList) (d :: # Type) (dl :: RowList)
+  | rl -> dl, dl -> d, rl -> r
 
 instance patchableRecordRLNil :: PatchableRecordRL () Nil () Nil
 
@@ -63,30 +85,21 @@ instance patchableRecordRLCons
      , PatchableRecordRL r1 rl d1 dl
      , Row.Cons l a r1 r2
      , Row.Cons l (Maybe (Change a)) d1 d2
-     -- , Patchable a da
      , Row.Lacks l r1
      , Row.Lacks l d1
      )
   => PatchableRecordRL r2 (RL.Cons l a rl) d2 (RL.Cons l (Maybe (Change a)) dl)
 
--- data ArrayUpdate a da
---   = InsertAt Int a
---   | DeleteAt Int
---   | UpdateAt Int da
---
--- derive instance eqArrayUpdate :: (Eq a, Eq da) => Eq (ArrayUpdate a da)
---
--- instance showArrayUpdate :: (Show a, Show da) => Show (ArrayUpdate a da) where
---   show (InsertAt i v) = "InsertAt(" <> (show i) <> ", " <> (show v) <> ")"
---   show (DeleteAt i) = "DeleteAt(" <> (show i) <> ")"
---   show (UpdateAt i v) = "UpdateAt(" <> (show i) <> ", " <> (show  v) <> ")"
+
 data ArrayUpdate a
   = InsertAt Int a
   | DeleteAt Int
   | UpdateAt Int (Change a)
 
+
 derive instance eqArrayUpdate ::
   (Patchable a da, Eq a, Eq da) => Eq (ArrayUpdate a)
+
 
 instance showArrayUpdate ::
   (Patchable a da, Show a, Show da) => Show (ArrayUpdate a) where
@@ -163,8 +176,10 @@ mapChange :: ∀ a b f
 mapChange f ca =
   toChange (f <$> (fromChange ca))
 
+
 fromChange :: forall a da. Patchable a da => Change a -> da
 fromChange = unsafeCoerce
+
 
 toChange :: forall a da. Patchable a da => da -> Change a
 toChange = unsafeCoerce
