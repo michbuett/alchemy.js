@@ -55,9 +55,9 @@ create ival = do
   r <- Ref.new ival
 
   let handle a = do
-       debugLog "input" a
+       -- debugLog "input" a
        ival' <- Ref.modify (next a) r
-       debugLog "new increment" ival'
+       -- debugLog "new increment" ival'
        case (delta ival') of
          Nothing -> pure unit
          Just _ -> sOut (increment ival')

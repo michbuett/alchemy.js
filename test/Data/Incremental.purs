@@ -3,9 +3,9 @@ module Test.Alchemy.Data.Incremental
 
 import Prelude
 
-import Alchemy.Data.Incremental (Increment, patch)
+import Alchemy.Data.Incremental (Increment, runPatch)
 import Alchemy.Data.Incremental.Array (cons, snoc, uncons, unsnoc, updateAt)
-import Alchemy.Data.Incremental.Atomic (Atomic(..), replaceWith, set)
+import Alchemy.Data.Incremental.Atomic (Atomic(..), replace, set)
 import Alchemy.Data.Incremental.Record (assign)
 import Alchemy.Data.Incremental.Types (ArrayUpdate(..), AtomicUpdate(..), toChange)
 import Control.Monad.State (StateT)
@@ -20,25 +20,25 @@ tests =
   describe "Alchemy.Data.Incremental2" do
     describe "Atomic values" do
       it "allows patching (=replacing) simple (=atomic) values" do
-        (patch (set $ Atomic "Bar") (Atomic "Foo"))
+        (runPatch (set $ Atomic "Bar") (Atomic "Foo"))
           `shouldEqual`
             { new: Atomic "Bar"
             , delta: Just $ toChange (Replace (Atomic "Foo") (Atomic "Bar"))
             }
 
-        (patch (set 2) 1)
+        (runPatch (set 2) 1)
           `shouldEqual` { new: 2, delta: Just $ toChange (Replace 1 2) }
 
-        (patch (set 2.0) 1.0)
+        (runPatch (set 2.0) 1.0)
           `shouldEqual` { new: 2.0, delta: Just $ toChange (Replace 1.0 2.0) }
 
-        (patch (set true) false)
+        (runPatch (set true) false)
           `shouldEqual` { new: true, delta: Just $ toChange (Replace false true) }
 
-        (patch (set "Bar") "Foo")
+        (runPatch (set "Bar") "Foo")
           `shouldEqual` { new: "Bar", delta: Just $ toChange (Replace "Foo" "Bar") }
 
-        (patch (set "Bar") "Bar")
+        (runPatch (set "Bar") "Bar")
           `shouldEqual` { new: "Bar", delta: Nothing }
 
     describe "Arrays" do
@@ -54,8 +54,8 @@ tests =
             expected1 = { new: [ 3, 1, 2 ], delta: Just $ toChange [ InsertAt 0 3 ] }
             expected2 = { new: [ 1, 2, 3 ], delta: Just $ toChange [ InsertAt 2 3 ] }
 
-        (patch p1 a) `shouldEqual` expected1
-        (patch p2 a) `shouldEqual` expected2
+        (runPatch p1 a) `shouldEqual` expected1
+        (runPatch p2 a) `shouldEqual` expected2
 
       it "allows removing values from arrays" do
         let a1 = [ 1, 2, 3 ]
@@ -70,18 +70,18 @@ tests =
             expected3 = { new: [ 1, 2 ], delta: Just $ toChange [ DeleteAt 2 ] }
             expected4 = { new: [], delta: Nothing }
 
-        (patch p1 a1) `shouldEqual` expected1
-        (patch p1 a2) `shouldEqual` expected2
-        (patch p2 a1) `shouldEqual` expected3
-        (patch p2 a2) `shouldEqual` expected4
+        (runPatch p1 a1) `shouldEqual` expected1
+        (runPatch p1 a2) `shouldEqual` expected2
+        (runPatch p2 a1) `shouldEqual` expected3
+        (runPatch p2 a2) `shouldEqual` expected4
 
       it "allows mapping array items" do
         let a = [ 1, 2, 3 ]
 
 
-            p1 = updateAt 1 (\x -> replaceWith (10 * x) x)
-            p2 = updateAt 10 (\x -> replaceWith (10 * x) x)
-            p3 = updateAt 1 (\x -> replaceWith x x)
+            p1 = updateAt 1 (\x -> replace (10 * x) x)
+            p2 = updateAt 10 (\x -> replace (10 * x) x)
+            p3 = updateAt 1 (\x -> replace x x)
 
             expected1 =
               { new: [1, 20, 3]
@@ -93,9 +93,9 @@ tests =
               , delta: Nothing
               }
 
-        (patch p1 a) `shouldEqual` expected1
-        (patch p2 a) `shouldEqual` expected2
-        (patch p3 a) `shouldEqual` expected2
+        (runPatch p1 a) `shouldEqual` expected1
+        (runPatch p2 a) `shouldEqual` expected2
+        (runPatch p3 a) `shouldEqual` expected2
 
 
     describe "Records" do
@@ -119,7 +119,7 @@ tests =
                   }
               }
 
-        (patch p r) `shouldEqual` expected
+        (runPatch p r) `shouldEqual` expected
 
 
       it "allows patching nested records" do
@@ -159,7 +159,7 @@ tests =
                 }
               }
 
-        (patch p r)`shouldEqual` expected
+        (runPatch p r)`shouldEqual` expected
 
       it "tracks unchanged values when patching records" do
         let r = { foo: { bar: { k1: "v1" , k2: "v2" }}}
@@ -190,8 +190,8 @@ tests =
               , delta: Nothing
               }
 
-        (patch p1 r)`shouldEqual` expected1
-        (patch p2 r)`shouldEqual` expected2
+        (runPatch p1 r)`shouldEqual` expected1
+        (runPatch p2 r)`shouldEqual` expected2
 
 
       it "allows nested patches of differnt types" do
@@ -199,7 +199,7 @@ tests =
               { foo: "Foo", bar: [{ ping: "bing" }] }
 
             p =
-              assign { bar: updateAt 0 (patch $ assign { ping: set "Bong!" }) }
+              assign { bar: updateAt 0 (runPatch $ assign { ping: set "Bong!" }) }
 
             expected =
               { new:
@@ -212,4 +212,4 @@ tests =
                   }
               }
 
-        (patch p r) `shouldEqual` expected
+        (runPatch p r) `shouldEqual` expected
