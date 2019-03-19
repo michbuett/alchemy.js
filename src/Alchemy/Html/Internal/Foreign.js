@@ -52,18 +52,20 @@ exports.createTextNode = function (txt) {
   }
 }
 
-exports.unsafeHandler = function (eventName) {
+exports.unsafeAddEventHandler = function (eventName) {
   return function (fn) {
     return function (node) {
       return function () {
+        console.log('[DEBUG] addEventHandler', eventName, fn, node)
         var handler = function (e) {
+          console.log('[DEBUG] event "' + eventName + '": ', e)
           fn(e)()
         }
 
-        node.addEventHandler(eventName, handler)
+        node.addEventListener(eventName, handler)
 
         return function removeEventHandler() {
-          node.removeEventHandler(eventName, handler)
+          node.removeEvenListener(eventName, handler)
         }
       }
     }
@@ -83,4 +85,36 @@ exports.querySelectorImpl = function (Nothing) {
       }
     }
   }
+}
+
+exports.getTag = function (x) {
+  if (typeof x === 'number') {
+    if (x === Math.floor(x)) {
+      return 'int'
+    } else {
+      return 'number'
+    }
+  }
+
+  if (typeof x === 'string') {
+    return 'string'
+  }
+
+  if (x === null) {
+    return 'null'
+  }
+
+  if (x === undefined) {
+    return 'undefined'
+  }
+
+  if (Array.isArray(x)) {
+    return 'array'
+  }
+
+  if (typeof x === 'object') {
+    return 'object'
+  }
+
+  return 'unknown'
 }

@@ -1,6 +1,7 @@
 module Alchemy.Data.Incremental.Atomic
    ( Atomic(..)
    , modify
+   , set
    , replace
    , old
    , new
@@ -78,5 +79,6 @@ ival :: ∀ a b
 ival f a0 =
   fold runPatch (f a0)
   where
-    runPatch { delta: Nothing } last = { new: last.new, delta: Nothing }
-    runPatch { new: a } last = replace (f a) last.new
+    -- runPatch { delta: Nothing } last = { new: last.new, delta: Nothing }
+    -- runPatch { new: a } last = replace (f a) last.new
+    runPatch a last = replace (f a) last

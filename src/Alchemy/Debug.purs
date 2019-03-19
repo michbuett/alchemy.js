@@ -4,4 +4,5 @@ module Alchemy.Debug
 import Effect (Effect)
 import Prelude (Unit)
 
-foreign import debugLog :: ∀ a. a -> Effect Unit
+foreign import debugLog :: ∀ a.
+  String -> a -> Effect Unit

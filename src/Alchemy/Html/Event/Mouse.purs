@@ -1,15 +1,16 @@
-module Alchemy.DOM.Events.Mouse
+module Alchemy.Html.Event.Mouse
   ( MouseEvent
-  , click
-  , dblclick
-  , mousedown
-  , mouseup
+  , onClick
+  , onDblclick
+  , onMouseup
+  , onMousedown
+  , readMouseEvent
   ) where
 
 import Prelude
 
-import Alchemy.DOM.Internals.Unsafe (unsafeHandler)
-import Alchemy.DOM.Internals.Types (Attr)
+import Alchemy.DOM.Internal.Foreign (ForeignReader, read)
+import Alchemy.Html (Attribute, on')
 import Effect (Effect)
 
 -- | The MouseEvent interface represents events that occur due to the user
@@ -69,17 +70,20 @@ type MouseEvent =
   }
 
 
-click :: (MouseEvent → Effect Unit) → Attr
-click = unsafeHandler "click"
+onClick :: ∀ a. Effect Unit → Attribute a
+onClick = on' "click"
 
 
-dblclick :: (MouseEvent → Effect Unit) → Attr
-dblclick = unsafeHandler "dblclick"
+onDblclick :: ∀ a. Effect Unit → Attribute a
+onDblclick = on' "dblclick"
 
 
-mousedown :: (MouseEvent → Effect Unit) → Attr
-mousedown = unsafeHandler "mousedown"
+onMousedown :: ∀ a. Effect Unit → Attribute a
+onMousedown = on' "mousedown"
 
 
-mouseup :: (MouseEvent → Effect Unit) → Attr
-mouseup = unsafeHandler "mouseup"
+onMouseup :: ∀ a. Effect Unit → Attribute a
+onMouseup = on' "mouseup"
+
+readMouseEvent :: ForeignReader MouseEvent
+readMouseEvent = read

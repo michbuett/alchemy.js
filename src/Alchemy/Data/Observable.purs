@@ -16,9 +16,8 @@ module Alchemy.Data.Observable
 import Prelude hiding (map)
 
 import Alchemy.Data.Increment.Value (IVal, delta, increment, next, value)
-import Alchemy.Data.Incremental (Increment, Patch, noop, runPatch)
-import Alchemy.Data.Incremental (const) as P
-import Alchemy.Data.Incremental.Types (class Patchable, fromChange)
+import Alchemy.Data.Incremental (Increment, Patch, noop, runPatch, class Patchable, fromChange)
+import Alchemy.Debug (debugLog)
 import Alchemy.FRP.Event (Event, Sender, openChannel, shareWhen, subscribe)
 import Data.Maybe (Maybe(..), fromJust)
 import Effect (Effect)
@@ -47,7 +46,7 @@ constant a =
 create ::
   ∀ i o
   . IVal i o
- -> Effect { sender :: Sender (Increment i), ov :: OVal o }
+ -> Effect { sender :: Sender i, ov :: OVal o }
 create ival = do
   { event: eIn, sender: sIn } <- openChannel
 
@@ -56,10 +55,12 @@ create ival = do
   r <- Ref.new ival
 
   let handle a = do
+       debugLog "input" a
        ival' <- Ref.modify (next a) r
+       debugLog "new increment" ival'
        case (delta ival') of
          Nothing -> pure unit
-         Just _ -> sOut (increment ival)
+         Just _ -> sOut (increment ival')
 
   _ <- subscribe eIn handle
 

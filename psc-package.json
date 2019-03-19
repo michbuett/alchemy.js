@@ -5,6 +5,7 @@
   "depends": [
     "arrays",
     "effect",
+    "either",
     "functions",
     "maybe",
     "prelude",

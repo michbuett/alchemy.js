@@ -2,6 +2,7 @@ module Alchemy.Data.Incremental.Record
    ( class RecordPatchRL
    , class RecordChangeRL
    , assign
+   , assign'
    , prop
    ) where
 
@@ -9,7 +10,7 @@ module Alchemy.Data.Incremental.Record
 import Prelude
 
 import Alchemy.Data.Increment.Value (IVal(..))
-import Alchemy.Data.Incremental (Patch, fromChange, liftValue)
+import Alchemy.Data.Incremental (Increment, Patch(..), fromChange, liftValue, runPatch)
 import Alchemy.Data.Incremental.Types (class Patchable, Change)
 import Data.Maybe (Maybe(..), isJust)
 import Data.Symbol (class IsSymbol)
@@ -68,6 +69,8 @@ assign ::
  -> Patch (Record rs)
 assign dr = unsafePatchRecord isJust Just Nothing dr
 
+assign' :: ∀ r. (Record r -> Patch (Record r)) -> Patch (Record r)
+assign' f = Patch \r -> runPatch (f r) r
 
 foreign import unsafePatchRecord ::
   ∀ a b
@@ -81,7 +84,7 @@ foreign import unsafePatchRecord ::
 prop ::
   ∀ l a d rs r
   . IsSymbol l => Row.Cons l a rs r => Patchable (Record r) (Record d)
- => SProxy l -> (Record r) -> IVal (Record r) a
+ => SProxy l -> (Record r) -> IVal (Increment (Record r)) a
 prop key r0 =
   prop' $ liftValue r0
   where
@@ -89,7 +92,7 @@ prop key r0 =
     prop' ir = IVal
       { inc:
         { new: unsafeGet k ir.new
-        , delta: ir.delta <#> \dr -> unsafeGet k (fromChange dr)
+        , delta: ir.delta >>= \dr -> unsafeGet k (fromChange dr)
         }
       , next: prop'
       }

@@ -16,10 +16,11 @@
 // };
 
 var channel
-var pressedKeys
+var pressedKeys = {}
 
 exports.pressed = function (code) {
   return function (keys) {
+    console.log('[DEBUG] pressed', code, keys, !!keys[code])
     return !!keys[code]
   }
 }
