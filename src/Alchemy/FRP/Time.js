@@ -12,7 +12,7 @@ exports.tickImpl = function (openChannel) {
           elapsedMS = MAX_ELAPSED
         }
         // console.log('requestAnimationFrame')
-        channel.send(elapsedMS * TARGET_FPMS)
+        channel.sender(elapsedMS * TARGET_FPMS)()
       }
       lastTick = now
       window.requestAnimationFrame(tick)
