@@ -1,0 +1,31 @@
+{
+  "name": "example-webgl",
+  "description": "An example to demonstrate the usage of webgl",
+  "author": "Michael Büttner <michbuett@gmx.de>",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/michbuett/alchemy.js.git"
+  },
+  "license": "JSON",
+  "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-standard": "^11.0.0",
+    "eslint-plugin-import": "^2.17.2",
+    "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-promise": "^3.8.0",
+    "eslint-plugin-standard": "^3.1.0",
+    "psc-package": "^3.0.1",
+    "pulp": "^12.4.2",
+    "purescript": "^0.12.5",
+    "rollup": "^0.41.6",
+    "rollup-plugin-purs": "^1.0.38"
+  },
+  "scripts": {
+    "prebuild": "psc-package install",
+    "build": "pulp --psc-package browserify -t app.js"
+  },
+  "dependencies": {
+    "pixi.js": "^4.8.7"
+  }
+}
