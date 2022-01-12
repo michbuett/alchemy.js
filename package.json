@@ -11,30 +11,22 @@
   "keywords": [
     "FRP",
     "entity-system",
-    "web",
-    "frontend"
+    "gamedev"
   ],
   "license": "JSON",
   "devDependencies": {
-    "bower": "^1.8.4",
-    "eslint": "^4.19.1",
-    "eslint-config-standard": "^11.0.0",
-    "eslint-plugin-import": "^2.11.0",
-    "eslint-plugin-node": "^6.0.1",
-    "eslint-plugin-promise": "^3.7.0",
-    "eslint-plugin-standard": "^3.1.0",
+    "eslint": "^5.16.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.17.3",
+    "eslint-plugin-node": "^9.1.0",
+    "eslint-plugin-promise": "^4.1.1",
+    "eslint-plugin-standard": "^4.0.0",
     "psc-package": "^3.0.1",
-    "pulp": "^12.3.0",
-    "purescript": "^0.12.0"
+    "pulp": "^12.4.2",
+    "purescript": "^0.12.5"
   },
   "scripts": {
     "install_purescript_dependencies": "psc-package install",
-    "test": "pulp --psc-package test",
-    "build-example-arena": "pulp --psc-package browserify -m Example.Arena.Main -I examples/arena/src/ -t examples/arena/app.js",
-    "build-example-todo": "pulp --psc-package browserify -m Example.Todo.Main -I examples/todo/src/ -t examples/todo/app.js",
-    "build-example-pong": "pulp --psc-package browserify -m Example.Pong.Main -I examples/pong/ -t examples/pong/app.js"
-  },
-  "dependencies": {
-    "pixi.js": "^4.5.2"
+    "test": "pulp --psc-package test"
   }
 }

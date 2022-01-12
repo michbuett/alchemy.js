@@ -9,6 +9,7 @@
   },
   "license": "JSON",
   "devDependencies": {
+    "acorn": "^6.1.1",
     "eslint": "^4.19.1",
     "eslint-config-standard": "^11.0.0",
     "eslint-plugin-import": "^2.17.2",
@@ -18,14 +19,11 @@
     "psc-package": "^3.0.1",
     "pulp": "^12.4.2",
     "purescript": "^0.12.5",
-    "rollup": "^0.41.6",
-    "rollup-plugin-purs": "^1.0.38"
+    "rollup": "^1.12.4",
+    "rollup-plugin-purs": "https://github.com/FrigoEU/rollup-plugin-purs"
   },
   "scripts": {
     "prebuild": "psc-package install",
     "build": "pulp --psc-package browserify -t app.js"
-  },
-  "dependencies": {
-    "pixi.js": "^4.8.7"
   }
 }
